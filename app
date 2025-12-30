@@ -34,5 +34,9 @@ def product(id):
     product = next((p for p in products if p['id'] == id), None)
     return render_template('product.html', lang=lang, product=product)
 
+@app.route("/order", methods=["GET", "POST"])
+def order():
+    return "ORDER PAGE"
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=10000)

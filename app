@@ -35,4 +35,4 @@ def product(id):
     return render_template('product.html', lang=lang, product=product)
 
 if __name__ == '__main__':
-    app.run(host=0.0.0.0, port=10000)
+    app.run(host="0.0.0.0", port=10000)

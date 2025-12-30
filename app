@@ -31,13 +31,13 @@ def catalog():
 @app.route('/product/<int:id>')
 def product(id):
     lang = session.get('lang')
-    product = next((p for p in products if p['id'] == id), None)
-    return render_template('product.html', lang=lang, product=product)
+    product_item = next((p for p in products if p['id'] == id), None)
+    return render_template('product.html', lang=lang, product=product_item)
 
 @app.route("/order", methods=["GET", "POST"])
 def order():
     if request.method == "POST":
-        # Берём данные из формы
+        # Получаем данные из формы
         name = request.form.get("name")
         contact = request.form.get("contact")
 
@@ -46,10 +46,11 @@ def order():
         print("Контакт:", contact)
 
         # Передаём success=True, чтобы показать сообщение на странице
-        return render_template("order.html", success=True)
+        return render_template("order.html", success=True, lang=session.get('lang'))
 
     # Для GET-запроса просто показываем форму
-    return render_template("order.html")
+    return render_template("order.html", lang=session.get('lang'))
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    # Локально используем порт 5000
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -1,9 +1,13 @@
 <form action="/order" method="POST">
-    <label for="name">Имя:</label>
-    <input type="text" id="name" name="name" required>
+    <label>Имя:</label>
+    <input type="text" name="name" required>
 
-    <label for="contact">Телефон или Email:</label>
-    <input type="text" id="contact" name="contact" required>
+    <label>Телефон или Email:</label>
+    <input type="text" name="contact" required>
 
     <button type="submit">Отправить</button>
 </form>
+
+{% if success %}
+    <p style="color: green;">Заявка отправлена!</p>
+{% endif %}

@@ -1,0 +1,9 @@
+<form action="/order" method="POST">
+    <label for="name">Имя:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="contact">Телефон или Email:</label>
+    <input type="text" id="contact" name="contact" required>
+
+    <button type="submit">Отправить</button>
+</form>

@@ -49,4 +49,4 @@ def order():
     return render_template("order.html", lang=session.get('lang'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=1000)

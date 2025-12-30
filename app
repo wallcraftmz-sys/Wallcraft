@@ -36,17 +36,7 @@ def product(id):
 
 @app.route("/order", methods=["GET", "POST"])
 def order():
-    if request.method == "POST":
-        name = request.form.get("name")
-        contact = request.form.get("contact")
-
-        print("Новая заявка:")
-        print("Имя:", name)
-        print("Контакт:", contact)
-
-        return render_template("order.html", lang=session.get('lang'), success=True)
-
-    return render_template("order.html", lang=session.get('lang'))
+    return render_template("order.html")
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=1000)

@@ -36,6 +36,19 @@ def product(id):
 
 @app.route("/order", methods=["GET", "POST"])
 def order():
+    if request.method == "POST":
+        # Берём данные из формы
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+
+        print("Новая заявка:")
+        print("Имя:", name)
+        print("Контакт:", contact)
+
+        # Передаём success=True, чтобы показать сообщение на странице
+        return render_template("order.html", success=True)
+
+    # Для GET-запроса просто показываем форму
     return render_template("order.html")
 
 if __name__ == '__main__':

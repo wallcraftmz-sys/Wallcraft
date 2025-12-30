@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ product['name_lv'] if lang=='lv' else product['name_ru'] }}</h1>
+<img src="{{ url_for('static', filename='images/' + product['image']) }}" alt="product" width="300">
+<p>{{ product['description_lv'] if lang=='lv' else product['description_ru'] }}</p>
+<p>{{ product['price'] }} €</p>
+<button>{{ 'Pievienot grozam' if lang=='lv' else 'Добавить в корзину' }}</button>
+<button>{{ 'Nosūtīt pieprasījumu' if lang=='lv' else 'Отправить заявку менеджеру' }}</button>
+<a href="{{ url_for('catalog') }}">{{ 'Atpakaļ' if lang=='lv' else 'Назад' }}</a>
+{% endblock %}

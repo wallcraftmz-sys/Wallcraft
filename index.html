@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ 'Sākums' if lang=='lv' else 'Главная' }}</h1>
+<p>Добро пожаловать в WallCraft! / Laipni lūdzam WallCraft!</p>
+<a href="{{ url_for('catalog') }}">{{ 'Skatīt katalogu' if lang=='lv' else 'Смотреть каталог' }}</a>
+{% endblock %}

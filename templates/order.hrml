@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Order</title>
+    <meta charset="UTF-8">
+    <title>Заказ</title>
 </head>
 <body>
-    <h1>ORDER HTML WORKS</h1>
+    <h2>Форма заказа</h2>
+
+    <form action="/order" method="POST">
+        <label>Имя:</label>
+        <input type="text" name="name" required>
+
+        <label>Телефон или Email:</label>
+        <input type="text" name="contact" required>
+
+        <button type="submit">Отправить</button>
+    </form>
+
+    {% if success %}
+        <p style="color: green;">Заявка отправлена!</p>
+    {% endif %}
 </body>
 </html>
-<form action="/order" method="POST">
-    <label>Имя:</label>
-    <input type="text" name="name" required>
-
-    <label>Телефон или Email:</label>
-    <input type="text" name="contact" required>
-
-    <button type="submit">Отправить</button>
-</form>
-
-{% if success %}
-    <p style="color: green;">Заявка отправлена!</p>
-{% endif %}

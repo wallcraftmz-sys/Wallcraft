@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Корзина</h1>
+
+{% if cart_items %}
+<table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+  {% for item in cart_items %}
+  <tr>
+    <td>{{ item.product.name_ru }}</td>
+    <td>{{ item.qty }} шт.</td>
+    <td>{{ item.product.price }} €</td>
+    <td>{{ item.product.price * item.qty }} €</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td colspan="3"><b>Итого:</b></td>
+    <td><b>{{ total }} €</b></td>
+  </tr>
+</table>
+
+<a href="/order" class="buy-btn">Оформить заказ</a>
+
+{% else %}
+<p>Корзина пуста</p>
+{% endif %}
+{% endblock %}

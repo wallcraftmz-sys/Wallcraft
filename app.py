@@ -8,11 +8,10 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-
 app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'
 
-# Список товаров с категориями
+# Список товаров
 products = [
     {
         "id": 1,
@@ -50,26 +49,20 @@ def index():
 @app.route('/catalog')
 def catalog():
     lang = session.get('lang')
-
     cat = request.args.get("cat")
     min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
-
     filtered = products
-
     if cat:
         filtered = [p for p in filtered if p["category"] == cat]
     if min_price:
         try:
             filtered = [p for p in filtered if p["price"] >= float(min_price)]
-        except:
-            pass
+        except: pass
     if max_price:
         try:
             filtered = [p for p in filtered if p["price"] <= float(max_price)]
-        except:
-            pass
-
+        except: pass
     return render_template("catalog.html", lang=lang, products=filtered)
 
 # Страница товара
@@ -87,19 +80,31 @@ def add_to_cart(product_id):
     session["cart"] = cart
     return redirect(url_for("cart"))
 
+# Изменить количество товара в корзине
+@app.route("/update_cart/<int:product_id>/<action>")
+def update_cart(product_id, action):
+    cart = session.get("cart", {})
+    if str(product_id) in cart:
+        if action == "plus":
+            cart[str(product_id)] += 1
+        elif action == "minus":
+            cart[str(product_id)] -= 1
+            if cart[str(product_id)] <= 0:
+                del cart[str(product_id)]
+    session["cart"] = cart
+    return redirect(url_for("cart"))
+
 # Корзина
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
     cart_items = []
     total = 0
-
     for pid, qty in cart.items():
         prod = next((p for p in products if p["id"] == int(pid)), None)
         if prod:
             cart_items.append({"product": prod, "qty": qty})
             total += prod["price"] * qty
-
     return render_template("cart.html", cart_items=cart_items, total=total)
 
 # Форма заказа
@@ -109,21 +114,17 @@ def order():
         name = request.form.get("name")
         contact = request.form.get("contact")
 
-        # Асинхронная отправка
         def send_email(name, contact):
             sender_email = os.environ.get("WALLCRAFT_EMAIL")
             receiver_email = os.environ.get("WALLCRAFT_EMAIL")
             app_password = os.environ.get("WALLCRAFT_APP_PASSWORD")
-
             subject = "Новая заявка с сайта"
             body = f"Имя: {name}\nКонтакт: {contact}"
-
             message = MIMEMultipart()
             message["From"] = sender_email
             message["To"] = receiver_email
             message["Subject"] = subject
             message.attach(MIMEText(body, "plain"))
-
             try:
                 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                     server.login(sender_email, app_password)
@@ -133,19 +134,14 @@ def order():
                 print("Ошибка:", e)
 
         threading.Thread(target=send_email, args=(name, contact)).start()
-
         return render_template("order.html", success=True)
-
     return render_template("order.html")
-# ================= Админ‑панель ↓ =================
 
+# ================= Админ‑панель =================
 from functools import wraps
-
-# Логин/пароль для админа (можно хранить в переменных окружения)
 ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
 
-# Декоратор для защиты админ‑панели
 def admin_required(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
@@ -154,36 +150,28 @@ def admin_required(f):
         return redirect(url_for("admin_login"))
     return wrapped
 
-# Маршрут входа для администратора
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
         login = request.form.get("login")
         password = request.form.get("password")
-        # Проверяем логин и пароль
         if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
             session["is_admin"] = True
             return redirect("/admin")
-        # Неверные данные
         return render_template("admin_login.html", error="Неверный логин или пароль")
     return render_template("admin_login.html")
 
-# Маршрут выхода
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("is_admin", None)
     return redirect("/admin/login")
 
-# Защищённая админ‑панель
 @app.route("/admin")
 @admin_required
 def admin_panel():
-    # Показываем список заказов из базы
     conn = sqlite3.connect("orders.db")
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM orders")
     orders = cursor.fetchall()
     conn.close()
     return render_template("admin.html", orders=orders)
-
-# ================= Админ‑панель ↑ =================

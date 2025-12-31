@@ -70,7 +70,7 @@ def catalog():
 def product(id):
     lang = session.get('lang')
     product_item = next((p for p in products if p['id'] == id), None)
-    return render_template('product.html', lang=lang, product=product_item)
+    return render_template('product.html', lang=lang, product=# ------------------- КОРЗИНА -------------------
 
 # Добавить в корзину
 @app.route("/add_to_cart/<int:product_id>")
@@ -80,17 +80,20 @@ def add_to_cart(product_id):
     session["cart"] = cart
     return redirect(url_for("cart"))
 
-# Изменить количество товара в корзине
+# Обновить количество в корзине
 @app.route("/update_cart/<int:product_id>/<action>")
 def update_cart(product_id, action):
     cart = session.get("cart", {})
-    if str(product_id) in cart:
+    pid = str(product_id)
+
+    if pid in cart:
         if action == "plus":
-            cart[str(product_id)] += 1
+            cart[pid] += 1
         elif action == "minus":
-            cart[str(product_id)] -= 1
-            if cart[str(product_id)] <= 0:
-                del cart[str(product_id)]
+            cart[pid] -= 1
+            if cart[pid] <= 0:
+                del cart[pid]  # удаляем товар, если количество 0
+        # если action другой — ничего не делаем
     session["cart"] = cart
     return redirect(url_for("cart"))
 
@@ -100,12 +103,17 @@ def cart():
     cart = session.get("cart", {})
     cart_items = []
     total = 0
+
     for pid, qty in cart.items():
-        prod = next((p for p in products if p["id"] == int(pid)), None)
-        if prod:
-            cart_items.append({"product": prod, "qty": qty})
-            total += prod["price"] * qty
+        try:
+            prod = next(p for p in products if p["id"] == int(pid))
+        except StopIteration:
+            continue  # пропускаем, если продукт не найден
+        cart_items.append({"product": prod, "qty": qty})
+        total += prod["price"] * qty
+
     return render_template("cart.html", cart_items=cart_items, total=total)
+# ------------------- /КОРЗИНА -------------------
 
 # Форма заказа
 @app.route("/order", methods=["GET", "POST"])

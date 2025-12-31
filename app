@@ -132,4 +132,54 @@ def order():
 
         return render_template("order.html", success=True)
 
-    return render_template("order.html"
+    return render_template("order.html")
+# ================= Админ‑панель ↓ =================
+
+from functools import wraps
+
+# Логин/пароль для админа (можно хранить в переменных окружения)
+ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
+
+# Декоратор для защиты админ‑панели
+def admin_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if session.get("is_admin"):
+            return f(*args, **kwargs)
+        return redirect(url_for("admin_login"))
+    return wrapped
+
+# Маршрут входа для администратора
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        login = request.form.get("login")
+        password = request.form.get("password")
+        # Проверяем логин и пароль
+        if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
+            session["is_admin"] = True
+            return redirect("/admin")
+        # Неверные данные
+        return render_template("admin_login.html", error="Неверный логин или пароль")
+    return render_template("admin_login.html")
+
+# Маршрут выхода
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("is_admin", None)
+    return redirect("/admin/login")
+
+# Защищённая админ‑панель
+@app.route("/admin")
+@admin_required
+def admin_panel():
+    # Показываем список заказов из базы
+    conn = sqlite3.connect("orders.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders")
+    orders = cursor.fetchall()
+    conn.close()
+    return render_template("admin.html", orders=orders)
+
+# ================= Админ‑панель ↑ =================

@@ -2,23 +2,31 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Заказ</title>
+    <title>Форма заказа</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        form { max-width: 400px; margin: auto; }
+        label { display: block; margin-top: 10px; }
+        input { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 15px; padding: 10px 20px; }
+        p.success { color: green; font-weight: bold; margin-top: 15px; }
+    </style>
 </head>
 <body>
     <h2>Форма заказа</h2>
 
     <form action="/order" method="POST">
         <label>Имя:</label>
-        <input type="text" name="name" required>
+        <input type="text" name="name" placeholder="Ваше имя" required>
 
         <label>Телефон или Email:</label>
-        <input type="text" name="contact" required>
+        <input type="text" name="contact" placeholder="Телефон или email" required>
 
         <button type="submit">Отправить</button>
     </form>
 
     {% if success %}
-        <p style="color: green;">Заявка отправлена!</p>
+        <p class="success">Заявка отправлена! Проверьте почту.</p>
     {% endif %}
 </body>
 </html>

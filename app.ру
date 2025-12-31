@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-app = Flask(____)
+app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'
 
 # Список товаров с категориями

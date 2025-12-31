@@ -1,4 +1,8 @@
 from flask import Flask, render_template, request, session
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os  # для переменных окружения (безопасность)
 
 app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'
@@ -37,7 +41,6 @@ def product(id):
 @app.route("/order", methods=["GET", "POST"])
 def order():
     if request.method == "POST":
-        # Получаем данные из формы
         name = request.form.get("name")
         contact = request.form.get("contact")
 
@@ -45,10 +48,31 @@ def order():
         print("Имя:", name)
         print("Контакт:", contact)
 
-        # Передаём success=True, чтобы показать сообщение на странице
+        # --------- ОТПРАВКА НА ПОЧТУ ---------
+        sender_email = os.environ.get("WALLCRAFT_EMAIL")       # email отправителя
+        receiver_email = os.environ.get("WALLCRAFT_EMAIL")     # email получателя
+        app_password = os.environ.get("WALLCRAFT_APP_PASSWORD") # пароль приложения
+
+        subject = "Новая заявка с сайта"
+        body = f"Новая заявка:\nИмя: {name}\nКонтакт: {contact}"
+
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = receiver_email
+        message["Subject"] = subject
+        message.attach(MIMEText(body, "plain"))
+
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(sender_email, app_password)
+                server.sendmail(sender_email, receiver_email, message.as_string())
+            print("Письмо успешно отправлено!")
+        except Exception as e:
+            print("Ошибка при отправке письма:", e)
+        # --------------------------------------
+
         return render_template("order.html", success=True, lang=session.get('lang'))
 
-    # Для GET-запроса просто показываем форму
     return render_template("order.html", lang=session.get('lang'))
 
 if __name__ == '__main__':

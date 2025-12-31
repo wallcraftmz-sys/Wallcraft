@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect, url_for
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -8,88 +8,128 @@ import os
 app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'
 
-# Пример товара
-products = [{
-    "id": 1,
-    "name_lv": "Šķidrie tapetes - South 941",
-    "name_ru": "Жидкие обои - South 941",
-    "description_lv": "Materiāls dekoratīvai sienu un griestu apdarei...",
-    "description_ru": "Материал для декоративной отделки стен и потолков...",
-    "price": 25.00,
-    "image": "liquid_wallpaper.jpg"
-}]
+# Список товаров с категориями
+products = [
+    {
+        "id": 1,
+        "category": "walls",
+        "name_lv": "Šķidrie tapetes — South 941",
+        "name_ru": "Жидкие обои — South 941",
+        "description_lv": "Materiāls dekoratīvai sienu...",
+        "description_ru": "Материал для декоративной отделки...",
+        "price": 25.00,
+        "image": "liquid_wallpaper.jpg"
+    },
+    {
+        "id": 2,
+        "category": "tools",
+        "name_lv": "Rīku komplekts",
+        "name_ru": "Набор инструментов",
+        "description_lv": "Komplekts ar visu nepieciešamo",
+        "description_ru": "Комплект со всем необходимым",
+        "price": 15.00,
+        "image": "tool.jpg"
+    }
+]
 
 @app.before_request
 def get_lang():
     session['lang'] = request.args.get('lang') or session.get('lang') or 'lv'
 
-# ------------------- Маршруты -------------------
-
+# Главная
 @app.route('/')
 def index():
     lang = session.get('lang')
     return render_template('index.html', lang=lang, products=products)
 
+# Каталог с фильтрами
 @app.route('/catalog')
 def catalog():
     lang = session.get('lang')
-    return render_template('catalog.html', lang=lang, products=products)
 
+    cat = request.args.get("cat")
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+
+    filtered = products
+
+    if cat:
+        filtered = [p for p in filtered if p["category"] == cat]
+    if min_price:
+        try:
+            filtered = [p for p in filtered if p["price"] >= float(min_price)]
+        except:
+            pass
+    if max_price:
+        try:
+            filtered = [p for p in filtered if p["price"] <= float(max_price)]
+        except:
+            pass
+
+    return render_template("catalog.html", lang=lang, products=filtered)
+
+# Страница товара
 @app.route('/product/<int:id>')
 def product(id):
     lang = session.get('lang')
     product_item = next((p for p in products if p['id'] == id), None)
     return render_template('product.html', lang=lang, product=product_item)
 
-# ------------------- Асинхронная отправка письма -------------------
+# Добавить в корзину
+@app.route("/add_to_cart/<int:product_id>")
+def add_to_cart(product_id):
+    cart = session.get("cart", {})
+    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
+    session["cart"] = cart
+    return redirect(url_for("cart"))
 
-def send_email(name, contact):
-    sender_email = os.environ.get("WALLCRAFT_EMAIL")
-    receiver_email = os.environ.get("WALLCRAFT_EMAIL")
-    app_password = os.environ.get("WALLCRAFT_APP_PASSWORD")
+# Корзина
+@app.route("/cart")
+def cart():
+    cart = session.get("cart", {})
+    cart_items = []
+    total = 0
 
-    if not sender_email or not app_password:
-        print("Переменные окружения для почты не настроены!")
-        return
+    for pid, qty in cart.items():
+        prod = next((p for p in products if p["id"] == int(pid)), None)
+        if prod:
+            cart_items.append({"product": prod, "qty": qty})
+            total += prod["price"] * qty
 
-    subject = "Новая заявка с сайта"
-    body = f"Новая заявка:\nИмя: {name}\nКонтакт: {contact}"
+    return render_template("cart.html", cart_items=cart_items, total=total)
 
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["To"] = receiver_email
-    message["Subject"] = subject
-    message.attach(MIMEText(body, "plain"))
-
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, app_password)
-            server.sendmail(sender_email, receiver_email, message.as_string())
-        print("Письмо успешно отправлено!")
-    except Exception as e:
-        print("Ошибка при отправке письма:", e)
-
-# ------------------- Форма заказа -------------------
-
+# Форма заказа
 @app.route("/order", methods=["GET", "POST"])
 def order():
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")
 
-        print("Новая заявка:")
-        print("Имя:", name)
-        print("Контакт:", contact)
+        # Асинхронная отправка
+        def send_email(name, contact):
+            sender_email = os.environ.get("WALLCRAFT_EMAIL")
+            receiver_email = os.environ.get("WALLCRAFT_EMAIL")
+            app_password = os.environ.get("WALLCRAFT_APP_PASSWORD")
 
-        # Отправка письма в отдельном потоке
+            subject = "Новая заявка с сайта"
+            body = f"Имя: {name}\nКонтакт: {contact}"
+
+            message = MIMEMultipart()
+            message["From"] = sender_email
+            message["To"] = receiver_email
+            message["Subject"] = subject
+            message.attach(MIMEText(body, "plain"))
+
+            try:
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                    server.login(sender_email, app_password)
+                    server.sendmail(sender_email, receiver_email, message.as_string())
+                print("Письмо отправлено!")
+            except Exception as e:
+                print("Ошибка:", e)
+
         threading.Thread(target=send_email, args=(name, contact)).start()
 
-        return render_template("order.html", success=True, lang=session.get('lang'))
+        return render_template("order.html", success=True)
 
-    return render_template("order.html", lang=session.get('lang'))
-
-# ------------------- Запуск -------------------
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Render даёт порт через переменную PORT
-    app.run(host="0.0.0.0", port=port, debug=True)
+    return render_template("order.html")

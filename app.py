@@ -13,7 +13,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'
 
-# -------------------- Товары --------------------
+# =================== СПИСОК ТОВАРОВ ===================
 products = [
     {
         "id": 1,
@@ -34,8 +34,20 @@ products = [
         "description_ru": "Комплект со всем необходимым",
         "price": 15.00,
         "image": "tool.jpg"
+    },
+    # Новый товар
+    {
+        "id": 3,
+        "category": "walls",
+        "name_lv": "Silk Plaster 2025",
+        "name_ru": "Жидкие обои — Silk Plaster 2025",
+        "description_lv": "Augstas kvalitātes šķidrie tapetes",
+        "description_ru": "Высококачественные жидкие обои для стен",
+        "price": 30.00,
+        "image": "silk_plaster.jpg"
     }
 ]
+# ======================================================
 
 # -------------------- Язык --------------------
 @app.before_request

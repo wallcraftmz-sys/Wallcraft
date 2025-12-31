@@ -1,46 +1,23 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div style="max-width:900px; margin:30px auto; display:flex; gap:30px; flex-wrap:wrap;">
-
-    <!-- Фото товара -->
-    <div style="flex:1 1 300px; text-align:center;">
-        <img src="{{ url_for('static', filename=product.image) }}" 
-             style="max-width:100%; border-radius:8px; object-fit: cover; height: 350px;">
+<div class="product-detail">
+    <div class="product-image">
+        <img src="{{ url_for('static', filename=product['image']) }}" alt="{{ product['name_ru'] }}">
     </div>
+    <div class="product-info">
+        <h2>{{ product['name_lv'] if lang=='lv' else product['name_ru'] }}</h2>
+        <p class="description">{{ product['description_lv'] if lang=='lv' else product['description_ru'] }}</p>
+        <p class="price">{{ product['price'] }} €</p>
+        
+        <div class="qty-controls">
+            <a href="/change_qty/{{ product['id'] }}/-1" class="qty-btn">−</a>
+            <span class="qty-number">{{ session.get('cart', {}).get(str(product['id']), 1) }}</span>
+            <a href="/change_qty/{{ product['id'] }}/1" class="qty-btn">+</a>
+        </div>
 
-    <!-- Информация о товаре -->
-    <div style="flex:1 1 400px;">
-        <h1 style="font-size:1.5em; color:#111; margin-bottom:10px;">{{ product.name_ru }}</h1>
-        <p style="font-size:1em; color:#444; margin-bottom:20px;">{{ product.description_ru }}</p>
-
-        <!-- Цена -->
-        <p style="font-size:1.3em; font-weight:bold; color:#000; margin-bottom:20px;">
-            Цена: {{ product.price }} €
-        </p>
-
-        <!-- Кнопка купить -->
-        <a href="/order" style="
-            display:block;
-            padding:12px 0;
-            background:#1f2933;
-            color:white;
-            text-align:center;
-            text-decoration:none;
-            border-radius:6px;
-            font-weight:bold;
-            margin-bottom:15px;
-        ">Купить</a>
-
-        <!-- Назад в каталог -->
-        <a href="/catalog" style="
-            display:inline-block;
-            padding:10px 15px;
-            background:#ccc;
-            color:#111;
-            text-decoration:none;
-            border-radius:5px;
-        ">Назад в каталог</a>
+        <a href="/add_to_cart/{{ product['id'] }}" class="buy-btn">
+            {{ 'Добавить в корзину' if lang=='ru' else 'Pievienot grozam' }}
+        </a>
     </div>
 </div>
 {% endblock %}

@@ -5,13 +5,15 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import threading
 import os
+from functools import wraps
 from dotenv import load_dotenv
+
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'
 
-# Список товаров
+# -------------------- Товары --------------------
 products = [
     {
         "id": 1,
@@ -35,17 +37,18 @@ products = [
     }
 ]
 
+# -------------------- Язык --------------------
 @app.before_request
 def get_lang():
     session['lang'] = request.args.get('lang') or session.get('lang') or 'lv'
 
-# Главная
+# -------------------- Главная --------------------
 @app.route('/')
 def index():
     lang = session.get('lang')
     return render_template('index.html', lang=lang, products=products)
 
-# Каталог с фильтрами
+# -------------------- Каталог --------------------
 @app.route('/catalog')
 def catalog():
     lang = session.get('lang')
@@ -58,21 +61,23 @@ def catalog():
     if min_price:
         try:
             filtered = [p for p in filtered if p["price"] >= float(min_price)]
-        except: pass
+        except:
+            pass
     if max_price:
         try:
             filtered = [p for p in filtered if p["price"] <= float(max_price)]
-        except: pass
+        except:
+            pass
     return render_template("catalog.html", lang=lang, products=filtered)
 
-# Страница товара
+# -------------------- Страница товара --------------------
 @app.route('/product/<int:id>')
 def product(id):
     lang = session.get('lang')
     product_item = next((p for p in products if p['id'] == id), None)
-    return render_template('product.html', lang=lang, product=# ------------------- КОРЗИНА -------------------
+    return render_template('product.html', lang=lang, product=product_item)
 
-# Добавить в корзину
+# -------------------- Корзина --------------------
 @app.route("/add_to_cart/<int:product_id>")
 def add_to_cart(product_id):
     cart = session.get("cart", {})
@@ -80,42 +85,33 @@ def add_to_cart(product_id):
     session["cart"] = cart
     return redirect(url_for("cart"))
 
-# Обновить количество в корзине
 @app.route("/update_cart/<int:product_id>/<action>")
 def update_cart(product_id, action):
     cart = session.get("cart", {})
     pid = str(product_id)
-
     if pid in cart:
         if action == "plus":
             cart[pid] += 1
         elif action == "minus":
             cart[pid] -= 1
             if cart[pid] <= 0:
-                del cart[pid]  # удаляем товар, если количество 0
-        # если action другой — ничего не делаем
+                del cart[pid]
     session["cart"] = cart
     return redirect(url_for("cart"))
 
-# Корзина
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
     cart_items = []
     total = 0
-
     for pid, qty in cart.items():
-        try:
-            prod = next(p for p in products if p["id"] == int(pid))
-        except StopIteration:
-            continue  # пропускаем, если продукт не найден
-        cart_items.append({"product": prod, "qty": qty})
-        total += prod["price"] * qty
-
+        prod = next((p for p in products if p["id"] == int(pid)), None)
+        if prod:
+            cart_items.append({"product": prod, "qty": qty})
+            total += prod["price"] * qty
     return render_template("cart.html", cart_items=cart_items, total=total)
-# ------------------- /КОРЗИНА -------------------
 
-# Форма заказа
+# -------------------- Форма заказа --------------------
 @app.route("/order", methods=["GET", "POST"])
 def order():
     if request.method == "POST":
@@ -143,10 +139,10 @@ def order():
 
         threading.Thread(target=send_email, args=(name, contact)).start()
         return render_template("order.html", success=True)
+
     return render_template("order.html")
 
-# ================= Админ‑панель =================
-from functools import wraps
+# -------------------- Админ-панель --------------------
 ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
 
@@ -183,3 +179,7 @@ def admin_panel():
     orders = cursor.fetchall()
     conn.close()
     return render_template("admin.html", orders=orders)
+
+# -------------------- Запуск --------------------
+if __name__ == "__main__":
+    app.run(debug=True)

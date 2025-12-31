@@ -6,7 +6,7 @@ import threading
 import os
 from dotenv import load_dotenv
 load_dotenv()
-print(">> DEBUG: app.py loaded <<")
+
 
 app = Flask(__name__)
 app.secret_key = 'wallcraft_secret_key'

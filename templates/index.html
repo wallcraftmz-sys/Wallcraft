@@ -1,29 +1,42 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Wallcraft - Главная</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .product { border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; max-width: 300px; }
-        .product img { max-width: 100%; height: auto; }
-        a { text-decoration: none; color: #333; }
-        .button { display: inline-block; margin-top: 10px; padding: 8px 15px; background:#4CAF50; color:white; border-radius:5px; }
-    </style>
-</head>
-<body>
-    <h1>Добро пожаловать в Wallcraft</h1>
-    <h2>Товары</h2>
+{% extends "base.html" %}
 
+{% block content %}
+<h1 style="text-align:center; margin-bottom:30px;">Добро пожаловать в Wallcraft</h1>
+
+<div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
     {% for product in products %}
-    <div class="product">
-        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name_ru }}">
-        <h3>{{ product.name_ru }}</h3>
-        <p>{{ product.description_ru }}</p>
-        <p>Цена: {{ product.price }} $</p>
-        <a href="/product/{{ product.id }}" class="button">Посмотреть</a>
-        <a href="/order" class="button">Заказать</a>
+    <div style="background:#ffffff; padding:15px; border-radius:8px; 
+                max-width:260px; width:100%; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+        <!-- Фото товара -->
+        <div style="text-align:center;">
+            <img src="{{ url_for('static', filename=product.image) }}" 
+                 style="max-width:100%; border-radius:8px; object-fit:cover; height:180px;">
+        </div>
+
+        <!-- Название -->
+        <h3 style="font-size:1.1em; margin-top:10px; margin-bottom:8px; color:#111;">{{ product.name_ru }}</h3>
+
+        <!-- Описание -->
+        <p style="font-size:0.9em; color:#444;">{{ product.description_ru }}</p>
+
+        <!-- Цена и кнопка -->
+        <div style="margin-top:10px;">
+            <p style="font-size:1.1em; font-weight:bold; color:#000;">{{ product.price }} €</p>
+            <a href="/order" style="
+                display:block;
+                text-align:center;
+                padding:10px 0;
+                background:#1f2933;
+                color:white;
+                text-decoration:none;
+                border-radius:6px;
+                font-weight:bold;
+                margin-top:5px;
+            ">Купить</a>
+        </div>
+
     </div>
     {% endfor %}
-</body>
-</html>
+</div>
+{% endblock %}

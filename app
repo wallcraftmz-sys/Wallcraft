@@ -132,4 +132,4 @@ def order():
 
         return render_template("order.html", success=True)
 
-    return render_template("order.html")
+    return render_template("order.html"

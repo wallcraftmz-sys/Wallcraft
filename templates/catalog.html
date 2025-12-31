@@ -1,28 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Каталог</h1>
+<h1 style="margin-bottom:20px;">Каталог</h1>
 
-<div style="display:flex; flex-wrap:wrap; gap:20px;">
+<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
     {% for product in products %}
-    <div style="background:#f0f0f0; padding:15px; border-radius:8px; max-width:300px; flex:1 0 300px;">
-        <img src="{{ url_for('static', filename=product.image) }}" style="width:100%; border-radius:8px;">
-        
-        <h2>{{ product.name_ru }}</h2>
-        <p>{{ product.description_ru }}</p>
-        
-        <!-- Цена и кнопка Купить -->
-        <div style="margin-top:10px;">
-            <p><b>Цена:</b> {{ product.price }} 25€</p>
-            <a href="/order" style="
-                display:inline-block;
-                padding:10px 15px;
-                background:#1f2933;
-                color:white;
-                text-decoration:none;
-                border-radius:5px;
-            ">Купить</a>
+    <div style="background: #ffffff; padding: 15px; border-radius: 8px; 
+                max-width: 260px; width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+        <!-- Фото товара -->
+        <div style="text-align:center;">
+            <img src="{{ url_for('static', filename=product.image) }}" 
+                 style="max-width:100%; border-radius:8px; object-fit: cover; height: 180px;">
         </div>
+
+        <!-- Название -->
+        <h3 style="font-size:1.1em; margin-top:10px; margin-bottom:8px; color:#111;">{{ product.name_ru }}</h3>
+
+        <!-- Описание -->
+        <p style="font-size:0.9em; color:#444;">{{ product.description_ru }}</p>
+
+        <!-- Цена -->
+        <p style="font-size:1.1em; font-weight: bold; margin:10px 0; color:#000;">
+            {{ product.price }} €
+        </p>
+
+        <!-- Кнопка купить -->
+        <a href="/order" style="
+            display: block;
+            text-align:center;
+            padding: 10px 0;
+            background: #1f2933;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 5px;
+            ">
+            Купить
+        </a>
+
     </div>
     {% endfor %}
 </div>

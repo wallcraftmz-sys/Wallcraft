@@ -22,9 +22,12 @@
       <td>{{ "%.2f"|format(item.product.price) }} €</td>
       <td>{{ "%.2f"|format(item.product.price * item.qty) }} €</td>
       <td>
-        <a class="qty-btn" href="{{ url_for('update_cart', product_id=item.product.id, action='plus') }}">+</a>
-        <a class="qty-btn" href="{{ url_for('update_cart', product_id=item.product.id, action='minus') }}">–</a>
-      </td>
+  <div class="qty-controls">
+    <a class="qty-btn minus" href="{{ url_for('update_cart', product_id=item.product.id, action='minus') }}">−</a>
+    <span class="qty-number">{{ item.qty }}</span>
+    <a class="qty-btn plus" href="{{ url_for('update_cart', product_id=item.product.id, action='plus') }}">+</a>
+  </div>
+</td>
     </tr>
   {% endfor %}
     <tr>

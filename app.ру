@@ -35,6 +35,10 @@ products = [
         "image": "tool.jpg"
     }
 ]
+@app.route("/showfiles")
+def showfiles():
+    import os
+    return "<br>".join(os.listdir("."))
 
 @app.before_request
 def get_lang():

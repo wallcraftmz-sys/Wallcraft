@@ -19,30 +19,19 @@
 <div class="product-grid">
     {% for product in products %}
     <div class="product-card">
-       <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name_ru }}">
-        <h3>{{ product.name_ru }}</h3>
-        <p>{{ product.description_ru }}</p>
-        <p class="price">{{ product.price }} €</p>
-
-        <a href="/add_to_cart/{{ product.id }}" class="buy-btn">В корзину</a>
-        <a href="/order" class="buy-btn" style="background:#4CAF50">Заказать</a>
-    </div>
-    {% endfor %}
-</div>
-<div class="product-grid">
-    {% for product in products %}
-    <div class="product-card">
         <img src="{{ product.image }}" alt="{{ product.name_ru }}">
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>
         <button class="buy-btn" onclick="addToCart({{ product.id }})">В корзину</button>
+        <a href="/order" class="buy-btn" style="background:#4CAF50">Заказать</a>
     </div>
     {% endfor %}
 </div>
 
 <div id="popup" style="display:none; position:fixed; top:20%; right:20%; background:#fff; border:1px solid #ccc; padding:15px; z-index:999;">
     <span id="popup-text"></span>
+    <br>
     <button onclick="closePopup()">Закрыть</button>
 </div>
 
@@ -66,5 +55,4 @@ function closePopup() {
 }
 </script>
 {% endblock %}
-
 

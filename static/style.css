@@ -244,3 +244,50 @@ footer {
     text-decoration: none;
     border-radius: 5px;
 }
+.added-popup {
+    position: fixed;
+    top: 20%;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: fadeIn 0.3s;
+}
+
+.added-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.added-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 10px;
+    border-radius: 5px;
+}
+
+.popup-buttons a {
+    display: inline-block;
+    margin: 5px 0;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: white;
+    background: #2196F3;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.popup-buttons a:hover {
+    opacity: 0.9;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}

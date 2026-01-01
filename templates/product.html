@@ -3,7 +3,7 @@
 <div class="product-detail">
     <div class="product-image">
         <!-- Картинка товара -->
-        <img src="{{ url_for('static', filename=product['image']) }}"
+        <img src="{{ url_for('static/images', filename=product['image']) }}"
              alt="{{ product['name_ru'] }}">
     </div>
     <div class="product-info">

@@ -19,7 +19,11 @@
 <div class="product-grid">
     {% for product in products %}
     <div class="product-card">
-        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name_ru }}">
+        <img
+  src="{{ url_for('static', filename=product.image) }}"
+  alt="{{ product.name_ru }}"
+  style="width:100%; height:auto; border-radius:8px;"
+>
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>

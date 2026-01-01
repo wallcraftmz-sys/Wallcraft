@@ -24,6 +24,28 @@
   alt="{{ product.name_ru }}"
   style="width:100%; height:auto; border-radius:8px;"
 >
+        <img
+  src="{{ url_for('static', filename='images/ocean.jpg') }}"
+  alt="Жидкие обои Ocean"
+>
+        <img
+  src="{{ url_for('static', filename='images/golden.jpg') }}"
+  alt="Жидкие обои Golden"
+>
+
+<img
+  src="{{ url_for('static', filename='images/modern.jpg') }}"
+  alt="Жидкие обои Modern"
+>
+        <img
+  src="{{ url_for('static', filename='images/golden.jpg') }}"
+  alt="Жидкие обои Golden"
+>
+
+<img
+  src="{{ url_for('static', filename='images/modern.jpg') }}"
+  alt="Жидкие обои Modern"
+>
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>

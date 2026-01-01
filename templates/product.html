@@ -2,6 +2,7 @@
 {% block content %}
 <div class="product-detail">
     <div class="product-image">
+        <!-- Картинка товара -->
         <img src="{{ url_for('static', filename=product['image']) }}"
              alt="{{ product['name_ru'] }}">
     </div>
@@ -11,9 +12,9 @@
         <p class="price">{{ product['price'] }} €</p>
         
         <div class="qty-controls">
-            <a href="/change_qty/{{ product['id'] }}/-1" class="qty-btn">−</a>
+            <a href="/update_cart/{{ product['id'] }}/minus" class="qty-btn">−</a>
             <span class="qty-number">{{ session.get('cart', {}).get(str(product['id']), 1) }}</span>
-            <a href="/change_qty/{{ product['id'] }}/1" class="qty-btn">+</a>
+            <a href="/update_cart/{{ product['id'] }}/plus" class="qty-btn">+</a>
         </div>
 
         <a href="/add_to_cart/{{ product['id'] }}" class="buy-btn">

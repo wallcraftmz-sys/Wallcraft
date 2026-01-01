@@ -34,11 +34,7 @@
       <td colspan="3"><b>Итого:</b></td>
       <td colspan="2"><b>{{ "%.2f"|format(total) }} €</b></td>
     </tr>
-    <td>
-    <a class="qty-btn plus" href="{{ url_for('update_cart', product_id=item.product.id, action='plus') }}">+</a>
-    <a class="qty-btn minus" href="{{ url_for('update_cart', product_id=item.product.id, action='minus') }}">−</a>
-</td>
-  </tbody>
+   </tbody>
 </table>
 
 <a href="{{ url_for('order') }}" class="buy-btn">Оформить заказ</a>

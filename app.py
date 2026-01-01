@@ -34,7 +34,7 @@ products = [
     "description_lv": "Augstas kvalitātes šķidrie tapetes",
     "description_ru": "Высококачественные жидкие обои для стен",
     "price": 30.00,
-    "image": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Plaster_texture.jpg"
+    "image": "https://bioplast.ua/content/userfiles/files/dekorativnye-elementy-v-sostave-zhidkih-oboev.jpg"
     }
 ]
 # ======================================================

@@ -34,4 +34,29 @@ function addToCart(id){
 }
 function closePopup(){ document.getElementById('popup').style.display='none'; }
 </script>
+<div id="popup" class="popup" onclick="this.style.display='none'">
+    <div class="popup-content" onclick="event.stopPropagation()">
+        <div id="popup-text"></div>
+        <div class="popup-actions">
+            <a href="/catalog">Продолжить покупки</a>
+            <a href="/cart">Перейти в корзину</a>
+        </div>
+    </div>
+</div>
+<script>
+function addToCart(productId) {
+    fetch(`/api/add_to_cart/${productId}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('popup-text').innerHTML = `
+                    <img src="${data.product.image}" width="80"><br>
+                    <strong>${data.product.name_ru}</strong><br>
+                    ${data.product.qty} шт × ${data.product.price} €
+                `;
+                document.getElementById('popup').style.display = 'flex';
+            }
+        });
+}
+</script>
 {% endblock %}

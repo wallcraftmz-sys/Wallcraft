@@ -3,11 +3,8 @@
 <div class="product-detail">
     <div class="product-image">
         <!-- Картинка товара -->
-        <img
-    src="{{ url_for('static', filename=product['image']) }}"
-    alt="{{ product['name_ru'] }}"
-    style="images/modern.jpg"
->
+       <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name_ru }}">
+
     </div>
     <div class="product-info">
         <h2>{{ product['name_lv'] if lang=='lv' else product['name_ru'] }}</h2>

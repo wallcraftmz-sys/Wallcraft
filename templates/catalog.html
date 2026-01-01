@@ -2,17 +2,6 @@
 {% block content %}
 <h1>Каталог товаров</h1>
 
-<div class="filters">
-    <select id="catFilter">
-        <option value="">Все категории</option>
-        <option value="walls">Обои</option>
-        <option value="tools">Инструменты</option>
-    </select>
-    <input type="number" id="minPrice" placeholder="Мин. цена">
-    <input type="number" id="maxPrice" placeholder="Макс. цена">
-    <button onclick="applyFilter()">Фильтровать</button>
-</div>
-
 <div class="product-grid">
     {% for product in products %}
     <div class="product-card">

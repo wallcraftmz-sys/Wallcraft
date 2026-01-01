@@ -23,7 +23,7 @@ products = [
         "description_lv": "Komplekts ar visu nepieciešamo",
         "description_ru": "Комплект со всем необходимым",
         "price": 15.00,
-        "image": "images/tool.jpg"
+        "image": "https://bioplast.ua/ru/blog/vkhodyat-li-v-sostav-zhidkikh-oboev-vrednye-komponenty.html?srsltid=AfmBOore6tURbfaclf2toSYZ3OfrshAFs0vnRQaY--fkat_eQkR_jybv"
     },
     # Новый товар
     {

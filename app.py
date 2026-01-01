@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'wallcraft_secret_key'
+app.secret_key = 'wallcraft_secret_key'  # обязательно стабильный ключ
 
 # =================== СПИСОК ТОВАРОВ ===================
 products = [
@@ -46,8 +46,6 @@ products = [
         "image": "https://cdn.pixabay.com/photo/2017/08/07/12/50/wall-2608854_1280.jpg"
     }
 ]
-
-# ======================================================
 
 # -------------------- Язык --------------------
 @app.before_request
@@ -95,7 +93,17 @@ def add_to_cart(product_id):
     cart = session.get("cart", {})
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session["cart"] = cart
-    return redirect(url_for("cart"))
+
+    # передаем добавленный товар в шаблон для pop-up
+    added_product = next((p for p in products if p["id"] == product_id), None)
+    added_product = {
+        "image": added_product["image"],
+        "name_ru": added_product["name_ru"],
+        "qty": cart[str(product_id)],
+        "price": added_product["price"]
+    }
+
+    return render_template("cart.html", added_product=added_product, cart_items=[], total=0)
 
 @app.route("/update_cart/<int:product_id>/<action>")
 def update_cart(product_id, action):
@@ -123,49 +131,6 @@ def cart():
             total += prod["price"] * qty
     return render_template("cart.html", cart_items=cart_items, total=total)
 
-# -------------------- Форма заказа --------------------
-@app.route("/order", methods=["GET", "POST"])
-def order():
-    if request.method == "POST":
-        name = request.form.get("name")
-        contact = request.form.get("contact")
-
-        def send_email(name, contact):
-            sender_email = os.environ.get("WALLCRAFT_EMAIL")
-            receiver_email = os.environ.get("WALLCRAFT_EMAIL")
-            app_password = os.environ.get("WALLCRAFT_APP_PASSWORD")
-            subject = "Новая заявка с сайта"
-            body = f"Имя: {name}\nКонтакт: {contact}"
-            message = MIMEMultipart()
-            message["From"] = sender_email
-            message["To"] = receiver_email
-            message["Subject"] = subject
-            message.attach(MIMEText(body, "plain"))
-            try:
-                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-                    server.login(sender_email, app_password)
-                    server.sendmail(sender_email, receiver_email, message.as_string())
-                print("Письмо отправлено!")
-            except Exception as e:
-                print("Ошибка:", e)
-
-        threading.Thread(target=send_email, args=(name, contact)).start()
-        return render_template("order.html", success=True)
-
-    return render_template("order.html")
-    
-@app.route("/add_to_cart/<int:product_id>")
-def add_to_cart(product_id):
-    cart = session.get("cart", {})
-    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
-    session["cart"] = cart
-
-    # передаем добавленный товар в шаблон
-    added_product = next((p for p in products if p["id"] == product_id), None)
-    added_product = {"image": added_product["image"], "name_ru": added_product["name_ru"], "qty": cart[str(product_id)], "price": added_product["price"]}
-    
-    # вместо редиректа на /cart просто рендерим pop-up
-    return render_template("cart.html", added_product=added_product, cart_items=[], total=0)
 # -------------------- Админ-панель --------------------
 ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
@@ -203,6 +168,37 @@ def admin_panel():
     orders = cursor.fetchall()
     conn.close()
     return render_template("admin.html", orders=orders)
+
+# -------------------- Форма заказа --------------------
+@app.route("/order", methods=["GET", "POST"])
+def order():
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+
+        def send_email(name, contact):
+            sender_email = os.environ.get("WALLCRAFT_EMAIL")
+            receiver_email = os.environ.get("WALLCRAFT_EMAIL")
+            app_password = os.environ.get("WALLCRAFT_APP_PASSWORD")
+            subject = "Новая заявка с сайта"
+            body = f"Имя: {name}\nКонтакт: {contact}"
+            message = MIMEMultipart()
+            message["From"] = sender_email
+            message["To"] = receiver_email
+            message["Subject"] = subject
+            message.attach(MIMEText(body, "plain"))
+            try:
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                    server.login(sender_email, app_password)
+                    server.sendmail(sender_email, receiver_email, message.as_string())
+                print("Письмо отправлено!")
+            except Exception as e:
+                print("Ошибка:", e)
+
+        threading.Thread(target=send_email, args=(name, contact)).start()
+        return render_template("order.html", success=True)
+
+    return render_template("order.html")
 
 # -------------------- Запуск --------------------
 if __name__ == "__main__":

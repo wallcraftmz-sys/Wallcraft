@@ -29,6 +29,42 @@
     </div>
     {% endfor %}
 </div>
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <img src="{{ product.image }}" alt="{{ product.name_ru }}">
+        <h3>{{ product.name_ru }}</h3>
+        <p>{{ product.description_ru }}</p>
+        <p class="price">{{ product.price }} €</p>
+        <button class="buy-btn" onclick="addToCart({{ product.id }})">В корзину</button>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="popup" style="display:none; position:fixed; top:20%; right:20%; background:#fff; border:1px solid #ccc; padding:15px; z-index:999;">
+    <span id="popup-text"></span>
+    <button onclick="closePopup()">Закрыть</button>
+</div>
+
+<script>
+function addToCart(productId) {
+    fetch(`/api/add_to_cart/${productId}`, {method: 'POST'})
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            document.getElementById('popup-text').innerHTML = 
+                `<img src="${data.product.image}" width="50"> 
+                ${data.product.name_ru} (${data.product.qty} шт.) <br> 
+                ${data.product.price} €`;
+            document.getElementById('popup').style.display = 'block';
+        }
+    });
+}
+
+function closePopup() {
+    document.getElementById('popup').style.display = 'none';
+}
+</script>
 {% endblock %}
 
 

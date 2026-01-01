@@ -1,44 +1,48 @@
 {% extends "base.html" %}
-
 {% block content %}
 <h1>Каталог товаров</h1>
+
+<div class="filters">
+    <select id="catFilter">
+        <option value="">Все категории</option>
+        <option value="walls">Обои</option>
+        <option value="tools">Инструменты</option>
+    </select>
+    <input type="number" id="minPrice" placeholder="Мин. цена">
+    <input type="number" id="maxPrice" placeholder="Макс. цена">
+    <button onclick="applyFilter()">Фильтровать</button>
+</div>
 
 <div class="product-grid">
     {% for product in products %}
     <div class="product-card">
-       <img src="{{ product.image }}" alt="{{ product.name_ru }}">
+        <img src="{{ product.image }}" alt="{{ product.name_ru }}">
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>
-
         <button class="buy-btn" onclick="addToCart({{ product.id }})">В корзину</button>
-        <a href="/order" class="buy-btn" style="background:#4CAF50">Заказать</a>
     </div>
     {% endfor %}
 </div>
 
 <div id="popup" style="display:none; position:fixed; top:20%; right:20%; background:#fff; border:1px solid #ccc; padding:15px; z-index:999;">
+    <span id="popup-text"></span>
+    <button onclick="closePopup()">Закрыть</button>
 </div>
 
 <script>
-function addToCart(productId) {
-    fetch(`/api/add_to_cart/${productId}`, {method: 'POST'})
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            const popup = document.getElementById('popup');
-            popup.innerHTML = `<img src="${data.product.image}" width="50"> 
-                               ${data.product.name_ru} (${data.product.qty} шт.) <br> 
-                               ${data.product.price} € 
-                               <button onclick="closePopup()">Закрыть</button>`;
-            popup.style.display = 'block';
+function addToCart(id){
+    fetch(`/api/add_to_cart/${id}`, {method:'POST'})
+    .then(r=>r.json())
+    .then(data=>{
+        if(data.success){
+            let p = data.product;
+            document.getElementById('popup-text').innerHTML =
+                `<img src="${p.image}" width="50"> ${p.name_ru} (${p.qty} шт.)<br>${p.price} €`;
+            document.getElementById('popup').style.display='block';
         }
-    }).catch(err => console.log(err));
+    });
 }
-
-function closePopup() {
-    document.getElementById('popup').style.display = 'none';
-}
+function closePopup(){ document.getElementById('popup').style.display='none'; }
 </script>
-
 {% endblock %}

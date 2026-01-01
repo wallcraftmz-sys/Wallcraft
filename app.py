@@ -46,13 +46,12 @@ products = [
         "image": "https://cdn.pixabay.com/photo/2017/08/07/12/50/wall-2608854_1280.jpg"
     }
 ]
-
 # ======================================================
 
 # -------------------- Язык --------------------
 @app.before_request
 def get_lang():
-    session['lang'] = request.args.get('lang') or session.get('lang') or 'lv'
+    session['lang'] = request.args.get('lang') or session.get('lang') or 'ru'
 
 # -------------------- Главная --------------------
 @app.route('/')
@@ -96,34 +95,21 @@ def api_add_to_cart(product_id):
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session["cart"] = cart
 
-    prod = next((p for p in products if p["id"] == product_id), None)
+    product = next((p for p in products if p["id"] == product_id), None)
+    if not product:
+        return jsonify({"success": False})
+
     return jsonify({
         "success": True,
         "product": {
-            "id": prod["id"],
-            "name_ru": prod["name_ru"],
-            "image": prod["image"],
-            "price": prod["price"],
+            "id": product["id"],
+            "name_ru": product["name_ru"],
+            "image": product["image"],
+            "price": product["price"],
             "qty": cart[str(product_id)]
-        },
-        "total_items": sum(cart.values())
+        }
     })
 
-@app.route("/api/update_cart/<int:product_id>/<action>", methods=["POST"])
-def api_update_cart(product_id, action):
-    cart = session.get("cart", {})
-    pid = str(product_id)
-    if pid in cart:
-        if action == "plus":
-            cart[pid] += 1
-        elif action == "minus":
-            cart[pid] -= 1
-            if cart[pid] <= 0:
-                del cart[pid]
-    session["cart"] = cart
-    return jsonify({"success": True, "total_items": sum(cart.values())})
-
-# -------------------- Корзина --------------------
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
@@ -135,6 +121,20 @@ def cart():
             cart_items.append({"product": prod, "qty": qty})
             total += prod["price"] * qty
     return render_template("cart.html", cart_items=cart_items, total=total)
+
+@app.route("/update_cart/<int:product_id>/<action>")
+def update_cart(product_id, action):
+    cart = session.get("cart", {})
+    pid = str(product_id)
+    if pid in cart:
+        if action == "plus":
+            cart[pid] += 1
+        elif action == "minus":
+            cart[pid] -= 1
+            if cart[pid] <= 0:
+                del cart[pid]
+    session["cart"] = cart
+    return redirect(url_for("cart"))
 
 # -------------------- Форма заказа --------------------
 @app.route("/order", methods=["GET", "POST"])

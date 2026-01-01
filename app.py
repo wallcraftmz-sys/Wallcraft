@@ -153,7 +153,19 @@ def order():
         return render_template("order.html", success=True)
 
     return render_template("order.html")
+    
+@app.route("/add_to_cart/<int:product_id>")
+def add_to_cart(product_id):
+    cart = session.get("cart", {})
+    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
+    session["cart"] = cart
 
+    # передаем добавленный товар в шаблон
+    added_product = next((p for p in products if p["id"] == product_id), None)
+    added_product = {"image": added_product["image"], "name_ru": added_product["name_ru"], "qty": cart[str(product_id)], "price": added_product["price"]}
+    
+    # вместо редиректа на /cart просто рендерим pop-up
+    return render_template("cart.html", added_product=added_product, cart_items=[], total=0)
 # -------------------- Админ-панель --------------------
 ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")

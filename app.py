@@ -23,7 +23,7 @@ products = [
         "description_lv": "Komplekts ar visu nepieciešamo",
         "description_ru": "Комплект со всем необходимым",
         "price": 15.00,
-        "image": "https://bioplast.ua/content/userfiles/files/dekorativnye-elementy-v-sostave-zhidkih-oboev.jpg"
+        "image": "https://cdn.pixabay.com/photo/2017/01/13/11/41/wallpaper-1970933_1280.jpg"
     },
     # Новый товар
     {

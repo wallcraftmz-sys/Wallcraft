@@ -23,7 +23,7 @@ products = [
         "description_lv": "Augstas kvalitātes šķidrie tapetes",
         "description_ru": "Высококачественные жидкие обои для стен",
         "price": 25.00,
-        "image": "images/ocean.jpg"
+        "image": "https://cdn.pixabay.com/photo/2016/11/29/06/16/texture-1868576_1280.jpg"
     },
     {
         "id": 2,
@@ -33,7 +33,7 @@ products = [
         "description_lv": "Augstas kvalitātes šķidrie tapetes",
         "description_ru": "Высококачественные жидкие обои для стен",
         "price": 30.00,
-        "image": "images/ocean.jpg"
+        "image": "https://cdn.pixabay.com/photo/2018/10/18/18/38/wall-3759044_1280.jpg"
     },
     {
         "id": 3,
@@ -43,7 +43,7 @@ products = [
         "description_lv": "Augstas kvalitātes šķidrie tapetes",
         "description_ru": "Высококачественные жидкие обои для стен",
         "price": 28.00,
-        "image": "images/ocean.jpg"
+        "image": "https://cdn.pixabay.com/photo/2017/08/07/12/50/wall-2608854_1280.jpg"
     }
 ]
 

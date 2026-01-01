@@ -17,34 +17,24 @@ app.secret_key = 'wallcraft_secret_key'
 products = [
     {
         "id": 1,
-        "category": "walls",
-        "name_lv": "Šķidrie tapetes — South 941",
-        "name_ru": "Жидкие обои — South 941",
-        "description_lv": "Materiāls dekoratīvai sienu...",
-        "description_ru": "Материал для декоративной отделки...",
-        "price": 25.00,
-        "image": "liquid_wallpaper.jpg"
-    },
-    {
-        "id": 2,
         "category": "tools",
         "name_lv": "Rīku komplekts",
         "name_ru": "Набор инструментов",
         "description_lv": "Komplekts ar visu nepieciešamo",
         "description_ru": "Комплект со всем необходимым",
         "price": 15.00,
-        "image": "tool.jpg"
+        "image": "images/tool.jpg"
     },
     # Новый товар
     {
-        "id": 3,
+        "id": 2,
         "category": "walls",
         "name_lv": "Silk Plaster 2025",
         "name_ru": "Жидкие обои — Silk Plaster 2025",
         "description_lv": "Augstas kvalitātes šķidrie tapetes",
         "description_ru": "Высококачественные жидкие обои для стен",
         "price": 30.00,
-        "image": "silk_plaster.jpg"
+        "image": "images/silk_plaster.jpg"
     }
 ]
 # ======================================================

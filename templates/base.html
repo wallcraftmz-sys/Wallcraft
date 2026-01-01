@@ -7,17 +7,34 @@
 
     <!-- Подключение CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* Минималистичный стиль для нового меню */
+        body { margin:0; font-family: Arial, sans-serif; }
+        header {
+            display:flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px 20px; 
+            background: #2196F3; 
+            color: white; 
+        }
+        header a { color:white; text-decoration:none; margin: 0 10px; }
+        .logo { font-weight:bold; font-size:24px; }
+        nav { display:flex; align-items: center; }
+        nav a:hover { text-decoration: underline; }
+        .cart-icon { margin-left: 20px; }
+    </style>
 </head>
 <body>
 
 <header>
-    <h1><a href="/" class="logo">Wallcraft</a></h1>
+    <a href="/" class="logo">Wallcraft</a>
     <nav>
         <a href="/">Главная</a>
-        <a href="/catalog">Каталог</a>
-        <a href="/order">Заказать</a>
-        <a href="?lang=lv">LV</a>
-        <a href="?lang=ru">RU</a>
+        <a href="/catalog?cat=walls">Обои</a>
+        <a href="/catalog?cat=tools">Инструменты</a>
+        <a href="/cart" class="cart-icon">Корзина 🛒</a>
     </nav>
 </header>
 
@@ -25,7 +42,7 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer>
+<footer style="text-align:center; padding:20px; background:#eee;">
     © 2025 Wallcraft. Все права защищены.
 </footer>
 

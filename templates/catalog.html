@@ -30,3 +30,4 @@
     {% endfor %}
 </div>
 {% endblock %}
+<img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name_ru }}">

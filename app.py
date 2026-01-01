@@ -27,14 +27,14 @@ products = [
     },
     # Новый товар
     {
-        "id": 2,
-        "category": "walls",
-        "name_lv": "Silk Plaster 2025",
-        "name_ru": "Жидкие обои — Silk Plaster 2025",
-        "description_lv": "Augstas kvalitātes šķidrie tapetes",
-        "description_ru": "Высококачественные жидкие обои для стен",
-        "price": 30.00,
-        "image": "images/silk_plaster.jpg"
+       "id": 2,
+    "category": "walls",
+    "name_lv": "Silk Plaster 2025",
+    "name_ru": "Жидкие обои — Silk Plaster 2025",
+    "description_lv": "Augstas kvalitātes šķidrie tapetes",
+    "description_ru": "Высококачественные жидкие обои для стен",
+    "price": 30.00,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Plaster_texture.jpg"
     }
 ]
 # ======================================================

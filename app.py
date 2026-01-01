@@ -17,26 +17,36 @@ app.secret_key = 'wallcraft_secret_key'
 products = [
     {
         "id": 1,
-        "category": "tools",
-        "name_lv": "Rīku komplekts",
-        "name_ru": "Набор инструментов",
-        "description_lv": "Komplekts ar visu nepieciešamo",
-        "description_ru": "Комплект со всем необходимым",
-        "price": 15.00,
-        "image": "https://cdn.pixabay.com/photo/2017/01/13/11/41/wallpaper-1970933_1280.jpg"
+        "category": "walls",
+        "name_lv": "Жидкие обои — Ocean",
+        "name_ru": "Жидкие обои — Ocean",
+        "description_lv": "Augstas kvalitātes šķidrie tapetes",
+        "description_ru": "Высококачественные жидкие обои для стен",
+        "price": 25.00,
+        "image": "https://cdn.pixabay.com/photo/2018/05/08/08/35/wall-3386300_1280.jpg"
     },
-    # Новый товар
     {
-       "id": 2,
-    "category": "walls",
-    "name_lv": "Silk Plaster 2025",
-    "name_ru": "Жидкие обои — Silk Plaster 2025",
-    "description_lv": "Augstas kvalitātes šķidrie tapetes",
-    "description_ru": "Высококачественные жидкие обои для стен",
-    "price": 30.00,
-    "image": "https://bioplast.ua/content/userfiles/files/dekorativnye-elementy-v-sostave-zhidkih-oboev.jpg"
+        "id": 2,
+        "category": "walls",
+        "name_lv": "Жидкие обои — Golden",
+        "name_ru": "Жидкие обои — Golden",
+        "description_lv": "Augstas kvalitātes šķidrie tapetes",
+        "description_ru": "Высококачественные жидкие обои для стен",
+        "price": 30.00,
+        "image": "https://cdn.pixabay.com/photo/2017/09/14/17/21/wall-2745476_1280.jpg"
+    },
+    {
+        "id": 3,
+        "category": "walls",
+        "name_lv": "Жидкие обои — Modern",
+        "name_ru": "Жидкие обои — Modern",
+        "description_lv": "Augstas kvalitātes šķidrie tapetes",
+        "description_ru": "Высококачественные жидкие обои для стен",
+        "price": 28.00,
+        "image": "https://cdn.pixabay.com/photo/2017/12/29/20/50/texture-3045217_1280.jpg"
     }
 ]
+
 # ======================================================
 
 # -------------------- Язык --------------------

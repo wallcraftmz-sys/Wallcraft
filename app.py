@@ -43,13 +43,24 @@ def catalog():
     return render_template('catalog.html', products=filtered)
 
 # -------------------- Корзина --------------------
-@app.route('/api/add_to_cart/<int:product_id>', methods=['POST'])
-def add_to_cart_api(product_id):
-    cart = session.get('cart', {})
+@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
+def api_add_to_cart(product_id):
+    cart = session.get("cart", {})
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
-    session['cart'] = cart
-    prod = next((p for p in products if p['id']==product_id), None)
-    return jsonify({"success": True, "product":{"id":prod['id'], "name_ru":prod['name_ru'], "price":prod['price'], "image":prod['image'], "qty":cart[str(product_id)]}})
+    session["cart"] = cart
+
+    product = next(p for p in products if p["id"] == product_id)
+
+    return {
+        "success": True,
+        "product": {
+            "id": product["id"],
+            "name_ru": product["name_ru"],
+            "image": product["image"],
+            "qty": cart[str(product_id)],
+            "price": product["price"]
+        }
+    }
 
 @app.route('/cart')
 def cart():

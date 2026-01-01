@@ -62,17 +62,22 @@ def api_add_to_cart(product_id):
         }
     }
 
-@app.route('/cart')
+@app.route("/cart")
 def cart():
-    cart = session.get('cart', {})
-    items = []
+    cart = session.get("cart", {})
+    cart_items = []
     total = 0
+
     for pid, qty in cart.items():
-        prod = next((p for p in products if p['id']==int(pid)), None)
-        if prod:
-            items.append({"product":prod, "qty":qty})
-            total += prod['price']*qty
-    return render_template('cart.html', cart_items=items, total=total)
+        product = next((p for p in products if p["id"] == int(pid)), None)
+        if product:
+            cart_items.append({
+                "product": product,
+                "qty": qty
+            })
+            total += product["price"] * qty
+
+    return render_template("cart.html", cart_items=cart_items, total=total)
 
 # -------------------- Удаление/изменение --------------------
 @app.route('/update_cart/<int:product_id>/<action>')

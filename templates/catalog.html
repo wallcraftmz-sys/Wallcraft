@@ -19,11 +19,11 @@
     {% for product in products %}
     <div class="product-card">
 
-        <img>
-            src="{{ url_for('static', filename=product.image) }}"
-            alt="{{ product.name_ru }}"
-            class="product-image"
-        >
+        <img
+    src="{{ url_for('static', filename=product.image) }}"
+    alt="{{ product.name_ru }}"
+    class="product-image"
+/>
 
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>

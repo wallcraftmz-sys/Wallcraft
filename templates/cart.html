@@ -5,37 +5,38 @@
 
 {% if cart_items %}
 <div class="cart-list">
-    {% for item in cart_items %}
-    <div class="cart-item">
-        <img src="{{ url_for('static', filename=item.product.image) }}" class="cart-item-image">
 
-        <div class="cart-info">
-            <h4>{{ item.product.name_ru }}</h4>
-            <p>{{ "%.2f"|format(item.product.price) }} € × {{ item.qty }}</p>
+{% for item in cart_items %}
+<div class="cart-item">
+    <img
+      src="{{ url_for('static', filename=item.product.image) }}"
+      class="cart-item-image"
+    >
 
-            <div class="qty-controls">
-                <a href="/update_cart/{{ item.product.id }}/minus" class="qty-btn">−</a>
-                <span class="qty-number">{{ item.qty }}</span>
-                <a href="/update_cart/{{ item.product.id }}/plus" class="qty-btn">+</a>
-            </div>
-        </div>
-
-        <div class="cart-total">
-            {{ "%.2f"|format(item.product.price * item.qty) }} €
-        </div>
+    <div style="flex:1">
+        <strong>{{ item.product.name_ru }}</strong><br>
+        {{ item.product.price }} € × {{ item.qty }}
     </div>
-    {% endfor %}
+
+    <div class="qty-controls">
+        <a href="/update_cart/{{ item.product.id }}/minus" class="qty-btn">−</a>
+        <span class="qty-number">{{ item.qty }}</span>
+        <a href="/update_cart/{{ item.product.id }}/plus" class="qty-btn">+</a>
+    </div>
+</div>
+{% endfor %}
+
 </div>
 
 <div class="cart-summary">
-    <b>Итого: {{ "%.2f"|format(total) }} €</b>
+    Итого: <b>{{ "%.2f"|format(total) }} €</b>
 </div>
 
 <a href="/order" class="buy-btn full-width">Оформить заказ</a>
 
 {% else %}
 <p>Корзина пуста</p>
-<a href="/catalog" class="buy-btn">Вернуться в каталог</a>
+<a href="/catalog">Вернуться в каталог</a>
 {% endif %}
 
 {% endblock %}

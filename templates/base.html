@@ -28,14 +28,23 @@
 </head>
 <body>
 
-<header>
-    <a href="/" class="logo">Wallcraft</a>
-    <nav>
-        <a href="/">Главная</a>
-        <a href="/catalog?cat=walls">Обои</a>
-        <a href="/catalog?cat=tools">Инструменты</a>
-        <a href="/cart" class="cart-icon">Корзина 🛒</a>
-    </nav>
+<header class="site-header">
+    <div class="header-left">
+        <div class="menu-btn" onclick="toggleMenu()">⋮</div>
+
+        <div id="dropdown-menu" class="dropdown-menu">
+            <a href="/catalog?cat=walls">Обои</a>
+            <a href="/catalog?cat=tools">Инструменты</a>
+        </div>
+    </div>
+
+    <div class="header-center">
+        <a href="/" class="logo">Wallcraft</a>
+    </div>
+
+    <div class="header-right">
+        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
+    </div>
 </header>
 
 <main>

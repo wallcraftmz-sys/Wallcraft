@@ -42,25 +42,28 @@ def catalog():
         filtered = [p for p in filtered if p["price"] <= float(max_price)]
     return render_template('catalog.html', products=filtered)
 
-# -------------------- Корзина --------------------
+# -------------------- Корзина --------------------# API для добавления товара в корзину (для popup)
+
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def api_add_to_cart(product_id):
     cart = session.get("cart", {})
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session["cart"] = cart
 
-    product = next(p for p in products if p["id"] == product_id)
+    # Найдем товар
+    product_item = next((p for p in products if p["id"] == product_id), None)
+    if not product_item:
+        return jsonify({"success": False})
 
-    return {
+    # Добавим полный путь к картинке
+    product_item = dict(product_item)  # создаем копию
+    product_item["image_url"] = url_for("static", filename=product_item["image"])
+
+    return jsonify({
         "success": True,
-        "product": {
-            "id": product["id"],
-            "name_ru": product["name_ru"],
-            "image": product["image"],
-            "qty": cart[str(product_id)],
-            "price": product["price"]
-        }
-    }
+        "product": product_item,
+        "qty": cart[str(product_id)]
+    })
 
 @app.route("/cart")
 def cart():

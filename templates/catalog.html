@@ -19,7 +19,7 @@
     {% for product in products %}
     <div class="product-card">
 
-        <img
+        <img>
             src="{{ url_for('static', filename=product.image) }}"
             alt="{{ product.name_ru }}"
             class="product-image"

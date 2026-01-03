@@ -2,70 +2,68 @@
 {% block content %}
 <h1>Каталог товаров</h1>
 
-<form method="GET" style="margin-bottom:20px;">
-    <select name="cat">
-        <option value="">Все категории</option>
-        <option value="walls">Обои</option>
-        <option value="tools">Инструменты</option>
-    </select>
-
-    <input type="number" name="min_price" placeholder="Мин. цена">
-    <input type="number" name="max_price" placeholder="Макс. цена">
-
-    <button type="submit" class="buy-btn">Фильтровать</button>
-</form>
-
 <div class="product-grid">
     {% for product in products %}
     <div class="product-card">
-
-       <img
-    src="{{ product.image }}"
-    alt="{{ product.name_ru }}"
-    class="product-image"
-/>
-
+        <img src="{{ product.image }}" alt="{{ product.name_ru }}">
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>
-
-        <button type="button" class="buy-btn" onclick="addToCart({{ product.id }})">
-    В корзину
-</button>
+        <!-- Кнопка теперь вызывает JS API -->
+        <button class="buy-btn" onclick="addToCart({{ product.id }})">В корзину</button>
     </div>
     {% endfor %}
 </div>
 
-<!-- Поп-ап -->
-<div id="popup" class="popup" onclick="closePopup()">
-    <div class="popup-content" onclick="event.stopPropagation()">
+<!-- POP-UP: один экземпляр -->
+<div id="popup" class="popup" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:999;">
+    <div class="popup-content" style="background:#fff; padding:20px; border-radius:8px; max-width:420px; width:90%;">
         <div id="popup-text"></div>
-        <div class="popup-actions">
-            <a href="/catalog" class="btn-small">Продолжить покупки</a>
-            <a href="/cart" class="btn-small">Перейти в корзину</a>
+        <div style="margin-top:12px; display:flex; gap:10px; justify-content:center;">
+            <a href="/catalog" class="buy-btn" style="background:#2196F3; text-decoration:none; color:#fff; padding:8px 12px; border-radius:6px;">Продолжить покупки</a>
+            <a href="/cart" class="buy-btn" style="background:#4CAF50; text-decoration:none; color:#fff; padding:8px 12px; border-radius:6px;">Перейти в корзину</a>
+        </div>
+        <div style="text-align:right; margin-top:8px;">
+            <button onclick="closePopup()" style="background:none; border:none; color:#777; cursor:pointer;">Закрыть</button>
         </div>
     </div>
 </div>
 
 <script>
-function addToCart(productId) {
-    fetch(`/api/add_to_cart/${productId}`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('popup-text').innerHTML = `
-                    <img src="${data.product.image_url}" width="80"><br>
-                    <strong>${data.product.name_ru}</strong><br>
-                    ${data.qty} шт × ${data.product.price} €
-                `;
-                document.getElementById('popup').style.display = 'flex';
-            }
-        });
+function addToCart(productId){
+    fetch(`/api/add_to_cart/${productId}`, { method:'POST' })
+    .then(res => {
+        if(!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+    })
+    .then(data => {
+        if(data.success){
+            const p = data.product;
+            document.getElementById('popup-text').innerHTML =
+                `<div style="display:flex; gap:12px; align-items:center;">
+                    <img src="${p.image}" style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+                    <div>
+                        <b style="font-size:16px;">${p.name_ru}</b><br>
+                        ${p.qty} шт × ${p.price} €
+                    </div>
+                 </div>`;
+            document.getElementById('popup').style.display = 'flex';
+
+            // обновим счётчик корзины в header (если есть)
+            fetch('/api/cart_count').then(r => r.json()).then(d => {
+                const el = document.getElementById('cart-count');
+                if(el) el.innerText = d.count;
+            }).catch(()=>{});
+        }
+    })
+    .catch(err => {
+        console.error('addToCart error', err);
+        alert('Ошибка при добавлении в корзину');
+    });
 }
 
-function closePopup() {
+function closePopup(){
     document.getElementById('popup').style.display = 'none';
 }
 </script>
-
 {% endblock %}

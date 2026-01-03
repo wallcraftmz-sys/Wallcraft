@@ -29,10 +29,9 @@
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>
 
-        <button class="buy-btn" onclick="addToCart({{ product.id }})">
-            В корзину
-        </button>
-
+        <button type="button" class="buy-btn" onclick="addToCart({{ product.id }})">
+    В корзину
+</button>
     </div>
     {% endfor %}
 </div>

@@ -7,21 +7,28 @@
 <div class="cart-list">
 
 {% for item in cart_items %}
-<div class="cart-item">
-    <img
-      src="{{ url_for('static', filename=item.product.image) }}"
-      class="cart-item-image"
-    >
-
-    <div style="flex:1">
-        <strong>{{ item.product.name_ru }}</strong><br>
-        {{ item.product.price }} € × {{ item.qty }}
+<div class="cart-row" id="cart-row-{{ item.product.id }}">
+    <div class="cart-thumb">
+        {% if item.product.image.startswith('http') %}
+            <img src="{{ item.product.image }}" alt="{{ item.product.name_ru }}">
+        {% else %}
+            <img src="{{ url_for('static', filename=item.product.image) }}" alt="{{ item.product.name_ru }}">
+        {% endif %}
     </div>
 
-    <div class="qty-controls">
-        <a href="/update_cart/{{ item.product.id }}/minus" class="qty-btn">−</a>
-        <span class="qty-number">{{ item.qty }}</span>
-        <a href="/update_cart/{{ item.product.id }}/plus" class="qty-btn">+</a>
+    <div class="cart-info">
+        <div class="cart-name">{{ item.product.name_ru }}</div>
+        <div class="cart-price" id="price-{{ item.product.id }}">{{ "%.2f"|format(item.product.price) }} €</div>
+    </div>
+
+    <div class="cart-qty">
+        <button class="qty-btn minus" onclick="changeQty({{ item.product.id }}, 'minus')">−</button>
+        <span class="qty-number" id="qty-{{ item.product.id }}">{{ item.qty }}</span>
+        <button class="qty-btn plus" onclick="changeQty({{ item.product.id }}, 'plus')">+</button>
+    </div>
+
+    <div class="cart-subtotal" id="subtotal-{{ item.product.id }}">
+        {{ "%.2f"|format(item.product.price * item.qty) }} €
     </div>
 </div>
 {% endfor %}
@@ -29,14 +36,54 @@
 </div>
 
 <div class="cart-summary">
-    Итого: <b>{{ "%.2f"|format(total) }} €</b>
+    <div>Итого: <span id="cart-total">{{ "%.2f"|format(total) }}</span> €</div>
+    <a href="/order" class="buy-btn checkout">Оформить заказ</a>
 </div>
-
-<a href="/order" class="buy-btn full-width">Оформить заказ</a>
 
 {% else %}
 <p>Корзина пуста</p>
-<a href="/catalog">Вернуться в каталог</a>
+<a href="/catalog" class="buy-btn">Вернуться в каталог</a>
 {% endif %}
+
+<script>
+async function changeQty(productId, action) {
+    try {
+        const resp = await fetch(`/api/update_cart/${productId}/${action}`, { method: 'POST' });
+        if (!resp.ok) throw new Error('Network response not ok');
+        const data = await resp.json();
+        if (!data.success) throw new Error('Server returned error');
+
+        // обновим количество в строке
+        const qtyEl = document.getElementById(`qty-${productId}`);
+        if (qtyEl) qtyEl.innerText = data.qty;
+
+        // если qty == 0 — удалить DOM-строку
+        if (data.qty === 0) {
+            const row = document.getElementById(`cart-row-${productId}`);
+            if (row) row.remove();
+        } else {
+            // обновить subtotal для товара
+            const priceEl = document.getElementById(`price-${productId}`);
+            const subtotalEl = document.getElementById(`subtotal-${productId}`);
+            if (priceEl && subtotalEl) {
+                const price = parseFloat(priceEl.innerText.replace('€','').trim());
+                subtotalEl.innerText = (price * data.qty).toFixed(2) + ' €';
+            }
+        }
+
+        // обновим общий total
+        const totalEl = document.getElementById('cart-total');
+        if (totalEl) totalEl.innerText = parseFloat(data.total).toFixed(2);
+
+        // обновим счётчик корзины в header, если есть
+        const headerCount = document.getElementById('cart-count');
+        if (headerCount) headerCount.innerText = data.cart_total_items;
+
+    } catch (err) {
+        console.error('changeQty error:', err);
+        alert('Не удалось обновить количество. Попробуйте снова.');
+    }
+}
+</script>
 
 {% endblock %}

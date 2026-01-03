@@ -3,7 +3,7 @@ import threading
 import os
 import smtplib
 from functools import wraps
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
@@ -63,19 +63,47 @@ def catalog():
     if cat:
         filtered = [p for p in filtered if p["category"] == cat]
     if min_price:
-        filtered = [p for p in filtered if p["price"] >= float(min_price)]
+        try:
+            filtered = [p for p in filtered if p["price"] >= float(min_price)]
+        except:
+            pass
     if max_price:
-        filtered = [p for p in filtered if p["price"] <= float(max_price)]
+        try:
+            filtered = [p for p in filtered if p["price"] <= float(max_price)]
+        except:
+            pass
 
     return render_template("catalog.html", products=filtered)
 
-# ================== ДОБАВИТЬ В КОРЗИНУ ==================
-@app.route("/add_to_cart/<int:product_id>")
-def add_to_cart(product_id):
+# ================== API: ДОБАВИТЬ В КОРЗИНУ (для JS) ==================
+@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
+def api_add_to_cart(product_id):
+    # Обновляем корзину в сессии
     cart = session.get("cart", {})
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session["cart"] = cart
-    return redirect(url_for("cart"))
+
+    # Берём данные товара
+    product = next((p for p in products if p["id"] == product_id), None)
+    if not product:
+        return jsonify({"success": False}), 404
+
+    return jsonify({
+        "success": True,
+        "product": {
+            "id": product["id"],
+            "name_ru": product["name_ru"],
+            "image": product["image"],
+            "price": product["price"],
+            "qty": cart[str(product_id)]
+        },
+        "cart_total_items": sum(cart.values())
+    })
+
+# API, чтобы получать текущее кол-во предметов в корзине (для header)
+@app.route("/api/cart_count")
+def api_cart_count():
+    return jsonify({"count": sum(session.get("cart", {}).values())})
 
 # ================== КОРЗИНА ==================
 @app.route("/cart")
@@ -125,6 +153,10 @@ def send_email(name, contact):
     sender = os.environ.get("WALLCRAFT_EMAIL")
     password = os.environ.get("WALLCRAFT_APP_PASSWORD")
 
+    if not sender or not password:
+        print("Email / app password not set in env")
+        return
+
     msg = MIMEMultipart()
     msg["From"] = sender
     msg["To"] = sender
@@ -138,6 +170,44 @@ def send_email(name, contact):
             server.sendmail(sender, sender, msg.as_string())
     except Exception as e:
         print("Ошибка почты:", e)
+
+# ================== АДМИН (без изменений) ==================
+ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
+
+def admin_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if session.get("is_admin"):
+            return f(*args, **kwargs)
+        return redirect(url_for("admin_login"))
+    return wrapped
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        login = request.form.get("login")
+        password = request.form.get("password")
+        if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
+            session["is_admin"] = True
+            return redirect("/admin")
+        return render_template("admin_login.html", error="Неверный логин или пароль")
+    return render_template("admin_login.html")
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("is_admin", None)
+    return redirect("/admin/login")
+
+@app.route("/admin")
+@admin_required
+def admin_panel():
+    conn = sqlite3.connect("orders.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders")
+    orders = cursor.fetchall()
+    conn.close()
+    return render_template("admin.html", orders=orders)
 
 # ================== ЗАПУСК ==================
 if __name__ == "__main__":

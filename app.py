@@ -75,15 +75,13 @@ def catalog():
 
     return render_template("catalog.html", products=filtered)
 
-# ================== API: ДОБАВИТЬ В КОРЗИНУ (для JS) ==================
+# ================== API: ДОБАВИТЬ В КОРЗИНУ ==================
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def api_add_to_cart(product_id):
-    # Обновляем корзину в сессии
     cart = session.get("cart", {})
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session["cart"] = cart
 
-    # Берём данные товара
     product = next((p for p in products if p["id"] == product_id), None)
     if not product:
         return jsonify({"success": False}), 404
@@ -94,16 +92,49 @@ def api_add_to_cart(product_id):
             "id": product["id"],
             "name_ru": product["name_ru"],
             "image": product["image"],
-            "price": product["price"],
-            "qty": cart[str(product_id)]
+            "price": product["price"]
         },
+        "qty": cart[str(product_id)],
         "cart_total_items": sum(cart.values())
     })
 
-# API, чтобы получать текущее кол-во предметов в корзине (для header)
-@app.route("/api/cart_count")
-def api_cart_count():
-    return jsonify({"count": sum(session.get("cart", {}).values())})
+# ================== API: + / − В КОРЗИНЕ (ВАЖНО) ==================
+@app.route("/api/update_cart/<int:product_id>/<action>", methods=["POST"])
+def api_update_cart(product_id, action):
+    cart = session.get("cart", {})
+    pid = str(product_id)
+
+    if pid not in cart:
+        return jsonify({
+            "success": False,
+            "qty": 0,
+            "total": 0,
+            "cart_total_items": 0
+        })
+
+    if action == "plus":
+        cart[pid] += 1
+    elif action == "minus":
+        cart[pid] -= 1
+        if cart[pid] <= 0:
+            del cart[pid]
+
+    session["cart"] = cart
+
+    total = 0
+    total_items = 0
+    for k, q in cart.items():
+        product = next((p for p in products if p["id"] == int(k)), None)
+        if product:
+            total += product["price"] * q
+            total_items += q
+
+    return jsonify({
+        "success": True,
+        "qty": cart.get(pid, 0),
+        "total": total,
+        "cart_total_items": total_items
+    })
 
 # ================== КОРЗИНА ==================
 @app.route("/cart")
@@ -120,7 +151,7 @@ def cart():
 
     return render_template("cart.html", cart_items=cart_items, total=total)
 
-# ================== + / − ==================
+# ================== СТАРЫЙ + / − (НЕ ТРОГАЕМ) ==================
 @app.route("/update_cart/<int:product_id>/<action>")
 def update_cart(product_id, action):
     cart = session.get("cart", {})
@@ -143,71 +174,25 @@ def order():
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")
-
         threading.Thread(target=send_email, args=(name, contact)).start()
         return render_template("order.html", success=True)
-
     return render_template("order.html")
 
 def send_email(name, contact):
     sender = os.environ.get("WALLCRAFT_EMAIL")
     password = os.environ.get("WALLCRAFT_APP_PASSWORD")
-
     if not sender or not password:
-        print("Email / app password not set in env")
         return
 
     msg = MIMEMultipart()
     msg["From"] = sender
     msg["To"] = sender
-    msg["Subject"] = "Новая заявка с сайта"
-
+    msg["Subject"] = "Новая заявка"
     msg.attach(MIMEText(f"Имя: {name}\nКонтакт: {contact}", "plain"))
 
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender, password)
-            server.sendmail(sender, sender, msg.as_string())
-    except Exception as e:
-        print("Ошибка почты:", e)
-
-# ================== АДМИН (без изменений) ==================
-ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
-
-def admin_required(f):
-    @wraps(f)
-    def wrapped(*args, **kwargs):
-        if session.get("is_admin"):
-            return f(*args, **kwargs)
-        return redirect(url_for("admin_login"))
-    return wrapped
-
-@app.route("/admin/login", methods=["GET", "POST"])
-def admin_login():
-    if request.method == "POST":
-        login = request.form.get("login")
-        password = request.form.get("password")
-        if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
-            session["is_admin"] = True
-            return redirect("/admin")
-        return render_template("admin_login.html", error="Неверный логин или пароль")
-    return render_template("admin_login.html")
-
-@app.route("/admin/logout")
-def admin_logout():
-    session.pop("is_admin", None)
-    return redirect("/admin/login")
-
-@app.route("/admin")
-@admin_required
-def admin_panel():
-    conn = sqlite3.connect("orders.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders")
-    orders = cursor.fetchall()
-    conn.close()
-    return render_template("admin.html", orders=orders)
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender, password)
+        server.sendmail(sender, sender, msg.as_string())
 
 # ================== ЗАПУСК ==================
 if __name__ == "__main__":

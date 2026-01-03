@@ -143,8 +143,25 @@ main {
 }
 
 .menu-btn {
-    font-size: 24px;
+    width: 44px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+}
+
+/* три линии */
+.menu-btn::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: white;
+    box-shadow:
+        0 6px 0 white,
+        0 -6px 0 white;
 }
 
 .dropdown-menu {

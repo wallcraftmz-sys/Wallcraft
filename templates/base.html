@@ -62,5 +62,17 @@ function toggleMenu() {
 }
 </script>
     <a href="/cart" class="floating-cart">🛒</a>
+    <script>
+function toggleMenu() {
+    const menu = document.getElementById('dropdownMenu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.menu-btn') && !e.target.closest('.dropdown-menu')) {
+        document.getElementById('dropdownMenu').style.display = 'none';
+    }
+});
+</script>
 </body>
 </html>

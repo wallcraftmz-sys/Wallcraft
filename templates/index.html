@@ -1,45 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 style="text-align:center; margin-bottom:30px;">Добро пожаловать в Wallcraft</h1>
+<h1 style="text-align:center; margin-bottom:30px;">
+    Добро пожаловать в Wallcraft
+</h1>
 
 <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
     {% for product in products %}
-    <div style="background:#ffffff; padding:15px; border-radius:8px; 
-                max-width:260px; width:100%; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <div style="
+        background:#ffffff;
+        padding:15px;
+        border-radius:8px;
+        max-width:260px;
+        width:100%;
+        box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        text-align:center;
+    ">
 
-        <!-- Фото товара -->
-        <div style="text-align:center;">
-            <img
-  src="{{ url_for('static', filename=product.image) }}"
-  alt="{{ product.name_ru }}"
-  style="width:100%; height:auto; border-radius:8px;"
->
-     alt="Жидкие обои"
-     style="max-width:100%; border-radius:10px;">
-        </div>
+        <!-- Фото -->
+        <img
+            src="{{ product.image }}"
+            alt="{{ product.name_ru }}"
+            style="width:100%; height:auto; border-radius:8px;"
+        >
 
         <!-- Название -->
-        <h3 style="font-size:1.1em; margin-top:10px; margin-bottom:8px; color:#111;">{{ product.name_ru }}</h3>
+        <h3 style="font-size:1.1em; margin:10px 0 8px;">
+            {{ product.name_ru }}
+        </h3>
 
         <!-- Описание -->
-        <p style="font-size:0.9em; color:#444;">{{ product.description_ru }}</p>
-
-        <!-- Цена и кнопка -->
-        <div style="margin-top:10px;">
-            <p style="font-size:1.1em; font-weight:bold; color:#000;">{{ product.price }} €</p>
-            <a href="/order" style="
-                display:block;
-                text-align:center;
-                padding:10px 0;
-                background:#1f2933;
-                color:white;
-                text-decoration:none;
-                border-radius:6px;
-                font-weight:bold;
-                margin-top:5px;
-            ">Купить</a>
-        </div>
+        <p style="font-size:0.9em; color:#444;">
+            {{ product.description_ru }}
+        </p>
 
     </div>
     {% endfor %}

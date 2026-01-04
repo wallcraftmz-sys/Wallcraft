@@ -57,6 +57,15 @@ def index():
     lang = session.get("lang")
     return render_template("index.html", products=products, lang=lang)
 
+@app.route('/product/<int:id>')
+def product(id):
+    lang = session.get('lang')
+    product_item = next((p for p in products if p['id'] == id), None)
+    if not product_item:
+        # можно вернуть 404 или редирект на каталог
+        return redirect(url_for('catalog'))
+    return render_template('product.html', lang=lang, product=product_item)
+
 # ================== КАТАЛОГ ==================
 @app.route("/catalog")
 def catalog():

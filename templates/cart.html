@@ -2,44 +2,46 @@
 {% block content %}
 {% set lang = lang %}
 
-<h1>{{ "Корзина" if lang=="ru" else "Grozs" }}</h1>
+<h1 style="font-size:28px; margin-bottom:20px;">{{ "Корзина" if lang=="ru" else "Grozs" }}</h1>
 
-{% for item in cart_items %}
-<div class="cart-item">
-  <img src="{{ item.product.image }}" class="cart-item-image">
-  <b>{{ item.product["name_"+lang] }}</b>
-  {{ item.qty }} шт
-  <div class="qty-controls">
-    <button onclick="changeQty({{ item.product.id }},'minus')">−</button>
-    <button onclick="changeQty({{ item.product.id }},'plus')">+</button>
-  </div>
-</div>
-{% endfor %}
+{% if cart_items %}
+    {% for item in cart_items %}
+    <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px; background:#fff; padding:12px; border-radius:8px;">
+        <img src="{{ item.product.image }}" class="cart-item-image" style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+        <div>
+            <b style="font-size:18px;">{{ item.product["name_"+lang] }}</b>
+            <p style="margin:5px 0;">{{ item.qty }} шт</p>
+            <div class="qty-controls">
+                <button onclick="changeQty({{ item.product.id }},'minus')" style="padding:5px 10px;">−</button>
+                <button onclick="changeQty({{ item.product.id }},'plus')" style="padding:5px 10px;">+</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 
-<p><b>Итого:</b> {{ total }} €</p>
+    <p style="font-size:18px;"><b>Итого:</b> {{ total }} €</p>
 
-<a href="/" class="buy-btn">На главную</a>
-<a href="/catalog" class="buy-btn">В каталог</a>
+    <div style="margin-top:20px; display:flex; gap:15px; flex-wrap:wrap;">
+        <a href="/?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px;">{{ "На главную" if lang=="ru" else "Uz sākumlapu" }}</a>
+        <a href="/catalog?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px;">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
+        <a href="/order?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px; background:#FF9800;">{{ "Оформить заказ" if lang=="ru" else "Veikt pasūtījumu" }}</a>
+    </div>
+
+{% else %}
+    <p style="font-size:16px;">{{ "В корзине нет товаров" if lang=="ru" else "Grozs ir tukšs" }}</p>
+    <a href="/catalog?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px;">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
+{% endif %}
 
 <script>
 function changeQty(id, action) {
     fetch(`/api/update_cart/${id}/${action}`, { method: "POST" })
         .then(r => r.json())
         .then(data => {
-            if (data.qty === 0) {
-                location.reload();
-            } else {
-                document.getElementById(`qty-${id}`).innerText = data.qty;
+            if(data.success){
+                location.reload(); // проще перезагрузить, чтобы обновились итого и popup
             }
         });
 }
 </script>
-<div style="margin-top:20px; display:flex; gap:10px;">
-    <a href="/?lang={{ lang }}" class="buy-btn">
-        {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
-    </a>
-    <a href="/catalog?lang={{ lang }}" class="buy-btn">
-        {{ "В каталог" if lang=="ru" else "Uz katalogu" }}
-    </a>
-</div>
+
 {% endblock %}

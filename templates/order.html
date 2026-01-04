@@ -1,1 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 style="text-align:center; font-size:28px;">{{ "Оформление заказа" if lang=="ru" else "Pasūtījuma veikšana" }}</h1>
+
+{% if cart_items %}
+<form method="POST" style="max-width:400px;margin:auto;display:flex;flex-direction:column;gap:12px;">
+    <input type="text" name="name" placeholder="{{ 'Ваше имя' if lang=='ru' else 'Jūsu vārds' }}" required>
+    <input type="text" name="contact" placeholder="{{ 'Контакт' if lang=='ru' else 'Kontakti' }}" required>
+    <button type="submit" class="buy-btn">{{ 'Оформить заказ' if lang=='ru' else 'Veikt pasūtījumu' }}</button>
+</form>
+
+<p style="text-align:center; font-size:18px; color:green; margin-top:15px;">
+    {% if success %}{{ 'Заказ успешно оформлен!' if lang=='ru' else 'Pasūtījums veiksmīgi izveidots!' }}{% endif %}
+</p>
+
+{% else %}
+<p style="text-align:center; font-size:18px;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
+<a href="/catalog?lang={{ lang }}" class="buy-btn">{{ "В каталог" if lang=='ru' else "Uz katalogu" }}</a>
+{% endif %}
+{% endblock %}
 

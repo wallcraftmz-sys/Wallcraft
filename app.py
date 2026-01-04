@@ -167,8 +167,8 @@ def order():
         name = request.form.get("name")
         contact = request.form.get("contact")
         threading.Thread(target=send_email, args=(name, contact)).start()
-        return render_template("order.html", success=True)
-    return render_template("order.html")
+        return render_template("order.html", success=True, lang=lang)
+    return render_template("order.html", lang=lang)
 
 def send_email(name, contact):
     sender = os.environ.get("WALLCRAFT_EMAIL")

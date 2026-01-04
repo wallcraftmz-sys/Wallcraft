@@ -35,9 +35,11 @@
         <a href="/">Wallcraft</a>
     </div>
 
-    <div class="lang-switch">
-    <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
-</div>
+    <nav class="lang-switch">
+    <!-- ссылка остаётся на текущем пути и ставит параметр lang -->
+    <a href="{{ request.path }}?lang=ru">RU</a> |
+    <a href="{{ request.path }}?lang=lv">LV</a>
+</nav>
 </header>
 
 <div id="dropdownMenu" class="dropdown-menu">

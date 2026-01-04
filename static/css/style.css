@@ -1,78 +1,64 @@
-/* Общие стили */
+/* ======= Общие стили ======= */
 body {
-    font-family: sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background: #f5f5f5;
-    font-size: 18px; /* базовый размер шрифта больше */
-}
-
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px;
-    background: #333;
-    color: #fff;
-    position: relative;
-}
-
-.menu-btn {
-    cursor: pointer;
-    font-size: 28px; /* больше кнопка меню */
-}
-
-.logo a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 24px; /* крупный логотип */
-}
-
-.lang-switch a {
-    color: #fff;
-    text-decoration: none;
-    margin-left: 10px;
-    font-size: 16px;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 60px;
-    left: 10px;
-    background: #fff;
-    color: #333;
-    padding: 12px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 100;
-}
-
-.dropdown-menu a {
-    display: block;
-    color: #333;
-    text-decoration: none;
-    margin: 8px 0;
     font-size: 18px;
 }
 
-/* Плавающая корзина */
+main {
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+}
+
+/* ======= HEADER ======= */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #333;
+    color: #fff;
+    font-size: 20px;
+}
+
+header .logo a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+header .lang-switch a {
+    margin-left: 12px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.menu-btn {
+    font-size: 28px;
+    cursor: pointer;
+}
+
+/* ======= FLOATING CART ======= */
 .floating-cart {
     position: fixed;
     bottom: 25px;
     right: 20px;
-    font-size: 40px; /* увеличенная иконка */
     background: #ff5722;
-    color: #fff;
-    padding: 15px;
+    color: white;
+    width: 70px;
+    height: 70px;
+    font-size: 36px;
     border-radius: 50%;
-    z-index: 999;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 999;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: transform 0.2s;
 }
 
 .floating-cart:hover {
@@ -81,25 +67,23 @@ header {
 
 #cart-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -6px;
+    right: -6px;
     background: red;
     color: white;
     font-size: 16px;
     font-weight: bold;
     padding: 4px 8px;
     border-radius: 50%;
-    min-width: 24px;
-    text-align: center;
 }
 
-/* Сетка продуктов */
+/* ======= PRODUCT GRID ======= */
 .product-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    padding: 20px;
+    margin-top: 10px;
 }
 
 .product-card {
@@ -107,8 +91,9 @@ header {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 260px; /* больше карточка */
+    width: 260px;
     text-align: center;
+    font-size: 18px;
 }
 
 .product-card img {
@@ -118,48 +103,54 @@ header {
     margin-bottom: 12px;
 }
 
-/* Кнопки */
+/* ======= BUTTONS ======= */
 .buy-btn {
     display: inline-block;
-    background: #4CAF50;
-    color: #fff;
-    padding: 12px 20px; /* увеличенная кнопка */
+    background: #2196F3;
+    color: white;
+    padding: 14px 22px;
     border-radius: 8px;
     text-decoration: none;
-    margin: 8px 0;
+    font-size: 20px;
     cursor: pointer;
-    font-size: 18px;
+    margin: 10px 0;
 }
 
-/* Корзина */
+/* ======= CART ITEMS ======= */
 .cart-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     background: #fff;
-    padding: 15px;
+    padding: 16px;
     border-radius: 10px;
     margin-bottom: 15px;
+    font-size: 18px;
 }
 
 .cart-item img {
-    width: 100px; /* больше картинка */
+    width: 100px;
     height: auto;
     border-radius: 8px;
 }
 
+.qty-controls {
+    display: flex;
+    gap: 10px;
+}
+
 .qty-controls button {
-    padding: 8px 12px; /* кнопки +/− крупнее */
-    margin: 0 5px;
-    border: none;
+    padding: 10px 14px;
+    font-size: 20px;
     background: #2196F3;
+    border: none;
     color: #fff;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 18px;
 }
 
-/* Попап корзины */
+/* ======= POPUP ======= */
 .popup {
     display: none;
     position: fixed;
@@ -176,41 +167,48 @@ header {
 .popup-content {
     background: #fff;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     text-align: center;
     width: 90%;
     max-width: 400px;
+    font-size: 18px;
 }
 
 .popup-content button {
-    padding: 10px 16px;
-    font-size: 16px;
+    padding: 12px 18px;
+    font-size: 18px;
 }
 
-/* Адаптивность под мобильный экран */
+/* ======= FORM ORDER ======= */
+form input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* ======= MEDIA QUERIES (Mobile) ======= */
 @media (max-width: 600px) {
     header {
-        padding: 12px;
+        padding: 14px;
     }
     .logo a {
-        font-size: 22px;
+        font-size: 24px;
     }
     .menu-btn {
         font-size: 26px;
     }
     .lang-switch a {
-        font-size: 14px;
+        font-size: 16px;
     }
     .product-card {
-        width: 90%; /* карточки под экран */
-        padding: 16px;
+        width: 90%;
+        padding: 18px;
     }
     .product-card img {
         height: auto;
-    }
-    .buy-btn {
-        padding: 14px 22px;
-        font-size: 18px;
     }
     .cart-item {
         flex-direction: column;
@@ -222,6 +220,16 @@ header {
     }
     .qty-controls {
         flex-direction: row;
-        gap: 10px;
+        gap: 12px;
+    }
+    .buy-btn {
+        width: 100%;
+        text-align: center;
+        font-size: 20px;
+        padding: 16px 0;
+    }
+    form input {
+        font-size: 20px;
+        padding: 16px;
     }
 }

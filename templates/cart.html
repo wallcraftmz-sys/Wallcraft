@@ -23,5 +23,13 @@ function changeQty(id, action){
         .then(()=>location.reload())
 }
 </script>
+<div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+    <a href="/catalog" class="buy-btn">
+        {{ "В каталог" if lang=="ru" else "Uz katalogu" }}
+    </a>
 
+    <a href="/order" class="buy-btn" style="background:#4CAF50;">
+        {{ "Оформить заказ" if lang=="ru" else "Noformēt pasūtījumu" }}
+    </a>
+</div>
 {% endblock %}

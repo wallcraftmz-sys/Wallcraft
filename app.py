@@ -80,15 +80,23 @@ def catalog():
     )
 
 # ================== API: ДОБАВИТЬ В КОРЗИНУ ==================
-@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
+@app.route('/api/add_to_cart/<int:product_id>', methods=['POST'])
 def api_add_to_cart(product_id):
-    cart = session.get("cart", {})
-    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
-    session["cart"] = cart
+    cart = session.get('cart', {})
+    cart[product_id] = cart.get(product_id, 0) + 1
+    session['cart'] = cart
 
-    product = next((p for p in products if p["id"] == product_id), None)
+    product = next((p for p in products if p['id'] == product_id), None)
     if not product:
-        return jsonify({"success": False}), 404
+        return jsonify({"success": False, "error": "Product not found"}), 404
+
+    cart_total_items = sum(cart.values())
+
+    return jsonify({
+        "success": True,
+        "product": product,
+        "cart_total_items": cart_total_items
+    })
 
     return jsonify({
         "success": True,

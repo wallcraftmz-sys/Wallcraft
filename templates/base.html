@@ -1,85 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('lang', 'ru') }}">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Wallcraft</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .floating-cart {
-            position: fixed;
-            right: 20px;
-            bottom: 25px;
-            background: #1f2933;
-            color: white;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            text-decoration: none;
-            z-index: 2000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-        .floating-cart:hover { transform: scale(1.1); }
-        @media (max-width: 600px) {
-            .floating-cart { width:60px; height:60px; font-size:28px; right:15px; bottom:20px; }
-            .top-header { padding:10px 15px; }
-            .logo-center a { font-size:18px; }
-            .menu-btn { width:38px; height:28px; font-size:24px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Wallcraft</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<header class="top-header">
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    <div class="logo-center"><a href="/">WALLCRAFT</a></div>
-    <div class="lang-switch">
-        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
-    </div>
-    <div id="dropdownMenu" class="dropdown-menu">
-        <a href="/catalog?cat=walls">Обои</a>
-        <hr>
-        <a href="/admin/login">Вход</a>
-    </div>
+<header class="header">
+    <a href="/" class="logo">WALLCRAFT</a>
+    <a href="/cart" class="cart-btn">🛒</a>
 </header>
 
-<main>{% block content %}{% endblock %}</main>
-
-<!-- Плавающая корзина -->
-<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
-    🛒
-    <span id="cart-count" style="
-        position:absolute;
-        top:-5px;
-        right:-5px;
-        background:red;
-        color:white;
-        font-size:14px;
-        font-weight:bold;
-        padding:2px 6px;
-        border-radius:50%;
-        min-width:20px;
-        text-align:center;
-    ">
-        {{ session.get('cart')|map(attribute='1')|sum if session.get('cart') else 0 }}
-    </span>
-</a>
-
-<script>
-function toggleMenu() {
-    const menu = document.getElementById("dropdownMenu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-document.addEventListener("click", function(e) {
-    if (!e.target.closest(".menu-btn") && !e.target.closest(".dropdown-menu")) {
-        document.getElementById("dropdownMenu").style.display = "none";
-    }
-});
-</script>
+<main>
+{% block content %}{% endblock %}
+</main>
 
 </body>
 </html>

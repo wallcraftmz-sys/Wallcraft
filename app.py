@@ -107,6 +107,32 @@ def update_cart(pid, action):
         total=total,
         cart_total_items=sum(cart.values())
     )
+    @app.route("/order", methods=["GET", "POST"])
+def order():
+    cart = session.get("cart", {})
+    if not cart:
+        return redirect(url_for("catalog"))
+    
+    items = []
+    total = 0
+    for pid, qty in cart.items():
+        p = next(p for p in products if p["id"] == int(pid))
+        items.append({"product": p, "qty": qty})
+        total += p["price"] * qty
+
+    success = False
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+        # Здесь можно добавить отправку email/сохранение заказа
+        success = True
+        session["cart"] = {}  # Очистка корзины после заказа
+
+    return render_template("order.html",
+                           cart_items=items,
+                           total=total,
+                           success=success,
+                           lang=session["lang"])
 
 if __name__ == "__main__":
     app.run(debug=True)

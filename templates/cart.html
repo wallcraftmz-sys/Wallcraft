@@ -22,9 +22,16 @@
 <a href="/catalog" class="buy-btn">В каталог</a>
 
 <script>
-function changeQty(id,a){
- fetch(`/api/update_cart/${id}/${a}`,{method:'POST'})
- .then(()=>location.reload());
+function changeQty(id, action) {
+    fetch(`/api/update_cart/${id}/${action}`, { method: "POST" })
+        .then(r => r.json())
+        .then(data => {
+            if (data.qty === 0) {
+                location.reload();
+            } else {
+                document.getElementById(`qty-${id}`).innerText = data.qty;
+            }
+        });
 }
 </script>
 <div style="margin-top:20px; display:flex; gap:10px;">

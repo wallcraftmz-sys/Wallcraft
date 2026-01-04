@@ -19,12 +19,14 @@ products = [
         "id": 1,
         "category": "walls",
         "name_ru": "Жидкие обои — Ocean",
-        "name_lv": "Šķidrās tapetes — Ocean",
         "description_ru": "Высококачественные жидкие обои для стен",
-        "description_lv": "Augstas kvalitātes šķidrās tapetes sienām",
+        "name_lv": "Šķidrie tapetes — Ocean",
+        "description_lv": "Augstas kvalitātes šķidrie tapetes",
         "price": 25.00,
-        "image": "https://cdn.pixabay.com/photo/2016/11/29/06/16/texture-1868576_1280.jpg"
+        "image": "images/liquid_wallpaper1.jpg"
     },
+    ...
+
     {
         "id": 2,
         "category": "walls",

@@ -159,15 +159,16 @@ def cart_page():
             total += product["price"] * qty
     return render_template("cart.html", cart_items=cart_items, total=total, lang=session.get('lang', 'ru'))
 
-# ================== ЗАКАЗ ==================
-@app.route("/order", methods=["GET", "POST"])
+# ================== ЗАКАЗ ==================@app.route("/order", methods=["GET", "POST"])
 def order():
     lang = session.get("lang", "ru")
+
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")
         threading.Thread(target=send_email, args=(name, contact)).start()
         return render_template("order.html", success=True, lang=lang)
+
     return render_template("order.html", lang=lang)
 
 def send_email(name, contact):

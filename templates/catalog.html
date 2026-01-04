@@ -69,41 +69,50 @@
 </div>
 
 <script>
+const lang = "{{ lang }}"; // Передаем язык в JS
+
 function addToCart(productId){
-    fetch(`/api/add_to_cart/${productId}`, { method:'POST' })
+    fetch(`/api/add_to_cart/${productId}`, { method: 'POST' })
     .then(res => res.json())
     .then(data => {
-        if(data.success){
-            const p = data.product;  // product с сервера
-            const imgSrc = p.image.startsWith('http') ? p.image : '/static/' + p.image;
-
-            document.getElementById('popup-text').innerHTML = `
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <img src="${imgSrc}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
-                    <div style="text-align:left;">
-                        <b style="font-size:16px;">${lang=='ru' ? p.name_ru : p.name_lv}</b><br>
-                        ${data.cart_total_items} ${lang=='ru' ? 'шт' : 'gab'}
-                    </div>
-                 </div>`;
-            document.getElementById('popup').style.display='flex';
-
-            const headerCount = document.getElementById('cart-count');
-            if(headerCount){
-                headerCount.innerText = data.cart_total_items;
-            }
-        } else {
-            alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
+        if(!data.success){
+            alert(lang=='ru' ? 'Ошибка при добавлении в корзину' : 'Kļūda, pievienojot grozam');
+            return;
         }
+
+        const p = data.product;
+        const imgSrc = p.image.startsWith('http') ? p.image : '/static/' + p.image;
+
+        // Обновляем попап
+        const popupText = document.getElementById('popup-text');
+        popupText.innerHTML = `
+            <div style="display:flex; gap:12px; align-items:center;">
+                <img src="${imgSrc}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
+                <div style="text-align:left;">
+                    <b style="font-size:16px;">${lang=='ru' ? p.name_ru : p.name_lv}</b><br>
+                    ${data.cart_total_items} ${lang=='ru' ? 'шт' : 'gab'}
+                </div>
+            </div>`;
+
+        document.getElementById('popup').style.display = 'flex';
+
+        // Обновляем счётчик корзины в шапке
+        const headerCount = document.getElementById('cart-count');
+        if(headerCount){
+            headerCount.innerText = data.cart_total_items;
+        }
+
     })
     .catch(err => {
         console.error('addToCart error', err);
-        alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
+        alert(lang=='ru' ? 'Ошибка при добавлении в корзину' : 'Kļūda, pievienojot grozam');
     });
 }
 
 function closePopup(){
-    document.getElementById('popup').style.display='none';
+    document.getElementById('popup').style.display = 'none';
 }
 </script>
+
 
 {% endblock %}

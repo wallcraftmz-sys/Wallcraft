@@ -7,29 +7,30 @@ extends "base.html" %}
 <div class="cart-list">
 
 {% for item in cart_items %}
-<div class="cart-row" id="cart-row-{{ item.product.id }}">
+<div class="cart-row" id="cart-row-{{ item.product.get('id') }}">
     <div class="cart-thumb">
-        {% if item.product.image and item.product.image.startswith('http') %}
-            <img src="{{ item.product.image }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
+        {% if item.product.get('image') and item.product.get('image').startswith('http') %}
+            <img src="{{ item.product.get('image') }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
         {% else %}
-            <img src="{{ url_for('static', filename=item.product.image) }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
+            <img src="{{ url_for('static', filename=item.product.get('image')) }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
         {% endif %}
     </div>
 
     <div class="cart-info">
-        <div class="cart-name">{{ item.product.get("name_" + lang, item.product.get("name_ru")) }}</div>
-        <div class="cart-price" id="price-{{ item.product.id }}" data-price="{{ item.product.price }}">{{ "%.2f"|format(item.product.price) }} €</div>
+        <div class="cart-name">{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}</div>
+        <div class="cart-price" id="price-{{ item.product.get('id') }}" data-price="{{ item.product.get('price', 0) }}">{{ "%.2f"|format(item.product.get('price', 0)) }} €</div>
     </div>
 
     <div class="cart-qty">
-        <button class="qty-btn minus" onclick="changeQty({{ item.product.id }}, 'minus')">−</button>
-        <span class="qty-number" id="qty-{{ item.product.id }}">{{ item.qty }}</span>
-        <button class="qty-btn plus" onclick="changeQty({{ item.product.id }}, 'plus')">+</button>
+        <button class="qty-btn minus" onclick="changeQty({{ item.product.get('id') }}, 'minus')">−</button>
+        <span class="qty-number" id="qty-{{ item.product.get('id') }}">{{ item.qty }}</span>
+        <button class="qty-btn plus" onclick="changeQty({{ item.product.get('id') }}, 'plus')">+</button>
     </div>
 
-    <div class="cart-subtotal" id="subtotal-{{ item.product.id }}">
-        {{ "%.2f"|format(item.product.price * item.qty) }} €
+    <div class="cart-subtotal" id="subtotal-{{ item.product.get('id') }}">
+        {{ "%.2f"|format(item.product.get('price', 0) * item.qty) }} €
     </div>
+</div>
 </div>
 {% endfor %}
 

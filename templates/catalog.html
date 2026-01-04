@@ -9,46 +9,40 @@
     {% for product in products %}
     <div class="product-card" style="background:#fff; padding:15px; border-radius:8px; width:240px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
 
-        <!-- Фото -->
         {% if product.image.startswith('http') %}
-            <img src="{{ product.image }}" alt="{{ product.get('name_' + lang, product.name_ru) }}" 
+            <img src="{{ product.image }}" alt="{{ product.get('name_' + lang, product.name_ru) }}"
                  style="width:100%; height:180px; object-fit:cover; border-radius:6px;">
         {% else %}
-            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.get('name_' + lang, product.name_ru) }}" 
+            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.get('name_' + lang, product.name_ru) }}"
                  style="width:100%; height:180px; object-fit:cover; border-radius:6px;">
         {% endif %}
 
-        <!-- Название -->
         <h3 style="margin:12px 0 6px 0; font-size:16px;">{{ product.get('name_' + lang, product.name_ru) }}</h3>
 
-        <!-- Описание -->
         {% set desc = product.get('description_' + lang, product.description_ru) %}
         <p style="color:#555; font-size:14px; min-height:40px;">
             {{ desc[:80] }}{% if desc|length > 80 %}…{% endif %}
         </p>
 
-        <!-- Цена -->
         <p class="price" style="font-weight:bold; margin:6px 0;">{{ "%.2f"|format(product.price) }} €</p>
 
-        <!-- Кнопка В корзину -->
         <button class="buy-btn" style="background:#4CAF50; color:#fff; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;"
                 onclick="addToCart({{ product.id }})">
             {{ "В корзину" if lang=="ru" else "Ielikt grozā" }}
         </button>
-
     </div>
     {% endfor %}
 </div>
 
-<!-- Попап после добавления в корзину -->
+<!-- Попап -->
 <div id="popup" class="popup" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:999;">
     <div class="popup-content" style="background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%; text-align:center;">
         <div id="popup-text" style="margin-bottom:15px;"></div>
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-            <a href="/catalog" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
+            <a href="/catalog?lang={{ lang }}" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
                 {{ "Продолжить покупки" if lang=="ru" else "Turpināt iepirkties" }}
             </a>
-            <a href="/cart" class="buy-btn" style="background:#4CAF50; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
+            <a href="/cart?lang={{ lang }}" class="buy-btn" style="background:#4CAF50; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
                 {{ "Перейти в корзину" if lang=="ru" else "Pāriet uz grozu" }}
             </a>
         </div>
@@ -61,8 +55,6 @@
 </div>
 
 <script>
-const lang = "{{ lang }}";  // теперь JS знает текущий язык
-
 function addToCart(productId){
     fetch(`/api/add_to_cart/${productId}`, { method:'POST' })
     .then(res => res.json())
@@ -70,33 +62,26 @@ function addToCart(productId){
         if(data.success){
             const p = data.product;
             const imgSrc = p.image.startsWith('http') ? p.image : '/static/' + p.image;
-
             document.getElementById('popup-text').innerHTML = `
                 <div style="display:flex; gap:12px; align-items:center;">
                     <img src="${imgSrc}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
                     <div style="text-align:left;">
-                        <b>${lang=='ru' ? p.name_ru : p.name_lv}</b><br>
-                        ${data.cart_total_items} ${lang=='ru' ? 'шт' : 'gab'}
+                        <b>${lang=='ru'?p.name_ru:p.name_lv}</b><br>
+                        ${data.cart_total_items} ${lang=='ru'?'шт':'gab'}
                     </div>
                 </div>`;
             document.getElementById('popup').style.display='flex';
 
-            // Обновляем счетчик корзины
             const headerCount = document.getElementById('cart-count');
             if(headerCount) headerCount.innerText = data.cart_total_items;
         } else {
             alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
         }
     })
-    .catch(err => {
-        console.error(err);
-        alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
-    });
+    .catch(err => { console.error(err); alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}'); });
 }
 
-function closePopup(){
-    document.getElementById('popup').style.display='none';
-}
+function closePopup(){ document.getElementById('popup').style.display='none'; }
 </script>
 
 {% endblock %}

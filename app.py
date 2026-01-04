@@ -18,8 +18,21 @@ def set_lang():
 # ---------------- КАТАЛОГ ----------------
 @app.route("/catalog")
 def catalog():
-    lang = session.get("lang", "ru")
-    return render_template("catalog.html", products=products, lang=lang)
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    session["lang"] = lang
+
+    cart = session.get("cart", {})
+    cart_total_items = sum(cart.values())
+
+    # Фильтруем только обои
+    wall_products = [p for p in products if p["category"] == "walls"]
+
+    return render_template(
+        "catalog.html",
+        products=wall_products,
+        lang=lang,
+        cart_total_items=cart_total_items
+    )
 
 # ---------------- API: добавить в корзину ----------------
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])

@@ -70,7 +70,7 @@ function addToCart(productId){
             const p = data.product;
             document.getElementById('popup-text').innerHTML =
                 `<div style="display:flex; gap:12px; align-items:center;">
-                    <img src="${p.image}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
+                  <img src="/static/${p.image}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
                     <div style="text-align:left;">
                         <b style="font-size:16px;">${p.name_ru}</b><br>
                         ${p.qty} × ${p.price} €

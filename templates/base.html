@@ -81,7 +81,25 @@
 </main>
 
 <!-- ПЛАВАЮЩАЯ КОРЗИНА -->
-<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">🛒</a>
+<!-- ПЛАВАЮЩАЯ КОРЗИНА С КОЛИЧЕСТВОМ -->
+<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
+    🛒
+    <span id="cart-count" style="
+        position:absolute;
+        top:-5px;
+        right:-5px;
+        background:red;
+        color:white;
+        font-size:14px;
+        font-weight:bold;
+        padding:2px 6px;
+        border-radius:50%;
+        min-width:20px;
+        text-align:center;
+    ">
+        {{ session.get('cart') | sum(attribute='1') if session.get('cart') else 0 }}
+    </span>
+</a>
 
 <script>
 function toggleMenu() {

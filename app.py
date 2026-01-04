@@ -104,4 +104,5 @@ def update_cart(pid, action):
     return jsonify(success=True, qty=cart.get(pid, 0), total=total, cart_total_items=sum(cart.values()))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render даёт порт через переменную окружения
+    app.run(host="0.0.0.0", port=port, debug=True)

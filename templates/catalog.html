@@ -26,9 +26,13 @@
 
         <!-- Короткое описание с одним троеточием -->
         {% set desc = product.get("description_" + lang, product.get("description_ru")) %}
-        <p style="color:#555; font-size:14px; min-height:40px;">
-            {{ desc[:80] + ("…" if desc|length > 80 else "") }}
-        </p>
+{% if desc|length > 80 %}
+    {% set short_desc = desc[:80].rstrip("…") + "…" %}
+{% else %}
+    {% set short_desc = desc %}
+{% endif %}
+
+<p style="color:#555; font-size:14px; min-height:40px;">{{ short_desc }}</p>
 
         <!-- Цена -->
         <p class="price" style="font-weight:bold; margin:6px 0;">{{ "%.2f"|format(product.price) }} €</p>
@@ -70,7 +74,7 @@ function addToCart(productId){
     .then(res => res.json())
     .then(data => {
         if(data.success){
-            const p = data.product;
+            const p = data.product;  // product с сервера
             const imgSrc = p.image.startsWith('http') ? p.image : '/static/' + p.image;
 
             document.getElementById('popup-text').innerHTML = `
@@ -80,20 +84,17 @@ function addToCart(productId){
                         <b style="font-size:16px;">${lang=='ru' ? p.name_ru : p.name_lv}</b><br>
                         ${data.cart_total_items} ${lang=='ru' ? 'шт' : 'gab'}
                     </div>
-                </div>`;
+                 </div>`;
             document.getElementById('popup').style.display='flex';
 
             const headerCount = document.getElementById('cart-count');
-            if(headerCount && data.cart_total_items !== undefined){
+            if(headerCount){
                 headerCount.innerText = data.cart_total_items;
             }
+        } else {
+            alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
         }
     })
-    .catch(err => {
-        console.error('addToCart error', err);
-        alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
-    });
-}
     .catch(err => {
         console.error('addToCart error', err);
         alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');

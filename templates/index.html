@@ -8,41 +8,22 @@
 <div class="product-grid">
 {% for product in products %}
     <div class="product-card">
-        <img src="{{ url_for('static', filename=product.image) }}" 
-             alt="{{ product.get('name_' + lang, product.get('name_ru')) }}">
-        <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}</h3>
-        <p>{{ product.get("description_" + lang, product.get("description_ru")) }}</p>
-        <p class="price">{{ product.price }} €</p>
+        <a href="{{ url_for('product', id=product.id) }}" style="color:inherit; text-decoration:none;">
+            {% if product.image and product.image.startswith('http') %}
+                <img src="{{ product.image }}" alt="{{ product.get('name_' + lang, product.get('name_ru')) }}">
+            {% else %}
+                <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.get('name_' + lang, product.get('name_ru')) }}">
+            {% endif %}
 
-        <button class="buy-btn" onclick="addToCart({{ product.id }})">
-            {{ "В корзину" if lang=="ru" else "Ielikt grozā" }}
-        </button>
+            <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}</h3>
+        </a>
+        <!-- короткое описание (опционально) -->
+        <p style="color:#666; font-size:14px;">
+            {{ product.get("description_" + lang, product.get("description_ru"))[:120] }}{% if product.get("description_" + lang, product.get("description_ru"))|length > 120 %}…{% endif %}
+        </p>
+        <p class="price">{{ product.price }} €</p>
     </div>
 {% endfor %}
 </div>
-
-<div id="popup" class="popup" style="display:none;">
-    <div class="popup-content">
-        <div id="popup-text"></div>
-        <button onclick="closePopup()">Закрыть</button>
-    </div>
-</div>
-
-<script>
-function addToCart(id){
-    fetch(`/api/add_to_cart/${id}`, {method:'POST'})
-    .then(res=>res.json())
-    .then(data=>{
-        if(data.success){
-            let p = data.product;
-            document.getElementById('popup-text').innerHTML =
-                `<img src="${p.image}" width="50"> ${p.name_ru} (${p.qty} шт.)<br>${p.price} €`;
-            document.getElementById('popup').style.display='flex';
-        }
-    });
-}
-
-function closePopup(){ document.getElementById('popup').style.display='none'; }
-</script>
 
 {% endblock %}

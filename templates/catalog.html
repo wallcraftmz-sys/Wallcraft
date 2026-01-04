@@ -6,8 +6,8 @@
     {% for product in products %}
     <div class="product-card">
         <img src="{{ product.image }}" alt="">
-        <h3>{{ product.name_ru }}</h3>
-        <p>{{ product.description_ru }}</p>
+        <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}</h3>
+<p>{{ product.get("description_" + lang, product.get("description_ru")) }}</p>
         <p class="price">{{ product.price }} €</p>
         <!-- Кнопка теперь вызывает JS API -->
         <button class="buy-btn" onclick="addToCart({{ product.id }})">В корзину</button>

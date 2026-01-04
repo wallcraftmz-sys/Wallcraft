@@ -51,7 +51,7 @@
 
 <!-- Плавающая корзина -->
 <a href="/cart?lang={{ lang }}" class="floating-cart">🛒 
-    <span id="cart-count">{{ cart_total_items }}</span>
+    <span id="cart-count">{{ cart_total_items if cart_total_items else 0 }}</span>
 </a>
 
 <script>
@@ -60,11 +60,30 @@ function toggleMenu() {
     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
 
+// Закрытие выпадающего меню по клику вне его
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.menu-btn') && !e.target.closest('.dropdown-menu')) {
         document.getElementById('dropdownMenu').style.display = 'none';
     }
 });
+
+// Автообновление счетчика корзины
+async function updateCartCount() {
+    try {
+        const resp = await fetch('/api/cart_count');
+        const data = await resp.json();
+        const headerCount = document.getElementById('cart-count');
+        if(headerCount && data.count !== undefined){
+            headerCount.innerText = data.count;
+        }
+    } catch(err){
+        console.error('updateCartCount error', err);
+    }
+}
+
+// Обновим счетчик при загрузке страницы
+updateCartCount();
 </script>
+
 </body>
 </html>

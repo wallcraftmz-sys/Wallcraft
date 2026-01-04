@@ -46,10 +46,15 @@ function addToCart(id){
     .then(res => res.json())
     .then(data => {
         if(data.success){
+            // Обновляем попап
             document.getElementById("popup-text").innerHTML = `
                 <b>${lang=='ru'?data.product.name_ru:data.product.name_lv}</b><br>
                 ${data.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
             document.getElementById("popup").style.display='flex';
+
+            // Обновляем счетчик на плавающей корзине
+            const counter = document.getElementById("cart-count");
+            if(counter) counter.innerText = data.cart_total_items;
         } else {
             alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
         }

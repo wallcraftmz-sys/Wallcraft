@@ -7,13 +7,13 @@
 </h1>
 
 <div class="product-grid">
-    {% for p in products %}
+    {% for product in products %}
     <div class="product-card">
-        <img src="{{ url_for('static', filename=p.image) }}" alt="{{ p['name_'+lang] }}">
-        <h3 style="font-size:20px;">{{ p["name_" + lang] }}</h3>
-        <p style="font-size:16px; min-height:50px;">{{ p["description_" + lang] }}</p>
-        <p class="price" style="font-size:18px; font-weight:bold;">{{ "%.2f"|format(p.price) }} €</p>
-        <button class="buy-btn" style="font-size:18px; padding:12px 18px;" onclick="addToCart({{ p.id }})">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product['name_'+lang] }}">
+        <h3 style="font-size:20px;">{{ product["name_" + lang] }}</h3>
+        <p style="font-size:16px; min-height:50px;">{{ product["description_" + lang] }}</p>
+        <p class="price" style="font-size:18px; font-weight:bold;">{{ "%.2f"|format(product.price) }} €</p>
+        <button class="buy-btn" style="font-size:18px; padding:12px 18px;" onclick="addToCart({{ product.id }})">
             {{ "В корзину" if lang=="ru" else "Grozā" }}
         </button>
     </div>
@@ -50,8 +50,6 @@ function addToCart(id){
                 <b>${lang=='ru'?data.product.name_ru:data.product.name_lv}</b><br>
                 ${data.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
             document.getElementById("popup").style.display='flex';
-            const headerCount = document.getElementById("cart-count");
-            if(headerCount) headerCount.innerText = data.cart_total_items;
         } else {
             alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
         }

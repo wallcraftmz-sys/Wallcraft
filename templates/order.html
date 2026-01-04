@@ -1,15 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
+{% set lang = session.get('lang','ru') %}
 
-<h2>Оформление заказа</h2>
+<h1 style="text-align:center; font-size:28px; margin:20px 0;">
+    {{ "Оформление заказа" if lang=="ru" else "Pasūtījuma veikšana" }}
+</h1>
+
+{% if cart_items %}
+<div style="display:flex; flex-direction:column; gap:15px;">
+    {% for item in cart_items %}
+    <div class="cart-item">
+        <img src="{{ url_for('static', filename=item.product.image) }}" class="cart-item-image">
+        <div>
+            <b>{{ item.product["name_"+lang] }}</b>
+            <p>{{ "%.2f"|format(item.product.price * item.qty) }} €</p>
+            <p>{{ item.qty }} {{ lang=='ru'?'шт':'gab' }}</p>
+        </div>
+        <div class="qty-controls">
+            <button onclick="changeQty({{ item.product.id }}, 'minus')">−</button>
+            <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
+            <button onclick="changeQty({{ item.product.id }}, 'plus')">+</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<p style="text-align:right; font-size:20px;"><b>{{ "Итого" if lang=="ru" else "Kopā" }}:</b> {{ total }} €</p>
+
+<form method="POST" style="display:flex; flex-direction:column; gap:12px; max-width:400px; margin:auto;">
+    <input type="text" name="name" placeholder="{{ 'Ваше имя' if lang=='ru' else 'Jūsu vārds' }}" required>
+    <input type="text" name="contact" placeholder="{{ 'Контакт' if lang=='ru' else 'Kontakti' }}" required>
+    <button type="submit" class="buy-btn">{{ 'Оформить заказ' if lang=='ru' else 'Veikt pasūtījumu' }}</button>
+</form>
 
 {% if success %}
-<p>Заказ оформлен!</p>
-{% else %}
-<form method="POST">
-<input placeholder="Имя" required>
-<button>Отправить</button>
-</form>
+<p style="text-align:center; font-size:18px; color:green; margin-top:15px;">
+    {{ 'Заказ успешно оформлен!' if lang=='ru' else 'Pasūtījums veiksmīgi izveidots!' }}
+</p>
 {% endif %}
 
+<script>
+function changeQty(id, action){
+    fetch(`/api/update_cart/${id}/${action}`,{method:'POST'})
+    .then(r=>r.json()).then(()=>location.reload());
+}
+</script>
+
+{% else %}
+<p style="text-align:center;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
+<a href="/catalog?lang={{ lang }}" class="buy-btn">{{ "В каталог" if lang=='ru' else "Uz katalogu" }}</a>
+{% endif %}
 {% endblock %}

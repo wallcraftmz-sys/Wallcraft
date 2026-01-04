@@ -157,7 +157,7 @@ def cart_page():
         if product:
             cart_items.append({"product": product, "qty": qty})
             total += product["price"] * qty
-    return render_template("cart.html", cart_items=cart_items, total=total)
+    return render_template("cart.html", cart_items=cart_items, total=total, lang=session.get('lang', 'ru'))
 
 # ================== ЗАКАЗ ==================
 @app.route("/order", methods=["GET", "POST"])

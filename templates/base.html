@@ -82,7 +82,7 @@
 
 <!-- ПЛАВАЮЩАЯ КОРЗИНА -->
 <!-- ПЛАВАЮЩАЯ КОРЗИНА С КОЛИЧЕСТВОМ -->
-<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
+    <a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
     🛒
     <span id="cart-count" style="
         position:absolute;
@@ -97,7 +97,7 @@
         min-width:20px;
         text-align:center;
     ">
-        {{ session.get('cart') | sum(attribute='1') if session.get('cart') else 0 }}
+        {{ session.get('cart')|map(attribute='1')|sum if session.get('cart') else 0 }}
     </span>
 </a>
 

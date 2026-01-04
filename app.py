@@ -79,38 +79,34 @@ def catalog():
         lang=lang
     )
 
-# ================== API: ДОБАВИТЬ В КОРЗИНУ ==================
-@app.route('/api/add_to_cart/<int:product_id>', methods=['POST'])
+# ---------------- API: добавить в корзину ----------------
+@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def api_add_to_cart(product_id):
-    cart = session.get('cart', {})
-    cart[product_id] = cart.get(product_id, 0) + 1
-    session['cart'] = cart
+    cart = session.get("cart", {})
+    pid = str(product_id)
+    cart[pid] = cart.get(pid, 0) + 1
+    session["cart"] = cart
 
-    product = next((p for p in products if p['id'] == product_id), None)
+    product = next((p for p in products if p["id"] == product_id), None)
     if not product:
         return jsonify({"success": False, "error": "Product not found"}), 404
 
     cart_total_items = sum(cart.values())
-
-    return jsonify({
-        "success": True,
-        "product": product,
-        "cart_total_items": cart_total_items
-    })
-
     return jsonify({
         "success": True,
         "product": {
             "id": product["id"],
             "name_ru": product["name_ru"],
-            "image": product["image"],
+            "name_lv": product["name_lv"],
             "price": product["price"],
-            "qty": cart[str(product_id)]
+            "image": product["image"],
+            "qty": cart[pid]
         },
-        "cart_total_items": sum(cart.values())
+        "cart_total_items": cart_total_items
     })
 
-# ================== API: ОБНОВИТЬ КОЛ-ВО В КОРЗИНЕ ==================
+
+# ---------------- API: обновить количество в корзине ----------------
 @app.route("/api/update_cart/<int:product_id>/<action>", methods=["POST"])
 def api_update_cart(product_id, action):
     cart = session.get("cart", {})
@@ -142,6 +138,14 @@ def api_update_cart(product_id, action):
         "total": total,
         "cart_total_items": total_items
     })
+
+
+# ---------------- API: количество товаров в корзине ----------------
+@app.route("/api/cart_count")
+def api_cart_count():
+    cart = session.get("cart", {})
+    total_items = sum(cart.values())
+    return jsonify({"count": total_items})
 
 # ================== КОРЗИНА ==================
 @app.route("/cart")

@@ -1,42 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-{% set lang = session.get('lang', 'ru') %}
+{% set lang = lang %}
 
 <h1>{{ "Корзина" if lang=="ru" else "Grozs" }}</h1>
 
-{% if cart_items %}
 {% for item in cart_items %}
 <div class="cart-item">
-
-    <img src="{{ item.product.image }}" class="cart-item-image">
-
-    <div>
-        <b>{{ item.product["name_" + lang] }}</b><br>
-        {{ item.product.price }} €
-    </div>
-
-    <div class="qty-controls">
-        <button class="qty-btn" onclick="changeQty({{ item.product.id }}, 'minus')">−</button>
-        <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
-        <button class="qty-btn" onclick="changeQty({{ item.product.id }}, 'plus')">+</button>
-    </div>
-
+  <img src="{{ item.product.image }}" class="cart-item-image">
+  <b>{{ item.product["name_"+lang] }}</b>
+  {{ item.qty }} шт
+  <div class="qty-controls">
+    <button onclick="changeQty({{ item.product.id }},'minus')">−</button>
+    <button onclick="changeQty({{ item.product.id }},'plus')">+</button>
+  </div>
 </div>
 {% endfor %}
 
-<p><b>Итого:</b> <span id="cart-total">{{ total }}</span> €</p>
-<a href="/order" class="buy-btn">Оформить заказ</a>
+<p><b>Итого:</b> {{ total }} €</p>
 
-{% else %}
-<p>Корзина пуста</p>
-{% endif %}
+<a href="/" class="buy-btn">На главную</a>
+<a href="/catalog" class="buy-btn">В каталог</a>
 
 <script>
-function changeQty(id, action) {
-    fetch(`/api/update_cart/${id}/${action}`, { method: "POST" })
-        .then(r => r.json())
-        .then(() => location.reload());
+function changeQty(id,a){
+ fetch(`/api/update_cart/${id}/${a}`,{method:'POST'})
+ .then(()=>location.reload());
 }
 </script>
-
 {% endblock %}

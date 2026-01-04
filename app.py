@@ -1,9 +1,5 @@
 import os
-import threading
-import smtplib
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from functools import wraps
 from dotenv import load_dotenv
 
@@ -12,11 +8,38 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "wallcraft_secret_key")
 
-# ================== ТОВАРЫ (только обои) ==================
+# ================== ТОВАРЫ ==================
 products = [
-    {"id": 1, "category": "walls", "name_ru": "Жидкие обои — Ocean", "description_ru": "Высококачественные жидкие обои для стен", "name_lv": "Šķidrie tapetes — Ocean", "description_lv": "Augstas kvalitātes šķidrie tapetes", "price": 25.00, "image": "images/liquid_wallpaper1.jpg"},
-    {"id": 2, "category": "walls", "name_ru": "Жидкие обои — Golden", "description_ru": "Эффектные декоративные жидкие обои", "name_lv": "Šķidrās tapetes — Golden", "description_lv": "Dekoratīvas šķidrās tapetes", "price": 30.00, "image": "images/liquid_wallpaper2.jpg"},
-    {"id": 3, "category": "walls", "name_ru": "Жидкие обои — Modern", "description_ru": "Современный стиль для интерьера", "name_lv": "Šķidrās tapetes — Modern", "description_lv": "Mūsdienīgs interjera stils", "price": 28.00, "image": "images/liquid_wallpaper3.jpg"}
+    {
+        "id": 1,
+        "category": "walls",
+        "name_ru": "Жидкие обои — Ocean",
+        "description_ru": "Высококачественные жидкие обои для стен",
+        "name_lv": "Šķidrie tapetes — Ocean",
+        "description_lv": "Augstas kvalitātes šķidrie tapetes",
+        "price": 25.00,
+        "image": "images/liquid_wallpaper1.jpg"
+    },
+    {
+        "id": 2,
+        "category": "walls",
+        "name_ru": "Жидкие обои — Golden",
+        "description_ru": "Эффектные декоративные жидкие обои",
+        "name_lv": "Šķidrās tapetes — Golden",
+        "description_lv": "Dekoratīvas šķidrās tapetes",
+        "price": 30.00,
+        "image": "images/liquid_wallpaper2.jpg"
+    },
+    {
+        "id": 3,
+        "category": "walls",
+        "name_ru": "Жидкие обои — Modern",
+        "description_ru": "Современный стиль для интерьера",
+        "name_lv": "Šķidrās tapetes — Modern",
+        "description_lv": "Mūsdienīgs interjera stils",
+        "price": 28.00,
+        "image": "images/liquid_wallpaper3.jpg"
+    }
 ]
 
 # ================== ЯЗЫК ==================
@@ -24,30 +47,23 @@ products = [
 def set_lang():
     session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
 
-# ================== ДЕКОРАТОР РОЛИ ==================
-def role_required(role):
-    def wrapper(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            if session.get("role") != role:
-                return "Доступ запрещён", 403
-            return f(*args, **kwargs)
-        return decorated
-    return wrapper
-
 # ================== ГЛАВНАЯ ==================
 @app.route("/")
 def index():
     lang = session.get("lang", "ru")
-    return render_template("index.html", lang=lang, products=products, cart_total_items=sum(session.get("cart", {}).values()))
+    cart_total_items = sum(session.get("cart", {}).values())
+    return render_template("index.html", lang=lang, products=products, cart_total_items=cart_total_items)
 
 # ================== КАТАЛОГ ==================
 @app.route("/catalog")
 def catalog():
     lang = session.get("lang", "ru")
-    return render_template("catalog.html", products=products, lang=lang, cart_total_items=sum(session.get("cart", {}).values()))
+    cart_total_items = sum(session.get("cart", {}).values())
+    # Показываем только категорию "walls"
+    walls_products = [p for p in products if p["category"] == "walls"]
+    return render_template("catalog.html", products=walls_products, lang=lang, cart_total_items=cart_total_items)
 
-# ================== API: добавление в корзину ==================
+# ================== API: добавить в корзину ==================
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def api_add_to_cart(product_id):
     cart = session.get("cart", {})
@@ -73,7 +89,7 @@ def api_add_to_cart(product_id):
         "cart_total_items": cart_total_items
     })
 
-# ================== API: обновление корзины ==================
+# ================== API: обновить корзину ==================
 @app.route("/api/update_cart/<int:product_id>/<action>", methods=["POST"])
 def api_update_cart(product_id, action):
     cart = session.get("cart", {})
@@ -106,11 +122,12 @@ def api_update_cart(product_id, action):
         "cart_total_items": total_items
     })
 
-# ================== API: счетчик корзины ==================
+# ================== API: количество товаров в корзине ==================
 @app.route("/api/cart_count")
 def api_cart_count():
     cart = session.get("cart", {})
-    return jsonify({"count": sum(cart.values())})
+    total_items = sum(cart.values())
+    return jsonify({"count": total_items})
 
 # ================== КОРЗИНА ==================
 @app.route("/cart")
@@ -124,7 +141,8 @@ def cart_page():
         if product:
             cart_items.append({"product": product, "qty": qty})
             total += product["price"] * qty
-    return render_template("cart.html", cart_items=cart_items, total=total, lang=lang)
+
+    return render_template("cart.html", cart_items=cart_items, total=total, lang=lang, cart_total_items=sum(cart.values()))
 
 # ================== ЗАКАЗ ==================
 @app.route("/order", methods=["GET", "POST"])
@@ -134,33 +152,21 @@ def order():
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")
-        session["cart"] = {}
         success = True
-        threading.Thread(target=send_email, args=(name, contact)).start()
+        session["cart"] = {}
     return render_template("order.html", success=success, lang=lang)
-
-def send_email(name, contact):
-    sender = os.environ.get("WALLCRAFT_EMAIL")
-    password = os.environ.get("WALLCRAFT_APP_PASSWORD")
-    if not sender or not password:
-        print("Env-переменные почты не заданы")
-        return
-    msg = MIMEMultipart()
-    msg["From"] = sender
-    msg["To"] = sender
-    msg["Subject"] = "Новая заявка"
-    msg.attach(MIMEText(f"Имя: {name}\nКонтакт: {contact}", "plain"))
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender, password)
-            server.sendmail(sender, sender, msg.as_string())
-            print("Письмо отправлено")
-    except Exception as e:
-        print("Ошибка отправки письма:", e)
 
 # ================== АДМИН ==================
 ADMIN_LOGIN = os.environ.get("ADMIN_LOGIN", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "wallcraft123")
+
+def admin_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if session.get("is_admin"):
+            return f(*args, **kwargs)
+        return redirect(url_for("admin_login"))
+    return wrapped
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -168,20 +174,18 @@ def admin_login():
         login = request.form.get("login")
         password = request.form.get("password")
         if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
-            session["role"] = "admin"
-            session["username"] = login
+            session["is_admin"] = True
             return redirect("/admin")
         return render_template("admin_login.html", error="Неверный логин или пароль")
     return render_template("admin_login.html")
 
 @app.route("/admin/logout")
 def admin_logout():
-    session.pop("role", None)
-    session.pop("username", None)
+    session.pop("is_admin", None)
     return redirect("/admin/login")
 
 @app.route("/admin")
-@role_required("admin")
+@admin_required
 def admin_panel():
     return render_template("admin.html")
 

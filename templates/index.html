@@ -5,9 +5,9 @@
     {{ "Добро пожаловать в Wallcraft" if lang == "ru" else "Laipni lūdzam Wallcraft" }}
 </h1>
 
-<div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
+<div class="product-grid" style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
     {% for product in products %}
-    <div style="
+    <div class="product-card" style="
         background:#ffffff;
         padding:15px;
         border-radius:8px;
@@ -16,25 +16,104 @@
         box-shadow:0 2px 8px rgba(0,0,0,0.1);
         text-align:center;
     ">
+        <!-- Фото товара -->
         {% if product.image and product.image.startswith('http') %}
             <img src="{{ product.image }}" 
                  alt="{{ product.get('name_' + lang, product.get('name_ru')) }}" 
-                 style="width:100%; height:auto; border-radius:8px;">
+                 style="width:100%; height:180px; object-fit:cover; border-radius:6px;">
         {% else %}
             <img src="{{ url_for('static', filename=product.image) }}" 
                  alt="{{ product.get('name_' + lang, product.get('name_ru')) }}" 
-                 style="width:100%; height:auto; border-radius:8px;">
+                 style="width:100%; height:180px; object-fit:cover; border-radius:6px;">
         {% endif %}
 
+        <!-- Название -->
         <h3 style="margin:10px 0 5px;">
             {{ product.get("name_" + lang, product.get("name_ru")) }}
         </h3>
-        <!-- Описание можно оставить для красоты -->
-        <p style="color:#666; font-size:14px;">
-            {{ product.get("description_" + lang, product.get("description_ru"))[:120] }}{% if product.get("description_" + lang, product.get("description_ru"))|length > 120 %}…{% endif %}
-        </p>
+
+        <!-- Описание с одним троеточием -->
+        {% set desc = product.get("description_" + lang, product.get("description_ru")) %}
+        {% if desc|length > 120 %}
+            {% set short_desc = desc[:120].rstrip("…") + "…" %}
+        {% else %}
+            {% set short_desc = desc %}
+        {% endif %}
+        <p style="color:#666; font-size:14px; min-height:40px;">{{ short_desc }}</p>
+
+        <!-- Цена -->
+        <p class="price" style="font-weight:bold; margin:6px 0;">{{ "%.2f"|format(product.price) }} €</p>
+
+        <!-- Кнопка В корзину -->
+        <button class="buy-btn" style="background:#4CAF50; color:#fff; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;"
+                onclick="addToCart({{ product.id }})">
+            {{ "В корзину" if lang=="ru" else "Ielikt grozā" }}
+        </button>
     </div>
     {% endfor %}
 </div>
+
+<!-- Попап после добавления в корзину -->
+<div id="popup" class="popup" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:999;">
+    <div class="popup-content" style="background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%; text-align:center;">
+        <div id="popup-text" style="margin-bottom:15px;"></div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <a href="{{ url_for('catalog', lang=lang) }}" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
+                {{ "Продолжить покупки" if lang=="ru" else "Turpināt iepirkties" }}
+            </a>
+            <a href="{{ url_for('cart_page', lang=lang) }}" class="buy-btn" style="background:#4CAF50; color:#fff; padding:8px 12px; border-radius:6px; text-decoration:none;">
+                {{ "Перейти в корзину" if lang=="ru" else "Pāriet uz grozu" }}
+            </a>
+        </div>
+        <div style="margin-top:10px;">
+            <button onclick="closePopup()" style="background:none; border:none; color:#777; cursor:pointer;">
+                {{ "Закрыть" if lang=="ru" else "Aizvērt" }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Передаем lang в JS
+const lang = "{{ lang }}";
+
+function addToCart(productId){
+    fetch(`/api/add_to_cart/${productId}`, { method:'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            const p = data.product;
+            const imgSrc = p.image.startsWith('http') ? p.image : '/static/' + p.image;
+
+            // Попап
+            document.getElementById('popup-text').innerHTML = `
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <img src="${imgSrc}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
+                    <div style="text-align:left;">
+                        <b style="font-size:16px;">${lang=='ru' ? p.name_ru : p.name_lv}</b><br>
+                        ${data.cart_total_items} ${lang=='ru' ? 'шт' : 'gab'}
+                    </div>
+                </div>`;
+            document.getElementById('popup').style.display='flex';
+
+            // Обновляем счетчик в хедере
+            const headerCount = document.getElementById('cart-count');
+            if(headerCount){
+                headerCount.innerText = data.cart_total_items;
+            }
+        } else {
+            alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
+        }
+    })
+    .catch(err => {
+        console.error('addToCart error', err);
+        alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
+    });
+}
+
+function closePopup(){
+    document.getElementById('popup').style.display='none';
+}
+</script>
 
 {% endblock %}

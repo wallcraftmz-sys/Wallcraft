@@ -1,36 +1,24 @@
 {% extends "base.html" %}
-
 {% block content %}
+
 <h1 style="text-align:center; margin-bottom:30px;">
-    Добро пожаловать в Wallcraft
+    {{ "Добро пожаловать в Wallcraft" if lang=="ru" else "Laipni lūdzam Wallcraft" }}
 </h1>
 
-<div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center;">
-    {% for product in products %}
-    <div style="
-        background:#ffffff;
-        padding:15px;
-        border-radius:8px;
-        max-width:260px;
-        width:100%;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);
-        text-align:center;
-    ">
+<div class="product-grid">
+{% for product in products %}
+    <div class="product-card">
 
-        <!-- Фото -->
-       <img src="{{ product.image }}" alt="">
+        <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}">
 
-        <!-- Название -->
-        <h3 style="font-size:1.1em; margin:10px 0 8px;">
-            {{ product.name_ru }}
-        </h3>
+        <h3>{{ product["name_" + lang] }}</h3>
 
-        <!-- Описание -->
-        <p style="font-size:0.9em; color:#444;">
-            {{ product.description_ru }}
-        </p>
+        <p>{{ product["description_" + lang] }}</p>
+
+        <p class="price">{{ product.price }} €</p>
 
     </div>
-    {% endfor %}
+{% endfor %}
 </div>
+
 {% endblock %}

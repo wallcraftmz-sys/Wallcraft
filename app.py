@@ -1,3 +1,5 @@
+import smtplib
+from email.mime.text import MIMEText
 import os
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 
@@ -117,6 +119,39 @@ def cart():
         total += product["price"] * q
 
     return render_template("cart.html", cart_items=items, total=total, lang=session["lang"])
+# ================== ЗАКАЗ + EMAIL ==================
+@app.route("/order", methods=["GET", "POST"])
+def order():
+    success = False
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+
+        msg = MIMEText(f"Имя: {name}\nКонтакт: {contact}")
+        msg["Subject"] = "Новый заказ Wallcraft"
+        msg["From"] = os.environ["GMAIL_EMAIL"]
+        msg["To"] = os.environ["GMAIL_EMAIL"]
+
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+                s.login(
+                    os.environ["GMAIL_EMAIL"],
+                    os.environ["GMAIL_APP_PASSWORD"]
+                )
+                s.send_message(msg)
+
+            session["cart"] = {}
+            success = True
+
+        except Exception as e:
+            print("EMAIL ERROR:", e)
+
+    return render_template(
+        "order.html",
+        success=success,
+        lang=session["lang"]
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

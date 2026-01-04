@@ -1,50 +1,42 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ lang if lang else 'ru' }}">
 <head>
     <meta charset="UTF-8">
     <title>Wallcraft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Подключение CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <style>
-        /* Минималистичный стиль для нового меню */
-        body { margin:0; font-family: Arial, sans-serif; }
-        header {
-            display:flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px 20px; 
-            background: #2196F3; 
-            color: white; 
-        }
+        body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
+        header { display:flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #2196F3; color: white; position: relative; }
         header a { color:white; text-decoration:none; margin: 0 10px; }
-        .logo { font-weight:bold; font-size:24px; }
-        nav { display:flex; align-items: center; }
-        nav a:hover { text-decoration: underline; }
-        .cart-icon { margin-left: 20px; }
+        .logo-center a { font-weight:bold; font-size:24px; }
+        nav.lang-switch { display:flex; gap:5px; }
+        nav.lang-switch a:hover { text-decoration: underline; }
+        .dropdown-menu { display:none; position:absolute; top:50px; left:10px; background:#fff; padding:10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+        .dropdown-menu a { display:block; padding:5px 10px; color:#333; text-decoration:none; }
+        .dropdown-menu a:hover { background:#f0f0f0; }
+        .floating-cart { position:fixed; bottom:20px; right:20px; font-size:28px; text-decoration:none; color:#fff; background:#4CAF50; padding:10px 14px; border-radius:50%; box-shadow:0 2px 8px rgba(0,0,0,0.2); display:flex; align-items:center; justify-content:center; }
+        .cart-count { position:absolute; top:-6px; right:-6px; background:red; color:white; font-size:12px; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
 
-<header class="top-header">
-    <div class="menu-btn" onclick="toggleMenu()">⋮</div>
+<header>
+    <div class="menu-btn" onclick="toggleMenu()" style="cursor:pointer; font-size:24px;">☰</div>
 
     <div class="logo-center">
-        <a href="/">Wallcraft</a>
+        <a href="/?lang={{ lang if lang else 'ru' }}">Wallcraft</a>
     </div>
 
     <nav class="lang-switch">
-    <!-- ссылка остаётся на текущем пути и ставит параметр lang -->
-    <a href="{{ request.path }}?lang=ru">RU</a> |
-    <a href="{{ request.path }}?lang=lv">LV</a>
-</nav>
+        <a href="{{ request.path }}?lang=ru">RU</a> | 
+        <a href="{{ request.path }}?lang=lv">LV</a>
+    </nav>
 </header>
 
 <div id="dropdownMenu" class="dropdown-menu">
-    <a href="/catalog?cat=walls">Обои</a>
-    <a href="/catalog?cat=tools">Инструменты</a>
+    <a href="/catalog?cat=walls&lang={{ lang }}">Обои</a>
+    <a href="/catalog?cat=tools&lang={{ lang }}">Инструменты</a>
     <hr>
     <a href="/admin/login">Вход</a>
 </div>
@@ -56,14 +48,13 @@
 <footer style="text-align:center; padding:20px; background:#eee;">
     © 2025 Wallcraft. Все права защищены.
 </footer>
+
+<!-- Плавающая корзина -->
+<a href="/cart?lang={{ lang }}" class="floating-cart">
+    🛒 <span id="cart-count" class="cart-count">{{ session.get('cart_total_items', 0) }}</span>
+</a>
+
 <script>
-function toggleMenu() {
-    const menu = document.getElementById("dropdown-menu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-</script>
-    <a href="/cart" class="floating-cart">🛒</a>
-    <script>
 function toggleMenu() {
     const menu = document.getElementById('dropdownMenu');
     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';

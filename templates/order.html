@@ -1,35 +1,39 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Форма заказа</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        form { max-width: 400px; margin: auto; }
-        label { display: block; margin-top: 10px; }
-        input { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 20px; }
-        p.success { color: green; font-weight: bold; margin-top: 15px; }
-        a.home-btn { display:inline-block; margin-top:20px; padding:10px 20px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px; }
-    </style>
-</head>
-<body>
-    <h2>Форма заказа</h2>
+{% extends "base.html" %}
+{% block content %}
 
-    <form action="/order" method="POST">
-        <label>Имя:</label>
-        <input type="text" name="name" placeholder="Ваше имя" required>
+<h1 style="text-align:center; margin-bottom:25px;">
+    {{ "Оформление заказа" if lang=="ru" else "Pasūtījuma noformēšana" }}
+</h1>
 
-        <label>Телефон или Email:</label>
-        <input type="text" name="contact" placeholder="Телефон или email" required>
+{% if success %}
+    <p style="text-align:center; font-size:18px; color:green; font-weight:bold;">
+        {{ "Ваш заказ успешно отправлен!" if lang=="ru" else "Jūsu pasūtījums ir veiksmīgi nosūtīts!" }}
+    </p>
+{% endif %}
 
-        <button type="submit">Отправить</button>
-    </form>
+<form method="POST" style="max-width:400px; margin:20px auto; display:flex; flex-direction:column; gap:12px; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
 
-    {% if success %}
-        <p class="success">Заявка отправлена! Проверьте почту.</p>
-    {% endif %}
+    <label>{{ "Имя" if lang=="ru" else "Vārds" }}</label>
+    <input type="text" name="name" placeholder="{{ 'Ваше имя' if lang=='ru' else 'Jūsu vārds' }}" required
+           style="padding:8px; border-radius:4px; border:1px solid #ccc;">
 
-    <a href="/" class="home-btn">На главную</a>
-</body>
-</html>
+    <label>{{ "Контакт (телефон или email)" if lang=="ru" else "Kontakti (tālrunis vai email)" }}</label>
+    <input type="text" name="contact" placeholder="{{ 'Телефон или email' if lang=='ru' else 'Tālrunis vai email' }}" required
+           style="padding:8px; border-radius:4px; border:1px solid #ccc;">
+
+    <button type="submit" style="background:#4CAF50; color:#fff; padding:10px; border:none; border-radius:6px; cursor:pointer;">
+        {{ "Отправить заказ" if lang=="ru" else "Nosūtīt pasūtījumu" }}
+    </button>
+
+</form>
+
+<div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+    <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
+    </a>
+    <a href="/catalog" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
+    </a>
+</div>
+
+{% endblock %}

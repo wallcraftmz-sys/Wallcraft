@@ -11,31 +11,27 @@
     {% for item in cart_items %}
     <div class="cart-row" id="cart-row-{{ item.product.id }}" style="display:flex; align-items:center; gap:15px; padding:10px; border-bottom:1px solid #ddd;">
         
-        <!-- Картинка -->
         <div class="cart-thumb" style="width:80px; height:80px; flex-shrink:0;">
-            {% if item.product.image and item.product.image.startswith('http') %}
+            {% if item.product.image.startswith('http') %}
                 <img src="{{ item.product.image }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
             {% else %}
                 <img src="{{ url_for('static', filename=item.product.image) }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
             {% endif %}
         </div>
 
-        <!-- Информация -->
         <div class="cart-info" style="flex-grow:1;">
             <div class="cart-name" style="font-weight:bold;">{{ item.product.get("name_" + lang, item.product.get("name_ru")) }}</div>
             <div class="cart-price" id="price-{{ item.product.id }}" data-price="{{ item.product.price }}" style="color:#555;">{{ "%.2f"|format(item.product.price) }} €</div>
         </div>
 
-        <!-- Кол-во -->
         <div class="cart-qty" style="display:flex; align-items:center; gap:5px;">
-            <button class="qty-btn minus" onclick="changeQty({{ item.product.id }}, 'minus')" 
+            <button class="qty-btn minus" onclick="changeQty({{ item.product.id }}, 'minus')"
                 style="width:28px; height:28px; border:none; border-radius:4px; background:#f44336; color:#fff; font-size:18px; cursor:pointer;">−</button>
             <span class="qty-number" id="qty-{{ item.product.id }}" style="min-width:22px; text-align:center;">{{ item.qty }}</span>
-            <button class="qty-btn plus" onclick="changeQty({{ item.product.id }}, 'plus')" 
+            <button class="qty-btn plus" onclick="changeQty({{ item.product.id }}, 'plus')"
                 style="width:28px; height:28px; border:none; border-radius:4px; background:#4CAF50; color:#fff; font-size:18px; cursor:pointer;">+</button>
         </div>
 
-        <!-- Subtotal -->
         <div class="cart-subtotal" id="subtotal-{{ item.product.id }}" style="width:80px; text-align:right;">
             {{ "%.2f"|format(item.product.price * item.qty) }} €
         </div>
@@ -45,20 +41,19 @@
 
 </div>
 
-<!-- Итого и кнопки -->
 <div class="cart-summary" style="margin-top:25px; display:flex; flex-direction:column; gap:12px; align-items:flex-end;">
     <div style="font-size:18px; font-weight:bold;">
         {{ "Итого" if lang=="ru" else "Kopā" }}: <span id="cart-total">{{ "%.2f"|format(total) }}</span> €
     </div>
 
     <div style="display:flex; gap:10px;">
-        <a href="{{ url_for('order', lang=lang) }}" class="buy-btn checkout">
+        <a href="/order?lang={{ lang }}" class="buy-btn checkout" style="background:#4CAF50; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
             {{ "Оформить заказ" if lang=="ru" else "Noformēt pasūtījumu" }}
         </a>
-        <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        <a href="/?lang={{ lang }}" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
             {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
         </a>
-        <a href="/catalog" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        <a href="/catalog?lang={{ lang }}" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
             {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
         </a>
     </div>
@@ -67,48 +62,36 @@
 {% else %}
 <p style="text-align:center; margin-top:20px;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
 <div style="text-align:center; margin-top:10px; display:flex; gap:10px; justify-content:center;">
-    <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+    <a href="/?lang={{ lang }}" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
         {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
     </a>
-    <a href="/catalog" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+    <a href="/catalog?lang={{ lang }}" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
         {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
     </a>
 </div>
 {% endif %}
 
-<!-- JS для обновления кол-ва -->
 <script>
 async function changeQty(productId, action) {
     try {
         const resp = await fetch(`/api/update_cart/${productId}/${action}`, { method: 'POST' });
-        if (!resp.ok) throw new Error('Network response not ok');
         const data = await resp.json();
-        if (!data.success) throw new Error('Server returned error');
+        if (!data.success) throw new Error('Ошибка сервера');
 
-        const qtyEl = document.getElementById(`qty-${productId}`);
-        if (qtyEl) qtyEl.innerText = data.qty;
+        document.getElementById(`qty-${productId}`).innerText = data.qty;
+        const subtotalEl = document.getElementById(`subtotal-${productId}`);
+        const price = parseFloat(document.getElementById(`price-${productId}`).dataset.price);
+        subtotalEl.innerText = (price * data.qty).toFixed(2) + ' €';
 
-        if (data.qty === 0) {
-            const row = document.getElementById(`cart-row-${productId}`);
-            if (row) row.remove();
-        } else {
-            const priceEl = document.getElementById(`price-${productId}`);
-            const subtotalEl = document.getElementById(`subtotal-${productId}`);
-            if (priceEl && subtotalEl) {
-                const price = parseFloat(priceEl.dataset.price);
-                subtotalEl.innerText = (price * data.qty).toFixed(2) + ' €';
-            }
-        }
+        if(data.qty === 0) document.getElementById(`cart-row-${productId}`).remove();
 
-        const totalEl = document.getElementById('cart-total');
-        if (totalEl) totalEl.innerText = parseFloat(data.total).toFixed(2);
-
+        document.getElementById('cart-total').innerText = parseFloat(data.total).toFixed(2);
         const headerCount = document.getElementById('cart-count');
-        if (headerCount) headerCount.innerText = data.cart_total_items;
+        if(headerCount) headerCount.innerText = data.cart_total_items;
 
-    } catch (err) {
-        console.error('changeQty error:', err);
-        alert('{{ "Не удалось обновить количество. Попробуйте снова." if lang=="ru" else "Neizdevās atjaunināt skaitu. Mēģiniet vēlreiz." }}');
+    } catch(err) {
+        console.error(err);
+        alert('{{ "Не удалось обновить количество" if lang=="ru" else "Neizdevās atjaunināt skaitu" }}');
     }
 }
 </script>

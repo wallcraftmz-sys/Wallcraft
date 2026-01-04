@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Корзина</h1>
+<h1> {{ "Корзина" if lang == "ru" else "Grozs" }} </h1>
 
 {% if cart_items %}
 <div class="cart-list">
@@ -9,16 +9,17 @@
 {% for item in cart_items %}
 <div class="cart-row" id="cart-row-{{ item.product.id }}">
     <div class="cart-thumb">
-        {% if item.product.image.startswith('http') %}
-            <img src="{{ item.product.image }}" alt="{{ item.product.name_ru }}">
+        {% if item.product.image and item.product.image.startswith('http') %}
+            <img src="{{ item.product.image }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
         {% else %}
-            <img src="{{ url_for('static', filename=item.product.image) }}" alt="{{ item.product.name_ru }}">
+            <img src="{{ url_for('static', filename=item.product.image) }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
         {% endif %}
     </div>
 
     <div class="cart-info">
-        <div class="cart-name">{{ item.product.name_ru }}</div>
-        <div class="cart-price" id="price-{{ item.product.id }}">{{ "%.2f"|format(item.product.price) }} €</div>
+        <div class="cart-name">{{ item.product.get("name_" + lang, item.product.get("name_ru")) }}</div>
+        <!-- храню числовую цену в data-price, чтобы JS не парсил текст -->
+        <div class="cart-price" id="price-{{ item.product.id }}" data-price="{{ item.product.price }}">{{ "%.2f"|format(item.product.price) }} €</div>
     </div>
 
     <div class="cart-qty">
@@ -36,13 +37,13 @@
 </div>
 
 <div class="cart-summary">
-    <div>Итого: <span id="cart-total">{{ "%.2f"|format(total) }}</span> €</div>
-    <a href="/order" class="buy-btn checkout">Оформить заказ</a>
+    <div>{{ "Итого" if lang=="ru" else "Kopā" }}: <span id="cart-total">{{ "%.2f"|format(total) }}</span> €</div>
+    <a href="/order" class="buy-btn checkout">{{ "Оформить заказ" if lang=="ru" else "Noformēt pasūtījumu" }}</a>
 </div>
 
 {% else %}
-<p>Корзина пуста</p>
-<a href="/catalog" class="buy-btn">Вернуться в каталог</a>
+<p>{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
+<a href="/catalog" class="buy-btn">{{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}</a>
 {% endif %}
 
 <script>
@@ -53,35 +54,35 @@ async function changeQty(productId, action) {
         const data = await resp.json();
         if (!data.success) throw new Error('Server returned error');
 
-        // обновим количество в строке
+        // Обновляем количество
         const qtyEl = document.getElementById(`qty-${productId}`);
         if (qtyEl) qtyEl.innerText = data.qty;
 
-        // если qty == 0 — удалить DOM-строку
+        // Если qty == 0 — удалить DOM-строку
         if (data.qty === 0) {
             const row = document.getElementById(`cart-row-${productId}`);
             if (row) row.remove();
         } else {
-            // обновить subtotal для товара
+            // обновить subtotal для товара, используем data-price
             const priceEl = document.getElementById(`price-${productId}`);
             const subtotalEl = document.getElementById(`subtotal-${productId}`);
             if (priceEl && subtotalEl) {
-                const price = parseFloat(priceEl.innerText.replace('€','').trim());
+                const price = parseFloat(priceEl.dataset.price);
                 subtotalEl.innerText = (price * data.qty).toFixed(2) + ' €';
             }
         }
 
-        // обновим общий total
+        // обновим общий total (берём из ответа сервера)
         const totalEl = document.getElementById('cart-total');
         if (totalEl) totalEl.innerText = parseFloat(data.total).toFixed(2);
 
-        // обновим счётчик корзины в header, если есть
+        // обновим счётчик корзины в header (если есть элемент #cart-count)
         const headerCount = document.getElementById('cart-count');
         if (headerCount) headerCount.innerText = data.cart_total_items;
 
     } catch (err) {
         console.error('changeQty error:', err);
-        alert('Не удалось обновить количество. Попробуйте снова.');
+        alert('{{ "Не удалось обновить количество. Попробуйте снова." if lang=="ru" else "Neizdevās atjaunināt skaitu. Mēģiniet vēlreiz." }}');
     }
 }
 </script>

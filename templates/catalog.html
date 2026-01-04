@@ -23,9 +23,10 @@
         </h3>
 
         <!-- Короткое описание -->
-        <p style="color:#555; font-size:14px; min-height:40px;">
-            {{ product.get("description_" + lang, product.get("description_ru"))[:80] }}{% if product.get("description_" + lang, product.get("description_ru"))|length > 80 %}…{% endif %}
-        </p>
+        {% set desc = product.get("description_" + lang, product.get("description_ru")) %}
+<p style="color:#555; font-size:14px; min-height:40px;">
+    {{ desc[:80] + ("…" if desc|length > 80 else "") }}
+</p>
 
         <!-- Цена -->
         <p class="price" style="font-weight:bold; margin:6px 0;">{{ "%.2f"|format(product.price) }} €</p>

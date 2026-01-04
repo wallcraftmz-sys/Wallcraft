@@ -162,6 +162,7 @@ def cart_page():
 # ================== ЗАКАЗ ==================
 @app.route("/order", methods=["GET", "POST"])
 def order():
+    lang = session.get("lang", "ru")
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")

@@ -1,1 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ "Корзина" if lang=="ru" else "Grozs" }}</h1>
+
+{% if cart_items %}
+{% for item in cart_items %}
+<div class="cart-item">
+    <img src="{{ url_for('static', filename=item.product.image) }}" class="cart-item-image">
+    <div>
+        <b>{{ item.product["name_"+lang] }}</b>
+        <p>{{ "%.2f"|format(item.product.price*item.qty) }} €</p>
+    </div>
+    <div class="qty-controls">
+        <button onclick="changeQty({{ item.product.id }}, 'minus')">−</button>
+        <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
+        <button onclick="changeQty({{ item.product.id }}, 'plus')">+</button>
+    </div>
+</div>
+{% endfor %}
+
+<p><b>Итого:</b> <span id="cart-total">{{ total }}</span> €</p>
+<a href="/order?lang={{ lang }}" class="buy-btn">Оформить заказ</a>
+<a href="/catalog?lang={{ lang }}" class="buy-btn">Вернуться в каталог</a>
+
+{% else %}
+<p>{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
+<a href="/catalog?lang={{ lang }}" class="buy-btn">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
+{% endif %}
+
+<script>
+function changeQty(id, action){
+    fetch(`/api/update_cart/${id}/${action}`,{method:'POST'})
+    .then(r=>r.json()).then(()=>location.reload());
+}
+</script>
+{% endblock %}
 

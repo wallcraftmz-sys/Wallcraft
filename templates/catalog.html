@@ -7,64 +7,44 @@
 </h1>
 
 <div class="product-grid">
-    {% for product in products %}
+{% for product in products %}
     <div class="product-card">
-        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product['name_'+lang] }}">
-        <h3 style="font-size:20px;">{{ product["name_" + lang] }}</h3>
-        <p style="font-size:16px; min-height:50px;">{{ product["description_" + lang] }}</p>
-        <p class="price" style="font-size:18px; font-weight:bold;">{{ "%.2f"|format(product.price) }} €</p>
-        <button class="buy-btn" style="font-size:18px; padding:12px 18px;" onclick="addToCart({{ product.id }})">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product['name_' + lang] }}">
+        <h3>{{ product["name_" + lang] }}</h3>
+        <p>{{ product["description_" + lang] }}</p>
+        <p class="price">{{ "%.2f"|format(product.price) }} €</p>
+        <button onclick="addToCart({{ product.id }})">
             {{ "В корзину" if lang=="ru" else "Grozā" }}
         </button>
     </div>
-    {% endfor %}
+{% endfor %}
 </div>
 
-<!-- Попап добавления в корзину -->
-<div id="popup" class="popup">
+<div id="popup" class="popup" style="display:none;">
   <div class="popup-content">
-      <div id="popup-text" style="font-size:16px;"></div>
+      <div id="popup-text"></div>
       <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:10px;">
-          <a href="/catalog?lang={{ lang }}" class="buy-btn" style="font-size:16px; padding:10px 14px;">
-              {{ "Продолжить покупки" if lang=="ru" else "Turpināt iepirkties" }}
-          </a>
-          <a href="/cart?lang={{ lang }}" class="buy-btn" style="font-size:16px; padding:10px 14px;">
-              {{ "Перейти в корзину" if lang=="ru" else "Pāriet uz grozu" }}
-          </a>
+          <a href="/catalog?lang={{ lang }}"> {{ "Продолжить покупки" if lang=="ru" else "Turpināt iepirkties" }} </a>
+          <a href="/cart?lang={{ lang }}"> {{ "Перейти в корзину" if lang=="ru" else "Pāriet uz grozu" }} </a>
       </div>
-      <button onclick="closePopup()" style="margin-top:10px; font-size:16px; padding:6px 12px;">
-          {{ "Закрыть" if lang=="ru" else "Aizvērt" }}
-      </button>
+      <button onclick="closePopup()">{{ "Закрыть" if lang=="ru" else "Aizvērt" }}</button>
   </div>
 </div>
 
 <script>
-const lang = "{{ lang }}";
-
 function addToCart(id){
     fetch(`/api/add_to_cart/${id}`, { method:'POST' })
     .then(res => res.json())
     .then(data => {
         if(data.success){
-            // Обновляем попап
-            document.getElementById("popup-text").innerHTML = `
-                <b>${lang=='ru'?data.product.name_ru:data.product.name_lv}</b><br>
-                ${data.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
+            document.getElementById("popup-text").innerHTML = `<b>${lang=='ru'?data.product.name_ru:data.product.name_lv}</b><br>${data.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
             document.getElementById("popup").style.display='flex';
-
-            // Обновляем счетчик на плавающей корзине
             const counter = document.getElementById("cart-count");
             if(counter) counter.innerText = data.cart_total_items;
-        } else {
-            alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
         }
-    })
-    .catch(err => { console.error(err); alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}'); });
+    });
 }
-
-function closePopup(){
-    document.getElementById("popup").style.display='none';
-}
+function closePopup(){ document.getElementById("popup").style.display='none'; }
 </script>
 
 {% endblock %}

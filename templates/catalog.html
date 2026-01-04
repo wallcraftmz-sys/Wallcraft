@@ -3,23 +3,34 @@
 
 <h1>{{ "Каталог" if lang=="ru" else "Katalogs" }}</h1>
 
-<div class="product-grid">
-{% for p in products %}
-<div class="product-card">
-    <img src="{{ p.image }}">
-    <h3>{{ p["name_" + lang] }}</h3>
-    <p>{{ p["description_" + lang] }}</p>
-    <p class="price">{{ p.price }} €</p>
-    <button class="buy-btn" onclick="addToCart({{ p.id }})">
-        {{ "В корзину" if lang=="ru" else "Grozā" }}
-    </button>
-</div>
-{% endfor %}
+<!-- POPUP -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <p>
+            {{ "Товар добавлен в корзину" if lang=="ru" else "Prece pievienota grozam" }}
+        </p>
+
+        <a href="/cart" class="buy-btn">
+            {{ "Перейти в корзину" if lang=="ru" else "Doties uz grozu" }}
+        </a>
+
+        <button onclick="closePopup()" class="secondary-btn">
+            {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
+        </button>
+    </div>
 </div>
 
 <script>
-function addToCart(id){
-    fetch(`/api/add_to_cart/${id}`,{method:"POST"})
+function addToCart(id) {
+    fetch(`/api/add_to_cart/${id}`, { method: "POST" })
+        .then(r => r.json())
+        .then(data => {
+    document.getElementById("popup").style.display = "flex";
+});
+}
+
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
 }
 </script>
 

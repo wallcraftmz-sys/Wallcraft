@@ -15,7 +15,8 @@
                 <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.get('name_' + lang, product.get('name_ru')) }}">
             {% endif %}
 
-            <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}</h3>
+            <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}
+{{ product.get("description_" + lang, product.get("description_ru")) }}</h3>
         </a>
         <!-- короткое описание (опционально) -->
         <p style="color:#666; font-size:14px;">

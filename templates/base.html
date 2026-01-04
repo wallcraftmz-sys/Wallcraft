@@ -1,41 +1,42 @@
 <!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
-    <meta charset="UTF-8">
-    <title>Wallcraft</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<title>Wallcraft</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<header class="top-header">
+<header>
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-    <div class="logo-center">
-        <a href="/">WALLCRAFT</a>
-    </div>
-
+    <div class="logo"><a href="/">Wallcraft</a></div>
     <div class="lang-switch">
-        <a href="?lang=ru">RU</a> |
-        <a href="?lang=lv">LV</a>
+        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
     </div>
 
     <div id="dropdownMenu" class="dropdown-menu">
-        <a href="/catalog">Обои</a>
+        <a href="/catalog?cat=walls">Обои</>
+        <a href="/about">О компании</a>
+        <a href="/contact">Контакты</a>
+        <hr>
+        <a href="/login">Вход</a>
     </div>
 </header>
 
-<main>
-    {% block content %}{% endblock %}
-</main>
+<a href="/cart" class="floating-cart">🛒 {{ cart_total_items }}</a>
 
-<a href="/cart" class="floating-cart">🛒</a>
+<main>{% block content %}{% endblock %}</main>
 
 <script>
-function toggleMenu() {
-    const m = document.getElementById("dropdownMenu");
-    m.style.display = m.style.display === "block" ? "none" : "block";
+function toggleMenu(){
+    const m=document.getElementById("dropdownMenu");
+    m.style.display = m.style.display==="block"?"none":"block";
 }
+document.addEventListener("click", e=>{
+    if(!e.target.closest(".menu-btn") && !e.target.closest(".dropdown-menu")){
+        document.getElementById("dropdownMenu").style.display="none";
+    }
+});
 </script>
-
 </body>
 </html>

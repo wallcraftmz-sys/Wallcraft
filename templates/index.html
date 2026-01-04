@@ -1,32 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Wallcraft</h1>
+<h1 style="text-align:center">
+{{ "Добро пожаловать" if lang=="ru" else "Laipni lūdzam" }}
+</h1>
 
-<div class="grid">
+<div class="product-grid">
 {% for p in products %}
-<div class="card">
-    <img src="{{ url_for('static', filename=p.image) }}">
-    <h3>{{ p.name_ru }}</h3>
-    <p>{{ p.price }} €</p>
-    <button onclick="add({{ p.id }})">В корзину</button>
+<div class="product-card">
+    <img src="{{ p.image }}">
+    <h3>{{ p["name_" + lang] }}</h3>
+    <p>{{ p["description_" + lang] }}</p>
 </div>
 {% endfor %}
 </div>
-
-<div id="popup" class="popup">Товар добавлен</div>
-
-<script>
-function add(id){
- fetch(`/api/add_to_cart/${id}`,{method:"POST"})
- .then(r=>r.json())
- .then(d=>{
-   if(d.success){
-     document.getElementById("popup").style.display="block";
-     setTimeout(()=>popup.style.display="none",1500);
-   }
- })
-}
-</script>
 
 {% endblock %}

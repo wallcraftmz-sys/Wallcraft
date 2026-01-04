@@ -9,33 +9,26 @@
 {% if cart_items %}
 <div style="display:flex; flex-direction:column; gap:15px;">
 {% for item in cart_items %}
-<div class="cart-item" style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:#fff; padding:10px; border-radius:8px;">
-    <img src="{{ url_for('static', filename=item.product.image) }}" style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+<div style="display:flex; gap:10px; padding:10px; background:#fff; border-radius:8px; align-items:center;">
+    <img src="{{ url_for('static', filename=item.product.image) }}" style="width:80px;height:80px;object-fit:cover;">
     <div style="flex:1;">
-        <b style="font-size:20px;">{{ item.product["name_"+lang] }}</b>
+        <b>{{ item.product["name_"+lang] }}</b>
         <p>{{ item.qty }} {{ lang=='ru'?'шт':'gab' }}</p>
         <p>{{ "%.2f"|format(item.product.price*item.qty) }} €</p>
     </div>
-    <div class="qty-controls" style="display:flex; flex-direction:column; gap:5px;">
-        <button onclick="changeQty({{ item.product.id }},'plus')" 
-                style="font-size:22px; padding:6px 12px; border-radius:6px;">+</button>
-        <button onclick="changeQty({{ item.product.id }},'minus')" 
-                style="font-size:22px; padding:6px 12px; border-radius:6px;">−</button>
+    <div>
+        <button onclick="changeQty({{ item.product.id }},'plus')">+</button>
+        <button onclick="changeQty({{ item.product.id }},'minus')">−</button>
     </div>
 </div>
 {% endfor %}
 </div>
 
-<p style="font-size:20px; text-align:right; margin-top:15px;"><b>{{ "Итого" if lang=="ru" else "Kopā" }}:</b> {{ total }} €</p>
-
-<div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
-    <a href="/?lang={{ lang }}" class="buy-btn" style="padding:10px 15px; font-size:16px;">{{ "На главную" if lang=="ru" else "Uz sākumlapu" }}</a>
-    <a href="/catalog?lang={{ lang }}" class="buy-btn" style="padding:10px 15px; font-size:16px;">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
-    <a href="/order?lang={{ lang }}" class="buy-btn" style="padding:10px 15px; font-size:16px;">{{ "Оформить заказ" if lang=="ru" else "Pasūtīt" }}</a>
-</div>
+<p style="text-align:right; font-size:20px;"><b>{{ "Итого" if lang=="ru" else "Kopā" }}:</b> {{ total }} €</p>
+<a href="/order?lang={{ lang }}"> {{ "Оформить заказ" if lang=="ru" else "Pasūtīt" }} </a>
 
 <script>
-function changeQty(id, action) {
+function changeQty(id, action){
     fetch(`/api/update_cart/${id}/${action}`, { method:"POST" })
     .then(r=>r.json())
     .then(data=>{ location.reload(); });
@@ -43,7 +36,7 @@ function changeQty(id, action) {
 </script>
 
 {% else %}
-<p style="text-align:center; font-size:18px;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
-<a href="/catalog?lang={{ lang }}" class="buy-btn" style="padding:10px 15px; font-size:16px;">{{ "В каталог" if lang=='ru' else "Uz katalogu" }}</a>
+<p style="text-align:center;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
+<a href="/catalog?lang={{ lang }}"> {{ "В каталог" if lang=="ru" else "Uz katalogu" }} </a>
 {% endif %}
 {% endblock %}

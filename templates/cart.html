@@ -1,11 +1,10 @@
-extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
 
-<h1> {{ "Корзина" if lang == "ru" else "Grozs" }} </h1>
+<h1>{{ "Корзина" if lang == "ru" else "Grozs" }}</h1>
 
 {% if cart_items %}
 <div class="cart-list">
-
 {% for item in cart_items %}
 <div class="cart-row" id="cart-row-{{ item.product.get('id') }}">
     <div class="cart-thumb">
@@ -31,9 +30,7 @@ extends "base.html" %}
         {{ "%.2f"|format(item.product.get('price', 0) * item.qty) }} €
     </div>
 </div>
-</div>
 {% endfor %}
-
 </div>
 
 <div class="cart-summary">

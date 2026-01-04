@@ -1,49 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
-{% set lang = session.get('lang', 'ru') %}
-
-<h1>{{ "Каталог" if lang=="ru" else "Katalogs" }}</h1>
+{% set lang = lang %}
 
 <div class="product-grid">
-{% for product in products %}
+{% for p in products %}
 <div class="product-card">
-
-    <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}">
-
-    <h3>{{ product["name_" + lang] }}</h3>
-    <p>{{ product["description_" + lang] }}</p>
-    <p class="price">{{ product.price }} €</p>
-
-    <button class="buy-btn" onclick="addToCart({{ product.id }})">
+    <img src="{{ p.image }}">
+    <h3>{{ p["name_" + lang] }}</h3>
+    <p>{{ p["description_" + lang] }}</p>
+    <p class="price">{{ p.price }} €</p>
+    <button class="buy-btn" onclick="addToCart({{ p.id }})">
         {{ "В корзину" if lang=="ru" else "Grozā" }}
     </button>
-
 </div>
 {% endfor %}
 </div>
 
-<div id="popup" class="popup" onclick="closePopup()">
-    <div class="popup-content" onclick="event.stopPropagation()">
-        <div id="popup-text"></div>
-        <a href="/cart" class="buy-btn">OK</a>
-    </div>
+<div id="popup" class="popup" onclick="this.style.display='none'">
+  <div class="popup-content" onclick="event.stopPropagation()">
+    <div id="popup-text"></div>
+    <a href="/cart" class="buy-btn">OK</a>
+  </div>
 </div>
 
 <script>
-function addToCart(id) {
-    fetch(`/api/add_to_cart/${id}`, { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("popup-text").innerHTML =
-                    `<b>${data.product.name_ru}</b><br>${data.qty} шт`;
-                document.getElementById("popup").style.display = "flex";
-            }
-        });
-}
-function closePopup() {
-    document.getElementById("popup").style.display = "none";
+function addToCart(id){
+ fetch(`/api/add_to_cart/${id}`,{method:'POST'})
+ .then(r=>r.json())
+ .then(d=>{
+   document.getElementById("popup-text").innerHTML =
+     `<b>${d.product.name_ru}</b><br>${d.qty} шт`;
+   document.getElementById("popup").style.display="flex";
+ });
 }
 </script>
-
 {% endblock %}

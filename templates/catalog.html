@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Каталог товаров</h1>
+<h1>{{ "Каталог товаров" if lang == "ru" else "Preču katalogs" }}</h1>
 
 <div class="product-grid">
     {% for product in products %}
@@ -10,7 +10,9 @@
 <p>{{ product.get("description_" + lang, product.get("description_ru")) }}</p>
         <p class="price">{{ product.price }} €</p>
         <!-- Кнопка теперь вызывает JS API -->
-        <button class="buy-btn" onclick="addToCart({{ product.id }})">В корзину</button>
+        <button class="buy-btn" onclick="addToCart({{ product.id }})">
+    {{ "В корзину" if lang == "ru" else "Ielikt grozā" }}
+</button>
     </div>
     {% endfor %}
 </div>
@@ -20,11 +22,17 @@
     <div class="popup-content" style="background:#fff; padding:20px; border-radius:8px; max-width:420px; width:90%;">
         <div id="popup-text"></div>
         <div style="margin-top:12px; display:flex; gap:10px; justify-content:center;">
-            <a href="/catalog" class="buy-btn" style="background:#2196F3; text-decoration:none; color:#fff; padding:8px 12px; border-radius:6px;">Продолжить покупки</a>
-            <a href="/cart" class="buy-btn" style="background:#4CAF50; text-decoration:none; color:#fff; padding:8px 12px; border-radius:6px;">Перейти в корзину</a>
-        </div>
+    <a href="/catalog" class="buy-btn" style="background:#2196F3; text-decoration:none; color:#fff; padding:8px 12px; border-radius:6px;">
+        {{ "Продолжить покупки" if lang == "ru" else "Turpināt iepirkties" }}
+    </a>
+    <a href="/cart" class="buy-btn" style="background:#4CAF50; text-decoration:none; color:#fff; padding:8px 12px; border-radius:6px;">
+        {{ "Перейти в корзину" if lang == "ru" else "Aiziet uz grozu" }}
+    </a>
+</div>
         <div style="text-align:right; margin-top:8px;">
-            <button onclick="closePopup()" style="background:none; border:none; color:#777; cursor:pointer;">Закрыть</button>
+            <button onclick="closePopup()" style="background:none; border:none; color:#777; cursor:pointer;">
+    {{ "Закрыть" if lang == "ru" else "Aizvērt" }}
+</button>
         </div>
     </div>
 </div>

@@ -1,42 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-{% set lang = lang %}
 
-<h1 style="text-align:center; font-size:28px; margin-bottom:20px;">
-    {{ "Корзина" if lang=="ru" else "Grozs" }}
-</h1>
+<h2>Корзина</h2>
 
-{% if cart_items %}
-<div style="display:flex; flex-direction:column; gap:15px;">
-{% for item in cart_items %}
-<div style="display:flex; gap:10px; padding:10px; background:#fff; border-radius:8px; align-items:center;">
-    <img src="{{ url_for('static', filename=item.product.image) }}" style="width:80px;height:80px;object-fit:cover;">
-    <div style="flex:1;">
-        <b>{{ item.product["name_"+lang] }}</b>
-        <p>{{ item.qty }} {{ lang=='ru'?'шт':'gab' }}</p>
-        <p>{{ "%.2f"|format(item.product.price*item.qty) }} €</p>
-    </div>
-    <div>
-        <button onclick="changeQty({{ item.product.id }},'plus')">+</button>
-        <button onclick="changeQty({{ item.product.id }},'minus')">−</button>
-    </div>
+{% for i in items %}
+<div class="cart-item">
+    <img src="{{ url_for('static', filename=i.product.image) }}">
+    <b>{{ i.product.name_ru }}</b>
+    <p>{{ i.qty }} × {{ i.product.price }} €</p>
+    <button onclick="upd({{ i.product.id }},'plus')">+</button>
+    <button onclick="upd({{ i.product.id }},'minus')">−</button>
 </div>
 {% endfor %}
-</div>
 
-<p style="text-align:right; font-size:20px;"><b>{{ "Итого" if lang=="ru" else "Kopā" }}:</b> {{ total }} €</p>
-<a href="/order?lang={{ lang }}"> {{ "Оформить заказ" if lang=="ru" else "Pasūtīt" }} </a>
+<p><b>Итого:</b> {{ total }} €</p>
+
+<a href="/order">Оформить заказ</a>
 
 <script>
-function changeQty(id, action){
-    fetch(`/api/update_cart/${id}/${action}`, { method:"POST" })
-    .then(r=>r.json())
-    .then(data=>{ location.reload(); });
+function upd(id,action){
+ fetch(`/api/update/${id}/${action}`,{method:"POST"})
+ .then(()=>location.reload())
 }
 </script>
 
-{% else %}
-<p style="text-align:center;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
-<a href="/catalog?lang={{ lang }}"> {{ "В каталог" if lang=="ru" else "Uz katalogu" }} </a>
-{% endif %}
 {% endblock %}

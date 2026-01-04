@@ -1,39 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
+{% set lang = lang %}
 
-<h1 style="text-align:center; margin-bottom:25px;">
-    {{ "Оформление заказа" if lang=="ru" else "Pasūtījuma noformēšana" }}
-</h1>
+<h1 style="font-size:28px; margin-bottom:20px;">{{ "Оформление заказа" if lang=="ru" else "Pasūtījuma veikšana" }}</h1>
 
-<div style="max-width:420px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-
-    {% if success %}
-        <p style="color:#4CAF50; font-weight:bold; text-align:center;">
-            {{ "Заявка отправлена! Мы свяжемся с вами." if lang=="ru" else "Pieteikums nosūtīts! Mēs ar jums sazināsimies." }}
-        </p>
-    {% else %}
-        <form method="POST">
-            <label>{{ "Имя" if lang=="ru" else "Vārds" }}</label>
-            <input type="text" name="name" required style="width:100%; padding:8px; margin-top:5px;">
-
-            <label style="margin-top:10px;">{{ "Телефон или Email" if lang=="ru" else "Tālrunis vai e-pasts" }}</label>
-            <input type="text" name="contact" required style="width:100%; padding:8px; margin-top:5px;">
-
-            <button type="submit" style="margin-top:15px; width:100%; padding:10px; background:#4CAF50; color:#fff; border:none; border-radius:6px; cursor:pointer;">
-                {{ "Отправить" if lang=="ru" else "Nosūtīt" }}
-            </button>
-        </form>
-    {% endif %}
-
-    <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
-        <a href="/?lang={{ lang }}" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
-            {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
-        </a>
-        <a href="/catalog?lang={{ lang }}" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
-            {{ "В каталог" if lang=="ru" else "Uz katalogu" }}
-        </a>
+{% if cart_items %}
+    <h2 style="font-size:20px; margin-bottom:15px;">{{ "Ваши товары" if lang=="ru" else "Jūsu preces" }}</h2>
+    {% for item in cart_items %}
+    <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px; background:#fff; padding:12px; border-radius:8px;">
+        <img src="{{ item.product.image }}" class="cart-item-image" style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+        <div>
+            <b style="font-size:18px;">{{ item.product["name_"+lang] }}</b>
+            <p style="margin:5px 0;">{{ item.qty }} шт</p>
+            <p style="font-weight:bold;">{{ item.product.price * item.qty }} €</p>
+        </div>
     </div>
+    {% endfor %}
 
-</div>
+    <p style="font-size:18px;"><b>{{ "Итого:" if lang=="ru" else "Kopā:" }}</b> {{ total }} €</p>
+
+    <h2 style="font-size:20px; margin-top:20px;">{{ "Ваши данные" if lang=="ru" else "Jūsu dati" }}</h2>
+    <form method="POST" action="/order?lang={{ lang }}" style="display:flex; flex-direction:column; gap:10px; max-width:400px;">
+        <input type="text" name="name" placeholder="{{ 'Имя' if lang=='ru' else 'Vārds' }}" required style="padding:10px; font-size:16px; border-radius:6px; border:1px solid #ccc;">
+        <input type="text" name="contact" placeholder="{{ 'Телефон / Email' if lang=='ru' else 'Telefons / E-pasts' }}" required style="padding:10px; font-size:16px; border-radius:6px; border:1px solid #ccc;">
+        <button type="submit" class="buy-btn" style="padding:12px 20px; font-size:16px; background:#4CAF50;">{{ "Оформить заказ" if lang=="ru" else "Veikt pasūtījumu" }}</button>
+    </form>
+
+    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="/?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px;">{{ "На главную" if lang=="ru" else "Uz sākumlapu" }}</a>
+        <a href="/catalog?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px;">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
+    </div>
+{% else %}
+    <p style="font-size:16px;">{{ "В корзине нет товаров" if lang=="ru" else "Grozs ir tukšs" }}</p>
+    <a href="/catalog?lang={{ lang }}" class="buy-btn" style="padding:12px 20px; font-size:16px;">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
+{% endif %}
 
 {% endblock %}

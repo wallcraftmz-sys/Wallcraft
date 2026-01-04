@@ -52,7 +52,7 @@
     </div>
 
     <div style="display:flex; gap:10px;">
-        <a href="/order" class="buy-btn checkout" style="background:#4CAF50; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        <a href="{{ url_for('order', lang=lang) }}" class="buy-btn checkout">
             {{ "Оформить заказ" if lang=="ru" else "Noformēt pasūtījumu" }}
         </a>
         <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">

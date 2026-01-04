@@ -5,7 +5,7 @@
 <div class="product-grid">
     {% for product in products %}
     <div class="product-card">
-        <img src="{{ product.image }}" alt="{{ product.name_ru }}">
+        <img src="{{ product.image }}" alt="">
         <h3>{{ product.name_ru }}</h3>
         <p>{{ product.description_ru }}</p>
         <p class="price">{{ product.price }} €</p>

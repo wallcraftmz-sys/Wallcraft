@@ -14,9 +14,7 @@
 <div class="product-detail">
     <div class="product-image">
         <!-- Картинка товара -->
-       <img src="{{ url_for('static', filename=product.image) }}"
-     alt="{{ product.name_ru }}"
-     class="images/filename.jpg">
+       <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}">
 
     </div>
     <div class="product-info">

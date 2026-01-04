@@ -67,16 +67,25 @@ function addToCart(productId){
     fetch(`/api/add_to_cart/${productId}`, { method:'POST' })
     .then(res => res.json())
     .then(data => {
-        if(data.success){
-            const p = data.product;
-            document.getElementById('popup-text').innerHTML =
-                `<div style="display:flex; gap:12px; align-items:center;">
-                  <img src="${p.image.startsWith('http') ? p.image : '/static/' + p.image}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
-                    <div style="text-align:left;">
-                        <b style="font-size:16px;">${p.name_ru}</b><br>
-                        ${p.qty} × ${p.price} €
-                    </div>
-                 </div>`;
+    if(data.success){
+        const p = data.product;
+        document.getElementById('popup-text').innerHTML = `
+            <div style="display:flex; gap:12px; align-items:center;">
+                <img src="${p.image}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
+                <div style="text-align:left;">
+                    <b style="font-size:16px;">${p.name_ru}</b><br>
+                    1 × ${p.price} €
+                </div>
+            </div>`;
+        document.getElementById('popup').style.display='flex';
+
+        // Обновим счетчик корзины в шапке
+        const headerCount = document.getElementById('cart-count');
+        if(headerCount && data.cart_total_items !== undefined){
+            headerCount.innerText = data.cart_total_items;
+        }
+    }
+})
             document.getElementById('popup').style.display='flex';
 
             // обновим счетчик корзины в шапке

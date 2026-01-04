@@ -8,6 +8,7 @@
 <div class="product-grid">
 {% for product in products %}
     <div class="product-card">
+        {# Ссылка на страницу товара. Если маршрут product отсутствует, см. примечание ниже. #}
         <a href="{{ url_for('product', id=product.id) }}" style="color:inherit; text-decoration:none;">
             {% if product.image and product.image.startswith('http') %}
                 <img src="{{ product.image }}" alt="{{ product.get('name_' + lang, product.get('name_ru')) }}">
@@ -15,14 +16,15 @@
                 <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.get('name_' + lang, product.get('name_ru')) }}">
             {% endif %}
 
-            <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}
-{{ product.get("description_" + lang, product.get("description_ru")) }}</h3>
+            <h3>{{ product.get("name_" + lang, product.get("name_ru")) }}</h3>
         </a>
-        <!-- короткое описание (опционально) -->
+
+        {# Короткое описание под названием (усечённое до 120 знаков) #}
         <p style="color:#666; font-size:14px;">
             {{ product.get("description_" + lang, product.get("description_ru"))[:120] }}{% if product.get("description_" + lang, product.get("description_ru"))|length > 120 %}…{% endif %}
         </p>
-        <p class="price">{{ product.price }} €</p>
+
+        <p class="price">{{ "%.2f"|format(product.price) }} €</p>
     </div>
 {% endfor %}
 </div>

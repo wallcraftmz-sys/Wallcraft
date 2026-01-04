@@ -190,3 +190,9 @@ main {
     text-decoration: none;
     z-index: 2000;
 }
+.menu-btn {
+    font-size: 26px;
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 10px;
+}

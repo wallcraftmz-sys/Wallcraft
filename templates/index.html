@@ -11,9 +11,8 @@
 
         <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}">
 
-        <h3>{{ product["name_" + lang] }}</h3>
-
-        <p>{{ product["description_" + lang] }}</p>
+        <h3>{{ product.get("name_" + lang, product.name_ru) }}</h3>
+<p>{{ product.get("description_" + lang, product.description_ru) }}</p>
 
         <p class="price">{{ product.price }} €</p>
 

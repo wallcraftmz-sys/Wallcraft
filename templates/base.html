@@ -1,20 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ lang }}">
 <head>
-<meta charset="UTF-8">
-<title>Wallcraft</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <title>Wallcraft</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<header class="header">
-    <a href="/" class="logo">WALLCRAFT</a>
-    <a href="/cart" class="cart-btn">🛒</a>
+<header class="top-header">
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+    <div class="logo-center">
+        <a href="/">WALLCRAFT</a>
+    </div>
+
+    <div class="lang-switch">
+        <a href="?lang=ru">RU</a> |
+        <a href="?lang=lv">LV</a>
+    </div>
+
+    <div id="dropdownMenu" class="dropdown-menu">
+        <a href="/catalog">Обои</a>
+    </div>
 </header>
 
 <main>
-{% block content %}{% endblock %}
+    {% block content %}{% endblock %}
 </main>
+
+<a href="/cart" class="floating-cart">🛒</a>
+
+<script>
+function toggleMenu() {
+    const m = document.getElementById("dropdownMenu");
+    m.style.display = m.style.display === "block" ? "none" : "block";
+}
+</script>
 
 </body>
 </html>

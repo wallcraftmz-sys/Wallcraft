@@ -2,7 +2,7 @@
 {% block content %}
 {% set lang = session.get('lang', 'ru') %}
 
-<h1 style="text-align:center; font-size:28px; margin:20px 0;">
+<h1 style="text-align:center; font-size:28px; margin-bottom:20px;">
     {{ "Каталог товаров" if lang=="ru" else "Preču katalogs" }}
 </h1>
 
@@ -11,8 +11,8 @@
     <div class="product-card">
         <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product['name_' + lang] }}">
         <h3>{{ product["name_" + lang] }}</h3>
-        <p>{{ product["description_" + lang] }}</p>
-        <p class="price">{{ "%.2f"|format(product.price) }} €</p>
+        <p style="min-height:50px;">{{ product["description_" + lang] }}</p>
+        <p class="price"><b>{{ "%.2f"|format(product.price) }} €</b></p>
         <button class="buy-btn" onclick="addToCart({{ product.id }})">
             {{ "В корзину" if lang=="ru" else "Grozā" }}
         </button>
@@ -20,34 +20,35 @@
     {% endfor %}
 </div>
 
-<!-- Попап корзины -->
+<!-- Попап добавления в корзину -->
 <div id="popup" class="popup">
   <div class="popup-content">
       <div id="popup-text"></div>
-      <div style="margin-top:10px;">
-          <a href="/catalog?lang={{ lang }}" class="buy-btn">{{ "Продолжить покупки" if lang=="ru" else "Turpināt iepirkties" }}</a>
-          <a href="/cart?lang={{ lang }}" class="buy-btn">{{ "Перейти в корзину" if lang=="ru" else "Pāriet uz grozu" }}</a>
+      <div style="margin-top:12px;">
+          <a href="/catalog?lang={{ lang }}" class="buy-btn">
+              {{ "Продолжить покупки" if lang=="ru" else "Turpināt iepirkties" }}
+          </a>
+          <a href="/cart?lang={{ lang }}" class="buy-btn">
+              {{ "Перейти в корзину" if lang=="ru" else "Pāriet uz grozu" }}
+          </a>
       </div>
-      <button onclick="closePopup()" class="buy-btn">{{ "Закрыть" if lang=="ru" else "Aizvērt" }}</button>
+      <button onclick="closePopup()" style="margin-top:10px;">{{ "Закрыть" if lang=="ru" else "Aizvērt" }}</button>
   </div>
 </div>
 
 <script>
-const lang = "{{ lang }}";
-
 function addToCart(id){
     fetch(`/api/add_to_cart/${id}`, { method:'POST' })
-    .then(res=>res.json())
-    .then(data=>{
+    .then(res => res.json())
+    .then(data => {
         if(data.success){
             document.getElementById("popup-text").innerHTML = `
                 <b>${lang=='ru'?data.product.name_ru:data.product.name_lv}</b><br>
                 ${data.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
             document.getElementById("popup").style.display='flex';
-            const counter = document.getElementById("cart-count");
-            if(counter) counter.innerText = data.cart_total_items;
+            document.getElementById("cart-count").innerText = data.cart_total_items;
         }
-    }).catch(err=>console.error(err));
+    });
 }
 
 function closePopup(){

@@ -50,8 +50,8 @@
 </footer>
 
 <!-- Плавающая корзина -->
-<a href="/cart?lang={{ lang }}" class="floating-cart">
-    🛒 <span id="cart-count" class="cart-count">{{ session.get('cart_total_items', 0) }}</span>
+<a href="/cart?lang={{ lang }}" class="floating-cart">🛒 
+    <span id="cart-count">{{ cart_total_items }}</span>
 </a>
 
 <script>

@@ -54,8 +54,9 @@ def set_lang():
 # ================== ГЛАВНАЯ ==================
 @app.route("/")
 def index():
-    lang = session.get("lang")
-    return render_template("index.html", products=products, lang=lang)
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    session["lang"] = lang
+    return render_template("index.html", lang=lang)
 
 @app.route('/product/<int:id>')
 def product(id):
@@ -69,26 +70,14 @@ def product(id):
 # ================== КАТАЛОГ ==================
 @app.route("/catalog")
 def catalog():
-    lang = session.get("lang")
-    cat = request.args.get("cat")
-    min_price = request.args.get("min_price")
-    max_price = request.args.get("max_price")
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    session["lang"] = lang
 
-    filtered = products
-    if cat:
-        filtered = [p for p in filtered if p["category"] == cat]
-    if min_price:
-        try:
-            filtered = [p for p in filtered if p["price"] >= float(min_price)]
-        except:
-            pass
-    if max_price:
-        try:
-            filtered = [p for p in filtered if p["price"] <= float(max_price)]
-        except:
-            pass
-
-    return render_template("catalog.html", products=filtered, lang=lang)
+    return render_template(
+        "catalog.html",
+        products=products,
+        lang=lang
+    )
 
 # ================== API: ДОБАВИТЬ В КОРЗИНУ ==================
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
@@ -149,27 +138,45 @@ def api_update_cart(product_id, action):
 # ================== КОРЗИНА ==================
 @app.route("/cart")
 def cart_page():
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    session["lang"] = lang
+
     cart = session.get("cart", {})
     cart_items = []
     total = 0
+
     for pid, qty in cart.items():
         product = next((p for p in products if p["id"] == int(pid)), None)
         if product:
             cart_items.append({"product": product, "qty": qty})
             total += product["price"] * qty
-    return render_template("cart.html", cart_items=cart_items, total=total, lang=session.get('lang', 'ru'))
+
+    return render_template(
+        "cart.html",
+        cart_items=cart_items,
+        total=total,
+        lang=lang
+    )
 
 # ================== ЗАКАЗ ==================@app.route("/order", methods=["GET", "POST"])
+@app.route("/order", methods=["GET", "POST"])
 def order():
-    lang = session.get("lang", "ru")
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    session["lang"] = lang
+
+    success = False
 
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")
-        threading.Thread(target=send_email, args=(name, contact)).start()
-        return render_template("order.html", success=True, lang=lang)
+        success = True
+        session["cart"] = {}
 
-    return render_template("order.html", lang=lang)
+    return render_template(
+        "order.html",
+        success=success,
+        lang=lang
+    )
 
 def send_email(name, contact):
     sender = os.environ.get("WALLCRAFT_EMAIL")

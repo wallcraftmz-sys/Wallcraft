@@ -1,1 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 style="text-align:center;">Добро пожаловать, {{ admin }}</h1>
+<div style="display:flex;flex-direction:column;align-items:center;gap:15px;margin-top:30px;">
+    <a href="/admin/logout" class="buy-btn">Выйти</a>
+    <a href="/catalog?lang={{ lang }}" class="buy-btn">Новый заказ</a>
+</div>
+{% endblock %}
 

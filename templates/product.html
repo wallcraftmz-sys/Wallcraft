@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<a href="{{ url_for('index') }}" class="back-btn" style="
+    display:inline-block;
+    margin-bottom:20px;
+    padding:8px 12px;
+    background:#2196F3;
+    color:#fff;
+    text-decoration:none;
+    border-radius:6px;
+">
+    {{ "На главную" if lang == "ru" else "Uz sākumlapu" }}
+</a>
 <div class="product-detail">
     <div class="product-image">
         <!-- Картинка товара -->

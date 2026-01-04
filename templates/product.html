@@ -9,9 +9,9 @@
 
     </div>
     <div class="product-info">
-        <h2>{{ product['name_lv'] if lang=='lv' else product['name_ru'] }}</h2>
-        <p class="description">{{ product['description_lv'] if lang=='lv' else product['description_ru'] }}</p>
-        <p class="price">{{ product['price'] }} €</p>
+        <h2>{{ product.get("name_" + lang, product.get("name_ru")) }}</h2>
+<p class="description">{{ product.get("description_" + lang, product.get("description_ru")) }}</p>
+<p class="price">{{ "%.2f"|format(product.price) }} €</p>
         
         <div class="qty-controls">
             <a href="/update_cart/{{ product['id'] }}/minus" class="qty-btn">−</a>

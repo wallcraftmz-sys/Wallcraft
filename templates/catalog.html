@@ -71,26 +71,29 @@ function addToCart(productId){
     .then(data => {
         if(data.success){
             const p = data.product;
+            const imgSrc = p.image.startsWith('http') ? p.image : '/static/' + p.image;
 
-            // Попап красиво с картинкой и названием
             document.getElementById('popup-text').innerHTML = `
                 <div style="display:flex; gap:12px; align-items:center;">
-                    <img src="${p.image.startsWith('http') ? p.image : '/static/' + p.image}" 
-                         style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
+                    <img src="${imgSrc}" style="width:60px; height:60px; object-fit:cover; border-radius:6px;">
                     <div style="text-align:left;">
                         <b style="font-size:16px;">${lang=='ru' ? p.name_ru : p.name_lv}</b><br>
-                        ${data.cart_total_items} {{ "шт" if lang=="ru" else "gab" }}
+                        ${data.cart_total_items} ${lang=='ru' ? 'шт' : 'gab'}
                     </div>
                 </div>`;
             document.getElementById('popup').style.display='flex';
 
-            // Обновляем счетчик корзины в шапке
             const headerCount = document.getElementById('cart-count');
             if(headerCount && data.cart_total_items !== undefined){
                 headerCount.innerText = data.cart_total_items;
             }
         }
     })
+    .catch(err => {
+        console.error('addToCart error', err);
+        alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
+    });
+}
     .catch(err => {
         console.error('addToCart error', err);
         alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');

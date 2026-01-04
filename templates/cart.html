@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>Корзина</h2>
+<h1>{{ "Корзина" if lang=="ru" else "Grozs" }}</h1>
 
-{% for i in items %}
+{% for item in cart_items %}
 <div class="cart-item">
-    <img src="{{ url_for('static', filename=i.product.image) }}">
-    <b>{{ i.product.name_ru }}</b>
-    <p>{{ i.qty }} × {{ i.product.price }} €</p>
-    <button onclick="upd({{ i.product.id }},'plus')">+</button>
-    <button onclick="upd({{ i.product.id }},'minus')">−</button>
+    <img src="{{ item.product.image }}" class="cart-item-image">
+    <b>{{ item.product["name_" + lang] }}</b>
+    <div class="qty-controls">
+        <button onclick="changeQty({{ item.product.id }},'minus')">−</button>
+        {{ item.qty }}
+        <button onclick="changeQty({{ item.product.id }},'plus')">+</button>
+    </div>
 </div>
 {% endfor %}
 
 <p><b>Итого:</b> {{ total }} €</p>
 
-<a href="/order">Оформить заказ</a>
-
 <script>
-function upd(id,action){
- fetch(`/api/update/${id}/${action}`,{method:"POST"})
- .then(()=>location.reload())
+function changeQty(id, action){
+    fetch(`/api/update_cart/${id}/${action}`,{method:"POST"})
+        .then(()=>location.reload())
 }
 </script>
 

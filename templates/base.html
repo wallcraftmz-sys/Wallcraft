@@ -5,7 +5,6 @@
     <title>Wallcraft</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* Увеличиваем плавающую корзину */
         .floating-cart {
             position: fixed;
             right: 20px;
@@ -18,57 +17,29 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px; /* больше иконка */
+            font-size: 32px;
             text-decoration: none;
             z-index: 2000;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             transition: transform 0.2s;
         }
-        .floating-cart:hover {
-            transform: scale(1.1);
-        }
-
-        /* Адаптивность для мобильных */
+        .floating-cart:hover { transform: scale(1.1); }
         @media (max-width: 600px) {
-            .floating-cart {
-                width: 60px;
-                height: 60px;
-                font-size: 28px;
-                right: 15px;
-                bottom: 20px;
-            }
-            .top-header {
-                padding: 10px 15px;
-            }
-            .logo-center a {
-                font-size: 18px;
-            }
-            .menu-btn {
-                width: 38px;
-                height: 28px;
-                font-size: 24px;
-            }
+            .floating-cart { width:60px; height:60px; font-size:28px; right:15px; bottom:20px; }
+            .top-header { padding:10px 15px; }
+            .logo-center a { font-size:18px; }
+            .menu-btn { width:38px; height:28px; font-size:24px; }
         }
     </style>
 </head>
 <body>
 
 <header class="top-header">
-    <!-- ☰ меню -->
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-    <!-- ЛОГО -->
-    <div class="logo-center">
-        <a href="/">WALLCRAFT</a>
-    </div>
-
-    <!-- ЯЗЫК -->
+    <div class="logo-center"><a href="/">WALLCRAFT</a></div>
     <div class="lang-switch">
-        <a href="?lang=ru">RU</a> |
-        <a href="?lang=lv">LV</a>
+        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
     </div>
-
-    <!-- ВЫПАДАЮЩЕЕ МЕНЮ -->
     <div id="dropdownMenu" class="dropdown-menu">
         <a href="/catalog?cat=walls">Обои</a>
         <hr>
@@ -76,13 +47,10 @@
     </div>
 </header>
 
-<main>
-    {% block content %}{% endblock %}
-</main>
+<main>{% block content %}{% endblock %}</main>
 
-<!-- ПЛАВАЮЩАЯ КОРЗИНА -->
-<!-- ПЛАВАЮЩАЯ КОРЗИНА С КОЛИЧЕСТВОМ -->
-    <a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
+<!-- Плавающая корзина -->
+<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
     🛒
     <span id="cart-count" style="
         position:absolute;
@@ -106,7 +74,6 @@ function toggleMenu() {
     const menu = document.getElementById("dropdownMenu");
     menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
-
 document.addEventListener("click", function(e) {
     if (!e.target.closest(".menu-btn") && !e.target.closest(".dropdown-menu")) {
         document.getElementById("dropdownMenu").style.display = "none";

@@ -17,7 +17,7 @@ products = [
         "description_ru": "Высококачественные жидкие обои для стен",
         "description_lv": "Augstas kvalitātes šķidrās tapetes sienām",
         "price": 25.00,
-        "image": "images/IMG_0856.PNG"  # положи файл в static/images/
+        "image": "images/IMG_0856.PNG"
     },
     {
         "id": 2,
@@ -27,7 +27,7 @@ products = [
         "description_ru": "Эффектные декоративные жидкие обои",
         "description_lv": "Dekoratīvas šķidrās tapetes",
         "price": 30.00,
-        "image": "images/IMG_0856.PNG"  # можно повторить пока тест
+        "image": "images/IMG_0856.PNG"
     }
 ]
 
@@ -56,7 +56,7 @@ def cart_page():
         total += p["price"] * qty
     return render_template("cart.html", cart_items=items, total=total, lang=session["lang"])
 
-@app.route("/order", methods=["GET","POST"])
+@app.route("/order", methods=["GET", "POST"])
 def order():
     cart = session.get("cart", {})
     if not cart:
@@ -73,9 +73,8 @@ def order():
     if request.method == "POST":
         name = request.form.get("name")
         contact = request.form.get("contact")
-        # Здесь можно добавить обработку заказа (email, запись в базу)
         success = True
-        session["cart"] = {}  # Очистка корзины после заказа
+        session["cart"] = {}  # очистка корзины
 
     return render_template("order.html", cart_items=items, total=total, success=success, lang=session["lang"])
 
@@ -94,18 +93,15 @@ def update_cart(pid, action):
     pid = str(pid)
     if pid not in cart:
         return jsonify(success=False)
-    if action=="plus":
+    if action == "plus":
         cart[pid] += 1
     else:
         cart[pid] -= 1
         if cart[pid] <= 0:
             del cart[pid]
     session["cart"] = cart
-    total = 0
-    for k,q in cart.items():
-        p = next(p for p in products if p["id"] == int(k))
-        total += p["price"]*q
-    return jsonify(success=True, qty=cart.get(pid,0), total=total, cart_total_items=sum(cart.values()))
+    total = sum(next(p for p in products if p["id"] == int(k))["price"] * q for k, q in cart.items())
+    return jsonify(success=True, qty=cart.get(pid, 0), total=total, cart_total_items=sum(cart.values()))
 
 if __name__ == "__main__":
     app.run(debug=True)

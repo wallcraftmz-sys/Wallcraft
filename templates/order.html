@@ -1,38 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 style="text-align:center; margin-bottom:25px;">
-    {{ "Оформление заказа" if lang=="ru" else "Pasūtījuma noformēšana" }}
-</h1>
+<h2 style="text-align:center;">
+    {{ "Форма заказа" if lang=="ru" else "Pasūtījuma forma" }}
+</h2>
 
-{% if success %}
-    <p style="text-align:center; font-size:18px; color:green; font-weight:bold;">
-        {{ "Ваш заказ успешно отправлен!" if lang=="ru" else "Jūsu pasūtījums ir veiksmīgi nosūtīts!" }}
-    </p>
-{% endif %}
+<form action="/order" method="POST" style="max-width:400px; margin:20px auto;">
+    
+    <label>
+        {{ "Имя" if lang=="ru" else "Vārds" }}:
+    </label>
+    <input type="text" name="name" required>
 
-<form method="POST" style="max-width:400px; margin:20px auto; display:flex; flex-direction:column; gap:12px; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+    <label style="margin-top:10px;">
+        {{ "Телефон или Email" if lang=="ru" else "Tālrunis vai e-pasts" }}:
+    </label>
+    <input type="text" name="contact" required>
 
-    <label>{{ "Имя" if lang=="ru" else "Vārds" }}</label>
-    <input type="text" name="name" placeholder="{{ 'Ваше имя' if lang=='ru' else 'Jūsu vārds' }}" required
-           style="padding:8px; border-radius:4px; border:1px solid #ccc;">
-
-    <label>{{ "Контакт (телефон или email)" if lang=="ru" else "Kontakti (tālrunis vai email)" }}</label>
-    <input type="text" name="contact" placeholder="{{ 'Телефон или email' if lang=='ru' else 'Tālrunis vai email' }}" required
-           style="padding:8px; border-radius:4px; border:1px solid #ccc;">
-
-    <button type="submit" style="background:#4CAF50; color:#fff; padding:10px; border:none; border-radius:6px; cursor:pointer;">
-        {{ "Отправить заказ" if lang=="ru" else "Nosūtīt pasūtījumu" }}
+    <button type="submit" class="buy-btn" style="margin-top:15px;">
+        {{ "Отправить" if lang=="ru" else "Nosūtīt" }}
     </button>
-
 </form>
 
-<div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-    <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+{% if success %}
+<p style="color:green; text-align:center;">
+    {{ "Заявка отправлена!" if lang=="ru" else "Pieteikums nosūtīts!" }}
+</p>
+{% endif %}
+
+<div style="text-align:center; margin-top:20px;">
+    <a href="/" class="buy-btn">
         {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
     </a>
-    <a href="/catalog" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
-        {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
+    <a href="/catalog" class="buy-btn" style="margin-left:10px;">
+        {{ "В каталог" if lang=="ru" else "Uz katalogu" }}
     </a>
 </div>
 

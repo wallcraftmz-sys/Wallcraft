@@ -1,6 +1,5 @@
 import os
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
-from functools import wraps
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -107,12 +106,14 @@ def update_cart(pid, action):
         total=total,
         cart_total_items=sum(cart.values())
     )
-    @app.route("/order", methods=["GET", "POST"])
+
+# ================== ORDER ==================
+@app.route("/order", methods=["GET", "POST"])
 def order():
     cart = session.get("cart", {})
     if not cart:
         return redirect(url_for("catalog"))
-    
+
     items = []
     total = 0
     for pid, qty in cart.items():
@@ -128,11 +129,14 @@ def order():
         success = True
         session["cart"] = {}  # Очистка корзины после заказа
 
-    return render_template("order.html",
-                           cart_items=items,
-                           total=total,
-                           success=success,
-                           lang=session["lang"])
+    return render_template(
+        "order.html",
+        cart_items=items,
+        total=total,
+        success=success,
+        lang=session["lang"]
+    )
 
+# ================== RUN ==================
 if __name__ == "__main__":
     app.run(debug=True)

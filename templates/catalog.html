@@ -1,21 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
+{% set lang = session.get('lang', 'ru') %}
 
-<h1>{{ "Каталог" if lang=="ru" else "Katalogs" }}</h1>
+<h1 style="text-align:center; margin-bottom:20px;">
+    {{ "Каталог товаров" if lang=="ru" else "Preču katalogs" }}
+</h1>
 
-<!-- POPUP -->
-<div id="popup" class="popup">
-    <div class="popup-content">
-        <p>
-            {{ "Товар добавлен в корзину" if lang=="ru" else "Prece pievienota grozam" }}
-        </p>
+<div class="product-grid">
+{% for p in products %}
+    <div class="product-card">
+        <img src="{{ p.image }}" alt="{{ p["name_" + lang] }}">
 
-        <a href="/cart" class="buy-btn">
+        <h3>{{ p["name_" + lang] }}</h3>
+        <p>{{ p["description_" + lang] }}</p>
+        <p class="price">{{ "%.2f"|format(p.price) }} €</p>
+
+        <button class="buy-btn" onclick="addToCart({{ p.id }})">
+            {{ "В корзину" if lang=="ru" else "Grozā" }}
+        </button>
+    </div>
+{% endfor %}
+</div>
+
+<!-- popup -->
+<div id="popup" class="popup" onclick="closePopup()">
+    <div class="popup-content" onclick="event.stopPropagation()">
+        <p>{{ "Товар добавлен" if lang=="ru" else "Prece pievienota" }}</p>
+        <a href="/cart?lang={{ lang }}" class="buy-btn">
             {{ "Перейти в корзину" if lang=="ru" else "Doties uz grozu" }}
         </a>
-
         <button onclick="closePopup()" class="secondary-btn">
-            {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
+            {{ "В каталог" if lang=="ru" else "Atpakaļ uz katalogu" }}
         </button>
     </div>
 </div>
@@ -23,10 +38,10 @@
 <script>
 function addToCart(id) {
     fetch(`/api/add_to_cart/${id}`, { method: "POST" })
-        .then(r => r.json())
-        .then(data => {
-    document.getElementById("popup").style.display = "flex";
-});
+      .then(r => r.json())
+      .then(data => {
+          document.getElementById("popup").style.display = "flex";
+      });
 }
 
 function closePopup() {

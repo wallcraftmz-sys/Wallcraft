@@ -50,8 +50,6 @@ function addToCart(id){
                 <b>${lang=='ru'?data.product.name_ru:data.product.name_lv}</b><br>
                 ${data.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
             document.getElementById("popup").style.display='flex';
-            const headerCount = document.getElementById("cart-count");
-            if(headerCount) headerCount.innerText = data.cart_total_items;
         } else {
             alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
         }

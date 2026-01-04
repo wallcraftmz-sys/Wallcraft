@@ -18,7 +18,6 @@
 
     <div class="cart-info">
         <div class="cart-name">{{ item.product.get("name_" + lang, item.product.get("name_ru")) }}</div>
-        <!-- храню числовую цену в data-price, чтобы JS не парсил текст -->
         <div class="cart-price" id="price-{{ item.product.id }}" data-price="{{ item.product.price }}">{{ "%.2f"|format(item.product.price) }} €</div>
     </div>
 
@@ -54,16 +53,13 @@ async function changeQty(productId, action) {
         const data = await resp.json();
         if (!data.success) throw new Error('Server returned error');
 
-        // Обновляем количество
         const qtyEl = document.getElementById(`qty-${productId}`);
         if (qtyEl) qtyEl.innerText = data.qty;
 
-        // Если qty == 0 — удалить DOM-строку
         if (data.qty === 0) {
             const row = document.getElementById(`cart-row-${productId}`);
             if (row) row.remove();
         } else {
-            // обновить subtotal для товара, используем data-price
             const priceEl = document.getElementById(`price-${productId}`);
             const subtotalEl = document.getElementById(`subtotal-${productId}`);
             if (priceEl && subtotalEl) {
@@ -72,11 +68,9 @@ async function changeQty(productId, action) {
             }
         }
 
-        // обновим общий total (берём из ответа сервера)
         const totalEl = document.getElementById('cart-total');
         if (totalEl) totalEl.innerText = parseFloat(data.total).toFixed(2);
 
-        // обновим счётчик корзины в header (если есть элемент #cart-count)
         const headerCount = document.getElementById('cart-count');
         if (headerCount) headerCount.innerText = data.cart_total_items;
 

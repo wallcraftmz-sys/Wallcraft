@@ -19,7 +19,9 @@ products = [
         "id": 1,
         "category": "walls",
         "name_ru": "Жидкие обои — Ocean",
+        "name_lv": "Šķidrās tapetes — Ocean",
         "description_ru": "Высококачественные жидкие обои для стен",
+        "description_lv": "Augstas kvalitātes šķidrās tapetes sienām",
         "price": 25.00,
         "image": "https://cdn.pixabay.com/photo/2016/11/29/06/16/texture-1868576_1280.jpg"
     },
@@ -27,7 +29,9 @@ products = [
         "id": 2,
         "category": "walls",
         "name_ru": "Жидкие обои — Golden",
+        "name_lv": "Šķidrās tapetes — Golden",
         "description_ru": "Эффектные декоративные жидкие обои",
+        "description_lv": "Dekoratīvas šķidrās tapetes",
         "price": 30.00,
         "image": "https://cdn.pixabay.com/photo/2018/10/18/18/38/wall-3759044_1280.jpg"
     },
@@ -35,7 +39,9 @@ products = [
         "id": 3,
         "category": "walls",
         "name_ru": "Жидкие обои — Modern",
+        "name_lv": "Šķidrās tapetes — Modern",
         "description_ru": "Современный стиль для интерьера",
+        "description_lv": "Mūsdienīgs interjera stils",
         "price": 28.00,
         "image": "https://cdn.pixabay.com/photo/2017/08/07/12/50/wall-2608854_1280.jpg"
     }

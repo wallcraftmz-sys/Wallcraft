@@ -1,48 +1,82 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{ "Корзина" if lang == "ru" else "Grozs" }}</h1>
+<h1 style="text-align:center; margin-bottom:25px;">
+    {{ "Корзина" if lang == "ru" else "Grozs" }}
+</h1>
 
 {% if cart_items %}
-<div class="cart-list">
-{% for item in cart_items %}
-<div class="cart-row" id="cart-row-{{ item.product.get('id') }}">
-    <div class="cart-thumb">
-        {% if item.product.get('image') and item.product.get('image').startswith('http') %}
-            <img src="{{ item.product.get('image') }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
-        {% else %}
-            <img src="{{ url_for('static', filename=item.product.get('image')) }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}">
-        {% endif %}
-    </div>
+<div class="cart-list" style="display:flex; flex-direction:column; gap:15px;">
 
-    <div class="cart-info">
-        <div class="cart-name">{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}</div>
-        <div class="cart-price" id="price-{{ item.product.get('id') }}" data-price="{{ item.product.get('price', 0) }}">{{ "%.2f"|format(item.product.get('price', 0)) }} €</div>
-    </div>
+    {% for item in cart_items %}
+    <div class="cart-row" id="cart-row-{{ item.product.id }}" style="display:flex; align-items:center; gap:15px; padding:10px; border-bottom:1px solid #ddd;">
+        
+        <!-- Картинка -->
+        <div class="cart-thumb" style="width:80px; height:80px; flex-shrink:0;">
+            {% if item.product.image and item.product.image.startswith('http') %}
+                <img src="{{ item.product.image }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
+            {% else %}
+                <img src="{{ url_for('static', filename=item.product.image) }}" alt="{{ item.product.get('name_' + lang, item.product.get('name_ru')) }}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
+            {% endif %}
+        </div>
 
-    <div class="cart-qty">
-        <button class="qty-btn minus" onclick="changeQty({{ item.product.get('id') }}, 'minus')">−</button>
-        <span class="qty-number" id="qty-{{ item.product.get('id') }}">{{ item.qty }}</span>
-        <button class="qty-btn plus" onclick="changeQty({{ item.product.get('id') }}, 'plus')">+</button>
-    </div>
+        <!-- Информация -->
+        <div class="cart-info" style="flex-grow:1;">
+            <div class="cart-name" style="font-weight:bold;">{{ item.product.get("name_" + lang, item.product.get("name_ru")) }}</div>
+            <div class="cart-price" id="price-{{ item.product.id }}" data-price="{{ item.product.price }}" style="color:#555;">{{ "%.2f"|format(item.product.price) }} €</div>
+        </div>
 
-    <div class="cart-subtotal" id="subtotal-{{ item.product.get('id') }}">
-        {{ "%.2f"|format(item.product.get('price', 0) * item.qty) }} €
+        <!-- Кол-во -->
+        <div class="cart-qty" style="display:flex; align-items:center; gap:5px;">
+            <button class="qty-btn minus" onclick="changeQty({{ item.product.id }}, 'minus')" 
+                style="width:28px; height:28px; border:none; border-radius:4px; background:#f44336; color:#fff; font-size:18px; cursor:pointer;">−</button>
+            <span class="qty-number" id="qty-{{ item.product.id }}" style="min-width:22px; text-align:center;">{{ item.qty }}</span>
+            <button class="qty-btn plus" onclick="changeQty({{ item.product.id }}, 'plus')" 
+                style="width:28px; height:28px; border:none; border-radius:4px; background:#4CAF50; color:#fff; font-size:18px; cursor:pointer;">+</button>
+        </div>
+
+        <!-- Subtotal -->
+        <div class="cart-subtotal" id="subtotal-{{ item.product.id }}" style="width:80px; text-align:right;">
+            {{ "%.2f"|format(item.product.price * item.qty) }} €
+        </div>
+
     </div>
+    {% endfor %}
+
 </div>
-{% endfor %}
-</div>
 
-<div class="cart-summary">
-    <div>{{ "Итого" if lang=="ru" else "Kopā" }}: <span id="cart-total">{{ "%.2f"|format(total) }}</span> €</div>
-    <a href="/order" class="buy-btn checkout">{{ "Оформить заказ" if lang=="ru" else "Noformēt pasūtījumu" }}</a>
+<!-- Итого и кнопки -->
+<div class="cart-summary" style="margin-top:25px; display:flex; flex-direction:column; gap:12px; align-items:flex-end;">
+    <div style="font-size:18px; font-weight:bold;">
+        {{ "Итого" if lang=="ru" else "Kopā" }}: <span id="cart-total">{{ "%.2f"|format(total) }}</span> €
+    </div>
+
+    <div style="display:flex; gap:10px;">
+        <a href="/order" class="buy-btn checkout" style="background:#4CAF50; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+            {{ "Оформить заказ" if lang=="ru" else "Noformēt pasūtījumu" }}
+        </a>
+        <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+            {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
+        </a>
+        <a href="/catalog" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+            {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
+        </a>
+    </div>
 </div>
 
 {% else %}
-<p>{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
-<a href="/catalog" class="buy-btn">{{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}</a>
+<p style="text-align:center; margin-top:20px;">{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
+<div style="text-align:center; margin-top:10px; display:flex; gap:10px; justify-content:center;">
+    <a href="/" class="buy-btn" style="background:#2196F3; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        {{ "На главную" if lang=="ru" else "Uz sākumlapu" }}
+    </a>
+    <a href="/catalog" class="buy-btn" style="background:#FF9800; color:#fff; padding:8px 14px; border-radius:6px; text-decoration:none;">
+        {{ "Вернуться в каталог" if lang=="ru" else "Atgriezties katalogā" }}
+    </a>
+</div>
 {% endif %}
 
+<!-- JS для обновления кол-ва -->
 <script>
 async function changeQty(productId, action) {
     try {

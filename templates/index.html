@@ -2,18 +2,59 @@
 {% block content %}
 {% set lang = session.get('lang', 'ru') %}
 
-<h1 style="text-align:center; margin-bottom:30px;">
+<h1 style="text-align:center; margin-bottom:30px; font-size:28px;">
     {{ "Добро пожаловать в Wallcraft" if lang=="ru" else "Laipni lūdzam Wallcraft" }}
 </h1>
 
-<div class="product-grid">
-    {% for product in products %}
-    <div class="product-card">
-        <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}">
-        <h3>{{ product["name_" + lang] }}</h3>
-        <p>{{ product["description_" + lang] }}</p>
+<div class="product-grid" style="display:flex; flex-wrap:wrap; gap:25px; justify-content:center;">
+    {% for product in products[:3] %} {# показываем только первые 3 товара на главной #}
+    <div class="product-card" style="background:#fff; padding:20px; border-radius:12px; width:350px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}" style="width:100%; height:230px; object-fit:cover; border-radius:8px;">
+        <h3 style="font-size:20px; margin:15px 0 10px 0;">{{ product["name_" + lang] }}</h3>
+        <p style="font-size:16px; color:#555; min-height:50px;">{{ product["description_" + lang] }}</p>
+        <p class="price" style="font-weight:bold; margin:10px 0; font-size:18px;">{{ product.price }} €</p>
+        <button class="buy-btn" style="font-size:16px; padding:12px 20px; border:none; border-radius:8px; background:#4CAF50; color:#fff; cursor:pointer;"
+                onclick="addToCart({{ product.id }})">
+            {{ "В корзину" if lang=="ru" else "Grozā" }}
+        </button>
     </div>
     {% endfor %}
 </div>
 
+<div id="popup" class="popup" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:999;">
+  <div class="popup-content" style="background:#fff; padding:20px; border-radius:12px; max-width:400px; width:90%; text-align:center;">
+    <div id="popup-text" style="margin-bottom:15px; font-size:16px;"></div>
+    <a href="/catalog?lang={{ lang }}" class="buy-btn" style="display:inline-block; margin:5px; padding:12px 20px; background:#2196F3; color:#fff; border-radius:8px; text-decoration:none;">
+        {{ "Перейти в каталог" if lang=="ru" else "Uz katalogu" }}
+    </a>
+    <a href="/cart?lang={{ lang }}" class="buy-btn" style="display:inline-block; margin:5px; padding:12px 20px; background:#4CAF50; color:#fff; border-radius:8px; text-decoration:none;">
+        {{ "Перейти в корзину" if lang=="ru" else "Uz grozu" }}
+    </a>
+    <div style="margin-top:10px;">
+        <button onclick="closePopup()" style="background:none; border:none; color:#777; font-size:14px; cursor:pointer;">
+            {{ "Закрыть" if lang=="ru" else "Aizvērt" }}
+        </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function addToCart(id){
+ fetch(`/api/add_to_cart/${id}`,{method:'POST'})
+ .then(r=>r.json())
+ .then(d=>{
+   if(d.success){
+       document.getElementById("popup-text").innerHTML =
+         `<b>${lang=='ru'?d.product.name_ru:d.product.name_lv}</b><br>${d.cart_total_items} ${lang=='ru'?'шт':'gab'}`;
+       document.getElementById("popup").style.display="flex";
+
+       const headerCount = document.getElementById('cart-count');
+       if(headerCount) headerCount.innerText = d.cart_total_items;
+   } else {
+       alert('{{ "Ошибка при добавлении в корзину" if lang=="ru" else "Kļūda, pievienojot grozam" }}');
+   }
+ });
+}
+function closePopup(){ document.getElementById('popup').style.display='none'; }
+</script>
 {% endblock %}

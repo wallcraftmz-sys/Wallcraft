@@ -1,20 +1,18 @@
-/* static/style.css */
 body { font-family: Arial, sans-serif; margin:0; background:#f5f5f5; font-size:18px; }
-.top-header { display:flex; align-items:center; justify-content:space-between; padding:14px; background:#2196F3; color:white; }
-.logo-center a { color:white; text-decoration:none; font-weight:bold; font-size:20px; }
-.menu-btn { font-size:22px; cursor:pointer; }
-.lang-switch a { color:white; margin-left:8px; text-decoration:none; font-weight:600; }
+.top-header { display:flex; align-items:center; justify-content:space-between; padding:12px; background:#2196F3; color:#fff; }
+.logo-center a { color:#fff; text-decoration:none; font-weight:700; font-size:20px; }
+.menu-btn { font-size:22px; cursor:pointer; color:#fff; }
+.lang-switch a { color:#fff; margin-left:8px; text-decoration:none; font-weight:600; }
+
 .product-grid { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; padding:18px; }
-.product-card { width:260px; background:#fff; padding:14px; border-radius:10px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+.product-card { width:260px; background:#fff; padding:14px; border-radius:10px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
 .product-card img { width:100%; height:180px; object-fit:cover; border-radius:8px; }
-.buy-btn { background:#4CAF50; color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none; display:inline-block; margin-top:10px; font-weight:700; }
+.buy-btn { display:inline-block; margin-top:10px; background:#4CAF50; color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:700; }
 
-/* floating cart */
-.floating-cart { position:fixed; right:20px; bottom:20px; background:#ff5722; color:white; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; z-index:2000; }
-#cart-count { position:absolute; top:-6px; right:-6px; background:red; color:#fff; padding:4px 6px; border-radius:50%; font-weight:bold; }
+.floating-cart { position:fixed; right:18px; bottom:18px; background:#ff5722; color:#fff; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; z-index:2000; box-shadow:0 6px 18px rgba(0,0,0,0.2); }
 
-/* responsive */
+/* адаптив */
 @media (max-width:600px) {
-  .product-card { width:94%; }
+  .product-card { width:92%; }
   .product-card img { height:auto; }
 }

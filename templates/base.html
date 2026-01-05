@@ -1,47 +1,36 @@
-<!DOCTYPE html>
-<html lang="{{ session.get('lang', 'ru') }}">
+<!doctype html>
+<html lang="{{ session.get('lang','ru') }}">
 <head>
-    <meta charset="UTF-8">
-    <title>Wallcraft</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wallcraft</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
-<header>
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    <div class="logo"><a href="/">WALLCRAFT</a></div>
-    <div class="lang-switch">
-        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
-    </div>
-    <div id="dropdownMenu" class="dropdown-menu">
-        <a href="/catalog?cat=walls">Обои</a>
-        <hr>
-        <a href="/admin/login">Вход</a>
-    </div>
+<header class="top-header">
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+  <div class="logo-center"><a href="/?lang={{ session.get('lang','ru') }}">WALLCRAFT</a></div>
+  <nav class="lang-switch">
+    <a href="{{ request.path }}?lang=ru">RU</a> |
+    <a href="{{ request.path }}?lang=lv">LV</a>
+  </nav>
 </header>
 
+<div id="dropdownMenu" class="dropdown-menu" style="display:none;">
+  <a href="/catalog?lang={{ session.get('lang','ru') }}">Обои</a>
+</div>
+
 <main>
-    {% block content %}{% endblock %}
+  {% block content %}{% endblock %}
 </main>
 
-<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">
-    🛒
-    <span id="cart-count">
-        {{ session.get('cart') | sum(attribute='1') if session.get('cart') else 0 }}
-    </span>
-</a>
+<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">🛒</a>
 
 <script>
-function toggleMenu() {
-    const menu = document.getElementById("dropdownMenu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
+function toggleMenu(){
+  const el = document.getElementById('dropdownMenu');
+  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
 }
-document.addEventListener("click", function(e) {
-    if (!e.target.closest(".menu-btn") && !e.target.closest(".dropdown-menu")) {
-        document.getElementById("dropdownMenu").style.display = "none";
-    }
-});
 </script>
-
 </body>
 </html>

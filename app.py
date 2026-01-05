@@ -53,7 +53,14 @@ def product(product_id):
     if not item:
         return redirect(url_for('catalog'))
     return render_template('product.html', product=item, lang=lang)
-
+# API добавления в корзину (используется js)
+@app.route('/api/add_to_cart/<int:product_id>', methods=['POST'])
+def api_add_to_cart(product_id):
+    cart = session.get('cart', {})
+    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
+    session['cart'] = cart
+    p = next((x for x in products if x['id']==product_id), None)
+    return jsonify(success=True, product=p, cart_total_items=sum(cart.values()))
 if __name__ == '__main__':
     # локальный запуск
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)

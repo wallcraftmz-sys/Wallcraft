@@ -1,36 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<a href="{{ url_for('index') }}" class="back-btn" style="
-    display:inline-block;
-    margin-bottom:20px;
-    padding:8px 12px;
-    background:#2196F3;
-    color:#fff;
-    text-decoration:none;
-    border-radius:6px;
-">
-    {{ "На главную" if lang == "ru" else "Uz sākumlapu" }}
-</a>
-<div class="product-detail">
-    <div class="product-image">
-        <!-- Картинка товара -->
-       <img src="{{ product.image }}" alt="{{ product['name_' + lang] }}">
+<div style="max-width:900px;margin:20px auto;display:flex;gap:20px;flex-wrap:wrap;">
+  <div style="flex:1;min-width:280px;">
+    <img src="{{ url_for('static', filename=product.image) }}" style="width:100%; border-radius:8px;">
+  </div>
+  <div style="flex:1;min-width:280px;">
+    <h2>{{ product.get('name_' + lang, product.get('name_ru')) }}</h2>
+    <p>{{ product.get('description_' + lang, product.get('description_ru')) }}</p>
+    <p class="price">{{ '%.2f'|format(product.price) }} €</p>
 
-    </div>
-    <div class="product-info">
-        <h2>{{ product.get("name_" + lang, product.get("name_ru")) }}</h2>
-<p class="description">{{ product.get("description_" + lang, product.get("description_ru")) }}</p>
-<p class="price">{{ "%.2f"|format(product.price) }} €</p>
-        
-        <div class="qty-controls">
-            <a href="/update_cart/{{ product['id'] }}/minus" class="qty-btn">−</a>
-            <span class="qty-number">{{ session.get('cart', {}).get(str(product['id']), 1) }}</span>
-            <a href="/update_cart/{{ product['id'] }}/plus" class="qty-btn">+</a>
-        </div>
-
-        <a href="/add_to_cart/{{ product['id'] }}" class="buy-btn">
-            {{ 'Добавить в корзину' if lang=='ru' else 'Pievienot grozam' }}
-        </a>
-    </div>
+    <!-- На Фазе 2: здесь добавим кнопку "В корзину" с JS -->
+    <a href="/catalog?lang={{ lang }}" class="buy-btn">Назад в каталог</a>
+  </div>
 </div>
 {% endblock %}

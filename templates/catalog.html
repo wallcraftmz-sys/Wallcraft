@@ -1,18 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 style="text-align:center; margin:18px 0;">
-  {{ "Каталог товаров" if lang=='ru' else "Preču katalogs" }}
-</h1>
 
-<div class="product-grid">
-  {% for p in products %}
-  <div class="product-card">
-    <img src="{{ url_for('static', filename=p.image) }}" alt="{{ p.get('name_' + lang, p['name_ru']) }}">
-    <h3>{{ p.get('name_' + lang, p['name_ru']) }}</h3>
-    <p class="price">{{ '%.2f'|format(p.price) }} €</p>
-    <a class="buy-btn" href="{{ url_for('product', product_id=p.id) }}">Подробнее</a>
-  </div>
-  {% endfor %}
+<div class="grid">
+{% for p in products %}
+<div class="card">
+    <img src="{{ p.image }}">
+    <h3>{{ p["name_" + lang] }}</h3>
+    <p>{{ p.price }} €</p>
+
+    <button onclick="addToCart({{ p.id }})">
+        {{ "В корзину" if lang=="ru" else "Grozā" }}
+    </button>
 </div>
+{% endfor %}
+</div>
+
+<script>
+function addToCart(id) {
+    fetch(`/api/add_to_cart/${id}`, {method:"POST"})
+        .then(() => {
+            if (confirm("Перейти в корзину?")) {
+                location.href="/cart";
+            }
+        });
+}
+</script>
+
 {% endblock %}
 

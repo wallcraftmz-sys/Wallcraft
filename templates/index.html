@@ -4,7 +4,7 @@
 <div class="grid">
 {% for p in products %}
 <div class="card">
-    <img src="{{ p.image }}">
+    <img src="{{ url_for('static', filename=product.image) }}" alt="">
     <h3>{{ p["name_" + lang] }}</h3>
     <p>{{ p.price }} €</p>
 </div>

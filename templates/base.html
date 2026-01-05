@@ -1,15 +1,8 @@
-<!doctype html>
-<html lang="{{ session.get('lang','ru') }}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Wallcraft</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
 <header class="top-header">
-  <div class="menu-btn" onclick="toggleMenu()">☰</div>
-  <div class="logo-center"><a href="/?lang={{ session.get('lang','ru') }}">WALLCRAFT</a></div>
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+  <div class="logo-center"><a href="{{ url_for('index', lang=lang) }}">Wallcraft</a></div>
+
   <nav class="lang-switch">
     <a href="{{ request.path }}?lang=ru">RU</a> |
     <a href="{{ request.path }}?lang=lv">LV</a>
@@ -17,20 +10,12 @@
 </header>
 
 <div id="dropdownMenu" class="dropdown-menu" style="display:none;">
-  <a href="/catalog?lang={{ session.get('lang','ru') }}">Обои</a>
+  <a href="{{ url_for('catalog', cat='walls', lang=lang) }}">{{ 'Обои' if lang=='ru' else 'Tapetes' }}</a>
 </div>
-
-<main>
-  {% block content %}{% endblock %}
-</main>
-
-<a href="/cart?lang={{ session.get('lang','ru') }}" class="floating-cart">🛒</a>
 
 <script>
 function toggleMenu(){
-  const el = document.getElementById('dropdownMenu');
-  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  const m = document.getElementById('dropdownMenu');
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
 }
 </script>
-</body>
-</html>

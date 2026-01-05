@@ -1,109 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
 
-  <!-- HERO / заголовок -->
-  <section class="hero">
-    <div class="hero-inner">
-      <h1>{{ "Каталог обоев" if lang=="ru" else "Tapešu katalogs" }}</h1>
-      <p class="subtitle">{{ "Широкий выбор жидких обоев" if lang=="ru" else "Plašs šķidro tapetes klāsts" }}</p>
-    </div>
-  </section>
-
-  <!-- Фильтры / поиск -->
-  <section class="filters">
-    <form class="filters-form" method="GET" action="{{ url_for('catalog') }}">
-      <input name="q" type="search" placeholder="{{ 'Поиск по товарам' if lang=='ru' else 'Meklēt preces' }}" value="{{ request.args.get('q','') }}">
-      <select name="cat">
-        <option value="">{{ 'Все категории' if lang=='ru' else 'Visas kategorijas' }}</option>
-        <option value="walls" {% if request.args.get('cat')=='walls' %}selected{% endif %}>{{ 'Обои' if lang=='ru' else 'Tapetes' }}</option>
-      </select>
-      <button type="submit" class="filter-btn">{{ 'Найти' if lang=='ru' else 'Meklēt' }}</button>
-    </form>
-  </section>
-
-  <!-- Карточки товаров -->
-  <section class="products">
-    {% if products %}
-      <div class="product-grid">
-        {% for p in products %}
-        <article class="product-card">
-          <a class="product-link" href="{{ url_for('product', id=p.id) }}">
-            {% if p.image and p.image.startswith('http') %}
-              <img class="product-image" src="{{ p.image }}" alt="{{ p.get('name_' + lang, p.get('name_ru')) }}">
-            {% else %}
-              <img class="product-image" src="{{ url_for('static', filename=p.image) }}" alt="{{ p.get('name_' + lang, p.get('name_ru')) }}">
-            {% endif %}
-            <h3 class="product-title">{{ p.get('name_' + lang, p.get('name_ru')) }}</h3>
-          </a>
-
-          <p class="product-desc">{{ p.get('description_' + lang, p.get('description_ru'))[:100] }}{% if p.get('description_' + lang, p.get('description_ru'))|length > 100 %}…{% endif %}</p>
-
-          <div class="product-meta">
-            <div class="price">{{ "%.2f"|format(p.price) }} €</div>
-            <button class="buy-btn" onclick="addToCart({{ p.id }}); return false;">
-              {{ "В корзину" if lang=='ru' else "Ielikt grozā" }}
-            </button>
-          </div>
-        </article>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p class="no-products">{{ "Товары не найдены" if lang=='ru' else "Preces nav atrastas" }}</p>
-    {% endif %}
-  </section>
-
+<div class="grid">
+{% for p in products %}
+<div class="card">
+    <img src="{{ p.image }}">
+    <h3>{{ p["name_" + lang] }}</h3>
+    <p>{{ p.price }} €</p>
 </div>
-
-<!-- POPUP -->
-<div id="cart-popup" class="popup" style="display:none;">
-  <div class="popup-content">
-    <div id="popup-body"></div>
-    <div class="popup-actions">
-      <a id="popup-continue" href="{{ url_for('catalog') }}" class="buy-btn">{{ "Продолжить покупки" if lang=='ru' else "Turpināt iepirkties" }}</a>
-      <a id="popup-cart" href="{{ url_for('cart_page') }}" class="buy-btn">{{ "Перейти в корзину" if lang=='ru' else "Pāriet uz grozu" }}</a>
-    </div>
-    <button class="popup-close" onclick="closePopup()">{{ "Закрыть" if lang=='ru' else "Aizvērt" }}</button>
-  </div>
+{% endfor %}
 </div>
-
-<script>
-const lang = "{{ lang }}";
-
-async function addToCart(id) {
-  try {
-    const res = await fetch(`/api/add_to_cart/${id}`, { method: 'POST' });
-    if (!res.ok) throw new Error('network');
-    const data = await res.json();
-    if (!data.success) throw new Error('server');
-
-    // Построим содержимое попапа
-    const product = data.product;
-    const img = product.image && product.image.startsWith('http') ? product.image : `/static/${product.image}`;
-    document.getElementById('popup-body').innerHTML = `
-      <div style="display:flex; gap:12px; align-items:center;">
-        <img src="${img}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;">
-        <div>
-          <div style="font-weight:700;">${ lang=='ru' ? product.name_ru : product.name_lv }</div>
-          <div style="color:#666; margin-top:6px;">${data.cart_total_items} ${lang=='ru'?'шт':'gab'}</div>
-        </div>
-      </div>
-    `;
-    document.getElementById('cart-popup').style.display = 'flex';
-
-    // обновить счётчик (если есть)
-    fetch('/api/cart_count').then(r=>r.json()).then(d=>{
-      const el = document.getElementById('cart-count'); if (el) el.innerText = d.count;
-    }).catch(()=>{});
-  } catch (e) {
-    alert(lang=='ru' ? 'Ошибка при добавлении в корзину' : 'Kļūda, pievienojot grozam');
-    console.error(e);
-  }
-}
-
-function closePopup(){
-  document.getElementById('cart-popup').style.display = 'none';
-}
-</script>
 
 {% endblock %}

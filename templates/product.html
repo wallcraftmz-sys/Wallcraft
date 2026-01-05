@@ -2,7 +2,7 @@
 {% block content %}
 <div style="max-width:900px;margin:20px auto;display:flex;gap:20px;flex-wrap:wrap;">
   <div style="flex:1;min-width:260px;">
-    <img src="{{ url_for('static', filename=product.image) }}" style="width:100%; border-radius:8px;">
+    <img src="{{ url_for('static', filename=product.image) }}" alt="">
   </div>
   <div style="flex:1;min-width:260px;">
     <h2>{{ product.get('name_' + lang, product['name_ru']) }}</h2>

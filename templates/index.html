@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="grid">
-{% for p in products %}
-<div class="card">
-    <img src="{{ url_for('static', filename=product.image) }}" alt="">
-    <h3>{{ p["name_" + lang] }}</h3>
-    <p>{{ p.price }} €</p>
-</div>
-{% endfor %}
+<h1 style="text-align:center;">
+    {{ "Каталог товаров" if lang=="ru" else "Preču katalogs" }}
+</h1>
+
+<div class="product-grid">
+    {% for p in products %}
+    <div class="product-card">
+        <a href="{{ url_for('product', product_id=p.id, lang=lang) }}">
+            <img src="{{ url_for('static', filename=p.image) }}">
+            <h3>{{ p["name_"+lang] }}</h3>
+        </a>
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}

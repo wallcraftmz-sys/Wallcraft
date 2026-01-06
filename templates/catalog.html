@@ -9,7 +9,7 @@
     {% for p in products %}
     <div class="product-card">
         <a href="{{ url_for('product', product_id=p.id, lang=lang) }}">
-            <img src="{{ url_for('static', filename=p.image) }}">
+         <img src="{{ url_for('static', filename=product.image) }}" alt="">
             <h3>{{ p["name_"+lang] }}</h3>
             <p>{{ "%.2f"|format(p.price) }} €</p>
         </a>

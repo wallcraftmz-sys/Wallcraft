@@ -1,39 +1,25 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('lang','ru') }}">
+<html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
     <title>Wallcraft</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<header class="header">
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    <div class="logo">WALLCRAFT</div>
-    <div class="lang">
+<header>
+    <div class="logo">
+        <a href="{{ url_for('index', lang=lang) }}">WALLCRAFT</a>
+    </div>
+    <div class="lang-switch">
         <a href="?lang=ru">RU</a> |
         <a href="?lang=lv">LV</a>
     </div>
 </header>
 
-<nav id="menu" class="side-menu">
-    <a href="/catalog">Каталог</a>
-    <a href="/catalog">Жидкие обои</a>
-    <a href="/contact">Контакты</a>
-</nav>
-
 <main>
     {% block content %}{% endblock %}
 </main>
-
-<a href="/cart" class="floating-cart">🛒</a>
-
-<script>
-function toggleMenu() {
-    document.getElementById("menu").classList.toggle("open");
-}
-</script>
 
 </body>
 </html>

@@ -46,5 +46,18 @@ function toggleMenu() {
     menu.classList.toggle("open");
 }
 </script>
+    <!-- POPUP КОРЗИНЫ -->
+<div id="cartPopup" class="cart-popup">
+    <div class="cart-popup-box">
+        <h3>Товар добавлен в корзину</h3>
+
+        <div class="cart-popup-buttons">
+            <a href="/catalog" class="btn gray">Вернуться в каталог</a>
+            <a href="/cart" class="btn green">Перейти в корзину</a>
+        </div>
+
+        <button class="close-popup" onclick="closeCartPopup()">×</button>
+    </div>
+</div>
 </body>
 </html>

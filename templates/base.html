@@ -10,7 +10,7 @@
 
 <header class="top-header">
 
-    <!-- ☰ КНОПКА МЕНЮ -->
+    <!-- ☰ МЕНЮ -->
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
 
     <!-- ЛОГО -->
@@ -40,56 +40,37 @@
 <main class="container">
     {% block content %}{% endblock %}
 </main>
-<script>
-function toggleMenu() {
-    const menu = document.getElementById("sideMenu");
-    menu.classList.toggle("open");
-}
-</script>
-    <!-- POPUP КОРЗИНЫ -->
-<div id="cartPopup" class="cart-popup">
-    <div class="cart-popup-box">
-        <h3>Товар добавлен в корзину</h3>
 
-        <div class="cart-popup-buttons">
-            <a href="/catalog" class="btn gray">Вернуться в каталог</a>
-            <a href="/cart" class="btn green">Перейти в корзину</a>
-        </div>
+<!-- POPUP КОРЗИНЫ -->
+<div id="cart-popup" class="cart-popup">
+    <div class="cart-popup-content">
+        <p>Товар добавлен в корзину</p>
+
+        <a href="/catalog" class="popup-btn">Вернуться в каталог</a>
+        <a href="/cart" class="popup-btn primary">Перейти в корзину</a>
 
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>
 </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>
+
+<script>
+function toggleMenu() {
+    document.getElementById("sideMenu").classList.toggle("open");
+}
+
 function addToCart(productId) {
-    fetch(`/api/add_to_cart/${productId}`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("cart-popup").style.display = "block";
-            }
-        });
+    fetch(`/api/add_to_cart/${productId}`, { method: "POST" })
+        .then(() => openCartPopup());
+}
+
+function openCartPopup() {
+    document.getElementById("cart-popup").classList.add("show");
 }
 
 function closeCartPopup() {
-    document.getElementById("cart-popup").style.display = "none";
+    document.getElementById("cart-popup").classList.remove("show");
 }
 </script>
 
-<div id="cart-popup" style="
-    display:none;
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background:white;
-    padding:20px;
-    border:1px solid #ccc;
-    z-index:9999;
-">
-    <p>Товар добавлен в корзину</p>
-    <a href="/cart">Перейти в корзину</a><br><br>
-    <button onclick="closeCartPopup()">Вернуться в каталог</button>
-</div>
 </body>
 </html>

@@ -8,15 +8,6 @@
 <img src="{{ url_for('static', filename=product.image) }}" style="max-width:100%;">
 
 <p>{{ product["description_"+lang] }}</p>
-<p><b>{{ "%.2f"|format(product.price) }} €</b></p>
-
-<a href="{{ url_for('index', lang=lang) }}">← Назад</a>
-
-<h2>{{ product["name_"+lang] }}</h2>
-
-<img src="{{ url_for('static', filename=product.image) }}" style="max-width:100%;">
-
-<p>{{ product["description_"+lang] }}</p>
 
 <p><b>{{ "%.2f"|format(product.price) }} €</b></p>
 

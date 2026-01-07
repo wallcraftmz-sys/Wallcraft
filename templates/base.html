@@ -8,17 +8,35 @@
 </head>
 <body>
 
-<header class="header">
-    <div class="menu-btn">☰</div>
+<header class="top-header">
 
-    <div class="logo">
-        WALLCRAFT
+    <!-- ☰ КНОПКА МЕНЮ -->
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+    <!-- ЛОГО -->
+    <div class="logo-center">
+        <a href="/">WALLCRAFT</a>
     </div>
 
-    <div class="lang">
-        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
+    <!-- ЯЗЫК -->
+    <div class="lang-switch">
+        <a href="?lang=ru">RU</a> |
+        <a href="?lang=lv">LV</a>
     </div>
+
 </header>
+
+<!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
+<div id="sideMenu" class="side-menu">
+    <a href="/" onclick="toggleMenu()">🏠 Главная</a>
+    <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
+    <a href="/catalog" onclick="toggleMenu()">🧱 Жидкие обои</a>
+    <a href="/about" onclick="toggleMenu()">ℹ️ О компании</a>
+    <a href="/contact" onclick="toggleMenu()">📞 Контакты</a>
+    <hr>
+    <a href="/login" onclick="toggleMenu()">👤 Вход</a>
+    <a href="/register" onclick="toggleMenu()">📝 Регистрация</a>
+</div>
 
 <main class="container">
     {% block content %}{% endblock %}

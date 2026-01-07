@@ -1,21 +1,20 @@
 {% extends "base.html" %}
-{% block content %}
 
-<h1 style="text-align:center;">
-    {{ "Каталог" if lang=="ru" else "Katalogs" }}
+{% block content %}
+<h1 class="page-title">
+    {% if lang == "ru" %}Каталог товаров{% else %}Produktu katalogs{% endif %}
 </h1>
 
 <div class="product-grid">
-    {% for p in products %}
-    <div class="product-card">
-        <a href="{{ url_for('product', product_id=p.id, lang=lang) }}">
-         <img src="{{ url_for('static', filename=product.image) }}" alt="">
-            <h3>{{ p["name_"+lang] }}</h3>
-            <p>{{ "%.2f"|format(p.price) }} €</p>
-        </a>
-    </div>
+    {% for product in products %}
+    <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="">
+        <h3 class="product-title">
+            {{ product["name_" + lang] }}
+        </h3>
+        <p class="price">{{ product.price }} €</p>
+    </a>
     {% endfor %}
 </div>
-
 {% endblock %}
 

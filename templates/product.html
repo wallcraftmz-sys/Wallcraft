@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 
-<a href="{{ url_for('index', lang=lang) }}">← Назад</a>
+<a href="{{ url_for('catalog', lang=lang) }}">← Назад в каталог</a>
 
-<h2>{{ product["name_"+lang] }}</h2>
+<h2 class="product-title">{{ product["name_"+lang] }}</h2>
 
-<img src="{{ url_for('static', filename=product.image) }}" style="max-width:100%;">
+<img src="{{ url_for('static', filename=product.image) }}" class="product-image">
 
 <p>{{ product["description_"+lang] }}</p>
 
-<p><b>{{ "%.2f"|format(product.price) }} €</b></p>
+<p class="price"><b>{{ "%.2f"|format(product.price) }} €</b></p>
 
 <button class="add-to-cart-btn"
         onclick="addToCart({{ product.id }}); openCartPopup();">

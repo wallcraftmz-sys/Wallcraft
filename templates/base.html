@@ -41,6 +41,11 @@
 <main class="container">
     {% block content %}{% endblock %}
 </main>
-
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    menu.classList.toggle("open");
+}
+</script>
 </body>
 </html>

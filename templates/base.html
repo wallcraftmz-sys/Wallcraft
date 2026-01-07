@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Wallcraft</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<header>
+<header class="header">
+    <div class="menu-btn">☰</div>
+
     <div class="logo">
-        <a href="{{ url_for('index', lang=lang) }}">WALLCRAFT</a>
+        WALLCRAFT
     </div>
-    <div class="lang-switch">
-        <a href="?lang=ru">RU</a> |
-        <a href="?lang=lv">LV</a>
+
+    <div class="lang">
+        <a href="?lang=ru">RU</a> | <a href="?lang=lv">LV</a>
     </div>
 </header>
 
-<main>
+<main class="container">
     {% block content %}{% endblock %}
 </main>
 

@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block content %}
 
-<h1 style="text-align:center;">
-    {{ "Каталог товаров" if lang=="ru" else "Preču katalogs" }}
+{% block content %}
+<h1 class="page-title">
+    {% if lang == "ru" %}Жидкие обои{% else %}Šķidrās tapetes{% endif %}
 </h1>
 
 <div class="product-grid">
-    {% for p in products %}
-    <div class="product-card">
-        <a href="{{ url_for('product', product_id=p.id, lang=lang) }}">
-            <img src="{{ url_for('static', filename=p.image) }}">
-            <h3>{{ p["name_"+lang] }}</h3>
-        </a>
-    </div>
+    {% for product in products %}
+    <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">
+        <img src="{{ url_for('static', filename=product.image) }}" alt="">
+        <h3 class="product-title">
+            {{ product["name_" + lang] }}
+        </h3>
+        <p class="price">{{ product.price }} €</p>
+    </a>
     {% endfor %}
 </div>
-
 {% endblock %}

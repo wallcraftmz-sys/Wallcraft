@@ -1,37 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ "Корзина" if lang=="ru" else "Grozs" }}</h1>
+
+<h1>Корзина</h1>
 
 {% if cart_items %}
-{% for item in cart_items %}
-<div class="cart-item">
-    <img src="{{ url_for('static', filename=item.product.image) }}" class="cart-item-image">
-    <div>
-        <b>{{ item.product["name_"+lang] }}</b>
-        <p>{{ "%.2f"|format(item.product.price*item.qty) }} €</p>
-    </div>
-    <div class="qty-controls">
-        <button onclick="changeQty({{ item.product.id }}, 'minus')">−</button>
-        <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
-        <button onclick="changeQty({{ item.product.id }}, 'plus')">+</button>
-    </div>
-</div>
-{% endfor %}
 
-<p><b>Итого:</b> <span id="cart-total">{{ total }}</span> €</p>
-<a href="/order?lang={{ lang }}" class="buy-btn">Оформить заказ</a>
-<a href="/catalog?lang={{ lang }}" class="buy-btn">Вернуться в каталог</a>
+    {% for item in cart_items %}
+        <div style="border-bottom:1px solid #ddd; padding:10px 0;">
+            <b>{{ item.product["name_"+lang] }}</b><br>
+            Количество: {{ item.qty }}<br>
+            Цена: {{ "%.2f"|format(item.product.price) }} €
+        </div>
+    {% endfor %}
+
+    <h3>Итого: {{ "%.2f"|format(total) }} €</h3>
+
+    <a href="{{ url_for('catalog', lang=lang) }}">
+        ← Вернуться в каталог
+    </a>
+
+    <br><br>
+
+    <button>
+        Оформить заказ
+    </button>
 
 {% else %}
-<p>{{ "Корзина пуста" if lang=="ru" else "Grozs ir tukšs" }}</p>
-<a href="/catalog?lang={{ lang }}" class="buy-btn">{{ "В каталог" if lang=="ru" else "Uz katalogu" }}</a>
+
+    <p>Корзина пуста</p>
+
+    <a href="{{ url_for('catalog', lang=lang) }}">
+        Перейти в каталог
+    </a>
+
 {% endif %}
 
-<script>
-function changeQty(id, action){
-    fetch(`/api/update_cart/${id}/${action}`,{method:'POST'})
-    .then(r=>r.json()).then(()=>location.reload());
-}
-</script>
 {% endblock %}
 

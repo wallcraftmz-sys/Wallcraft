@@ -9,8 +9,6 @@
 
 <p>{{ product["description_"+lang] }}</p>
 <p><b>{{ "%.2f"|format(product.price) }} €</b></p>
-{% extends "base.html" %}
-{% block content %}
 
 <a href="{{ url_for('index', lang=lang) }}">← Назад</a>
 

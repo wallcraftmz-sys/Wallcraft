@@ -61,6 +61,28 @@ def api_add_to_cart(product_id):
     session['cart'] = cart
     p = next((x for x in products if x['id']==product_id), None)
     return jsonify(success=True, product=p, cart_total_items=sum(cart.values()))
+    @app.route('/cart')
+
+def cart():
+    cart = session.get('cart', {})
+    items = []
+    total = 0
+
+    for pid, qty in cart.items():
+        product = next((p for p in products if p['id'] == int(pid)), None)
+        if product:
+            items.append({
+                "product": product,
+                "qty": qty
+            })
+            total += product['price'] * qty
+
+    return render_template(
+        'cart.html',
+        cart_items=items,
+        total=total,
+        lang=session.get('lang', 'ru')
+    )
 if __name__ == '__main__':
     # локальный запуск
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)

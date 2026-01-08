@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
 
+{% block content %}
 <h1 class="page-title">
     {% if lang == "ru" %}Корзина{% else %}Grozs{% endif %}
 </h1>
@@ -8,65 +8,66 @@
 {% if cart_items %}
 
 <div class="cart-list">
-
     {% for item in cart_items %}
-    <div class="cart-row">
-
-        <img src="{{ url_for('static', filename=item.product.image) }}" class="cart-img">
+    <div class="cart-item" data-id="{{ item.product.id }}">
+        <img src="{{ url_for('static', filename=item.product.image) }}">
 
         <div class="cart-info">
-            <div class="cart-name">{{ item.product["name_"+lang] }}</div>
-            <div class="cart-price">{{ "%.2f"|format(item.product.price) }} €</div>
-        </div>
+            <h3>{{ item.product["name_"+lang] }}</h3>
+            <p>{{ "%.2f"|format(item.product.price) }} €</p>
 
-        <div class="cart-qty">
-            <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
-            <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
-            <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
-        </div>
+            <div class="cart-qty">
+                <button onclick="updateCart({{ item.product.id }}, 'minus')">−</button>
+                <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
+                <button onclick="updateCart({{ item.product.id }}, 'plus')">+</button>
+            </div>
 
-        <div class="cart-subtotal" id="sub-{{ item.product.id }}">
-            {{ "%.2f"|format(item.product.price * item.qty) }} €
+            <p>
+                {% if lang == "ru" %}Сумма:{% else %}Summa:{% endif %}
+                <b id="subtotal-{{ item.product.id }}">
+                    {{ "%.2f"|format(item.product.price * item.qty) }} €
+                </b>
+            </p>
         </div>
-
     </div>
     {% endfor %}
-
 </div>
 
-<div class="cart-total">
-    <b>
-        {% if lang == "ru" %}Итого{% else %}Kopā{% endif %}:
-        <span id="cart-total">{{ "%.2f"|format(total) }}</span> €
-    </b>
-</div>
+<p class="cart-total">
+    {% if lang == "ru" %}Итого:{% else %}Kopā:{% endif %}
+    <b id="cart-total">{{ "%.2f"|format(total) }} €</b>
+</p>
 
 <div class="cart-actions">
-    <a href="/catalog" class="btn gray">← В каталог</a>
-    <a href="/order" class="btn green">Оформить заказ</a>
+    <a href="/catalog" class="btn gray">
+        {% if lang == "ru" %}Вернуться в каталог{% else %}Atgriezties{% endif %}
+    </a>
+    <a href="/order" class="btn green">
+        {% if lang == "ru" %}Оформить заказ{% else %}Noformēt{% endif %}
+    </a>
 </div>
 
 {% else %}
-
-<p style="text-align:center;">Корзина пуста</p>
-<a href="/catalog" class="btn green">Перейти в каталог</a>
-
+<p style="text-align:center;">
+    {% if lang == "ru" %}Корзина пуста{% else %}Grozs ir tukšs{% endif %}
+</p>
 {% endif %}
 
 <script>
-function updateQty(productId, action) {
-    fetch(`/api/update_cart/${productId}/${action}`, { method: "POST" })
+function updateCart(pid, action) {
+    fetch(`/api/update_cart/${pid}/${action}`, { method: "POST" })
         .then(res => res.json())
         .then(data => {
             if (data.qty === 0) {
                 location.reload();
-            } else {
-                document.getElementById(`qty-${productId}`).innerText = data.qty;
-                document.getElementById(`sub-${productId}`).innerText =
-                    (data.subtotal).toFixed(2) + " €";
-                document.getElementById("cart-total").innerText =
-                    (data.total).toFixed(2);
+                return;
             }
+
+            document.getElementById(`qty-${pid}`).innerText = data.qty;
+            document.getElementById(`subtotal-${pid}`).innerText =
+                data.subtotal.toFixed(2) + " €";
+            document.getElementById("cart-total").innerText =
+                data.total.toFixed(2) + " €";
         });
 }
 </script>

@@ -50,6 +50,37 @@ def add_to_cart(product_id):
     cart[str(product_id)] = cart.get(str(product_id), 0) + 1
     session["cart"] = cart
     return jsonify(success=True)
+  
+@app.route("/api/update_cart/<int:pid>/<action>", methods=["POST"])
+def update_cart(pid, action):
+    cart = session.get("cart", {})
+    pid = str(pid)
+
+    if pid in cart:
+        if action == "plus":
+            cart[pid] += 1
+        elif action == "minus":
+            cart[pid] -= 1
+            if cart[pid] <= 0:
+                del cart[pid]
+
+    session["cart"] = cart
+
+    total = 0
+    subtotal = 0
+    qty = cart.get(pid, 0)
+
+    for k, q in cart.items():
+        product = next(p for p in products if p["id"] == int(k))
+        total += product["price"] * q
+        if k == pid:
+            subtotal = product["price"] * q
+
+    return {
+        "qty": qty,
+        "subtotal": subtotal,
+        "total": total
+    }
 
 @app.route("/cart")
 def cart():

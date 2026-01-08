@@ -114,14 +114,35 @@ def order():
     lang = session.get("lang", "ru")
     success = False
 
-    if request.method == "POST":
+    cart = session.get("cart", {})
+
+    if request.method == "POST" and cart:
         name = request.form.get("name")
         contact = request.form.get("contact")
 
-        text = f"Новый заказ Wallcraft\n\nИмя: {name}\nКонтакт: {contact}"
+        lines = []
+        total = 0
+
+        for pid, qty in cart.items():
+            product = next(p for p in products if p["id"] == int(pid))
+            subtotal = product["price"] * qty
+            total += subtotal
+
+            lines.append(
+                f"{product['name_ru']} — {qty} × {product['price']} € = {subtotal:.2f} €"
+            )
+
+        text = (
+            "НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
+            f"Имя: {name}\n"
+            f"Контакт: {contact}\n\n"
+            "СОСТАВ ЗАКАЗА:\n" +
+            "\n".join(lines) +
+            f"\n\nИТОГО: {total:.2f} €"
+        )
 
         msg = MIMEText(text)
-        msg["Subject"] = "Новая заявка Wallcraft"
+        msg["Subject"] = "Новый заказ Wallcraft"
         msg["From"] = os.environ["GMAIL_EMAIL"]
         msg["To"] = os.environ["GMAIL_EMAIL"]
 

@@ -1,4 +1,37 @@
-{% extends "base.html" %}
+{{% extends "base.html" %}
+{% block content %}
+
+<h1 class="page-title">
+    {% if lang == "ru" %}Оформление заказа{% else %}Pasūtījums{% endif %}
+</h1>
+
+{% if success %}
+<p style="text-align:center;font-size:18px;">
+    {% if lang == "ru" %}
+        Спасибо! Мы свяжемся с вами в ближайшее время.
+    {% else %}
+        Paldies! Mēs ar jums sazināsimies.
+    {% endif %}
+</p>
+
+<a href="/" class="btn green" style="display:block;text-align:center;">
+    {% if lang == "ru" %}На главную{% else %}Uz sākumu{% endif %}
+</a>
+
+{% else %}
+
+<form method="post" class="order-form">
+    <input type="text" name="name" placeholder="{% if lang=='ru' %}Ваше имя{% else %}Vārds{% endif %}" required>
+    <input type="text" name="contact" placeholder="{% if lang=='ru' %}Телефон / WhatsApp / Telegram{% else %}Kontakts{% endif %}" required>
+
+    <button type="submit" class="btn green">
+        {% if lang == "ru" %}Отправить заказ{% else %}Nosūtīt{% endif %}
+    </button>
+</form>
+
+{% endif %}
+
+{% endblock %}% extends "base.html" %}
 {% block content %}
 
 <h1 class="page-title">

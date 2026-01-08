@@ -37,7 +37,10 @@ def catalog():
 
 @app.route("/product/<int:product_id>")
 def product(product_id):
-    product = products[0]
+    product = next((p for p in products if p["id"] == product_id), None)
+    if not product:
+        return redirect(url_for("catalog"))
+
     return render_template(
         "product.html",
         product=product,
@@ -84,10 +87,23 @@ def update_cart(pid, action):
 
 @app.route("/cart")
 def cart():
+    cart = session.get("cart", {})
+    items = []
+    total = 0
+
+    for pid, qty in cart.items():
+        product = next((p for p in products if p["id"] == int(pid)), None)
+        if product:
+            items.append({
+                "product": product,
+                "qty": qty
+            })
+            total += product["price"] * qty
+
     return render_template(
         "cart.html",
-        cart_items=[],
-        total=0,
+        cart_items=items,
+        total=total,
         lang=session["lang"]
     )
 

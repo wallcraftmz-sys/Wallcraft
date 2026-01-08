@@ -1,4 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+import smtplib
+from email.mime.text import MIMEText
+import os
 
 app = Flask(__name__)
 app.secret_key = "wallcraft_secret_key"
@@ -106,6 +109,33 @@ def cart():
         total=total,
         lang=session["lang"]
     )
+@app.route("/order", methods=["GET", "POST"])
+def order():
+    lang = session.get("lang", "ru")
+    success = False
 
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+
+        text = f"Новый заказ Wallcraft\n\nИмя: {name}\nКонтакт: {contact}"
+
+        msg = MIMEText(text)
+        msg["Subject"] = "Новая заявка Wallcraft"
+        msg["From"] = os.environ["GMAIL_EMAIL"]
+        msg["To"] = os.environ["GMAIL_EMAIL"]
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(
+                os.environ["GMAIL_EMAIL"],
+                os.environ["GMAIL_APP_PASSWORD"]
+            )
+            server.send_message(msg)
+
+        session["cart"] = {}
+        success = True
+
+    return render_template("order.html", success=success, lang=lang)
+    
 if __name__ == "__main__":
     app.run(debug=True)

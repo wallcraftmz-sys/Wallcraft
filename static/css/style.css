@@ -362,3 +362,13 @@ body {
     color: #fff;
     cursor: default;
 }
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.product-link img {
+    width: 100%;
+    border-radius: 8px;
+}

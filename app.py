@@ -141,8 +141,8 @@ def order():
             f"\n\nИТОГО: {total:.2f} €"
         )
 
-        email = os.getenv("GMAIL_EMAIL")
-        password = os.getenv("GMAIL_APP_PASSWORD")
+        email = (os.getenv("GMAIL_EMAIL") or "").strip()
+password = (os.getenv("GMAIL_APP_PASSWORD") or "").replace(" ", "").strip()
 
         if email and password:
             try:

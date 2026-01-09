@@ -5,6 +5,7 @@ import requests
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_secret_key")
 
+# ===== PRODUCTS =====
 products = [
     {
         "id": 1,
@@ -19,23 +20,26 @@ products = [
 ]
 
 # ===== TELEGRAM =====
-def send_telegram(text):
+def send_telegram(message: str):
     token = os.getenv("TG_BOT_TOKEN")
     chat_id = os.getenv("TG_CHAT_ID")
 
     if not token or not chat_id:
+        print("TG ERROR: env vars not set")
         return
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = {
+    payload = {
         "chat_id": chat_id,
-        "text": text
+        "text": message
     }
 
     try:
-        requests.post(url, data=data, timeout=10)
+        r = requests.post(url, json=payload, timeout=10)
+        if r.status_code != 200:
+            print("TG ERROR:", r.text)
     except Exception as e:
-        print("Telegram error:", e)
+        print("TG EXCEPTION:", e)
 
 # ===== LANGUAGE =====
 @app.before_request
@@ -101,6 +105,7 @@ def update_cart(pid, action):
         cart_total_items=sum(cart.values())
     )
 
+# ===== CART PAGE =====
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
@@ -135,18 +140,20 @@ def order():
                 continue
             subtotal = pr["price"] * qty
             total += subtotal
-            lines.append(f"{pr['name_ru']} — {qty} шт × {pr['price']} €")
+            lines.append(
+                f"{pr['name_ru']} — {qty} шт × {pr['price']} € = {subtotal:.2f} €"
+            )
 
-        text = (
-            "🧾 НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
+        message = (
+            "🛒 НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
             f"👤 Имя: {name}\n"
             f"📞 Контакт: {contact}\n\n"
-            "📦 Заказ:\n"
+            "📦 СОСТАВ ЗАКАЗА:\n"
             + "\n".join(lines)
-            + f"\n\n💰 Итого: {total:.2f} €"
+            + f"\n\n💰 ИТОГО: {total:.2f} €"
         )
 
-        send_telegram(text)
+        send_telegram(message)
 
         session["cart"] = {}
         success = True

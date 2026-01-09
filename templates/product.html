@@ -1,19 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 
-<a href="{{ url_for('catalog', lang=lang) }}">← Назад в каталог</a>
+<a href="{{ url_for('catalog', lang=lang) }}" class="back-link">
+    ← {% if lang == "ru" %}Назад в каталог{% else %}Atpakaļ uz katalogu{% endif %}
+</a>
 
-<h2 class="product-title">{{ product["name_"+lang] }}</h2>
+<div class="product-page">
 
-<img src="{{ url_for('static', filename=product.image) }}" class="product-image">
+    <h2 class="product-title">
+        {{ product["name_" + lang] }}
+    </h2>
 
-<p>{{ product["description_"+lang] }}</p>
+    <img
+        src="{{ url_for('static', filename=product.image) }}"
+        alt="{{ product['name_' + lang] }}"
+        class="product-image"
+    >
 
-<p class="price"><b>{{ "%.2f"|format(product.price) }} €</b></p>
+    <p class="product-description">
+        {{ product["description_" + lang] }}
+    </p>
 
-<button class="add-to-cart-btn"
-        onclick="addToCart({{ product.id }}); openCartPopup();">
-    🛒 Добавить в корзину
-</button>
+    <p class="price">
+        <b>{{ "%.2f"|format(product.price) }} €</b>
+    </p>
+
+    <!-- ❗ ТОЛЬКО addToCart -->
+    <button
+        class="add-to-cart-btn"
+        onclick="addToCart({{ product.id }})">
+        🛒 {% if lang == "ru" %}Добавить в корзину{% else %}Pievienot grozam{% endif %}
+    </button>
+
+</div>
 
 {% endblock %}

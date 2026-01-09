@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
-import smtplib
-from email.mime.text import MIMEText
 import os
+import requests
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_secret_key")
@@ -19,10 +18,31 @@ products = [
     }
 ]
 
+# ===== TELEGRAM =====
+def send_telegram(text):
+    token = os.getenv("TG_BOT_TOKEN")
+    chat_id = os.getenv("TG_CHAT_ID")
+
+    if not token or not chat_id:
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = {
+        "chat_id": chat_id,
+        "text": text
+    }
+
+    try:
+        requests.post(url, data=data, timeout=10)
+    except Exception as e:
+        print("Telegram error:", e)
+
+# ===== LANGUAGE =====
 @app.before_request
 def set_lang():
     session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
 
+# ===== PAGES =====
 @app.route("/")
 def index():
     return render_template("index.html", products=products, lang=session["lang"])
@@ -38,6 +58,7 @@ def product(product_id):
         return redirect(url_for("catalog"))
     return render_template("product.html", product=item, lang=session["lang"])
 
+# ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     cart = session.get("cart", {})
@@ -73,7 +94,12 @@ def update_cart(pid, action):
         if k == pid_str:
             subtotal = pr["price"] * q
 
-    return jsonify(qty=qty, subtotal=subtotal, total=total, cart_total_items=sum(cart.values()))
+    return jsonify(
+        qty=qty,
+        subtotal=subtotal,
+        total=total,
+        cart_total_items=sum(cart.values())
+    )
 
 @app.route("/cart")
 def cart():
@@ -89,6 +115,7 @@ def cart():
 
     return render_template("cart.html", cart_items=items, total=total, lang=session["lang"])
 
+# ===== ORDER =====
 @app.route("/order", methods=["GET", "POST"])
 def order():
     lang = session.get("lang", "ru")
@@ -101,40 +128,25 @@ def order():
 
         lines = []
         total = 0.0
+
         for pid_str, qty in cart.items():
             pr = next((p for p in products if p["id"] == int(pid_str)), None)
             if not pr:
                 continue
             subtotal = pr["price"] * qty
             total += subtotal
-            lines.append(f"{pr['name_ru']} — {qty} × {pr['price']} € = {subtotal:.2f} €")
+            lines.append(f"{pr['name_ru']} — {qty} шт × {pr['price']} €")
 
         text = (
-            "НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
-            f"Имя: {name}\n"
-            f"Контакт: {contact}\n\n"
-            "СОСТАВ ЗАКАЗА:\n"
+            "🧾 НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
+            f"👤 Имя: {name}\n"
+            f"📞 Контакт: {contact}\n\n"
+            "📦 Заказ:\n"
             + "\n".join(lines)
-            + f"\n\nИТОГО: {total:.2f} €"
+            + f"\n\n💰 Итого: {total:.2f} €"
         )
 
-        email = (os.getenv("GMAIL_EMAIL") or "").strip()
-        password = (os.getenv("GMAIL_APP_PASSWORD") or "").replace(" ", "").strip()
-
-        if not email or not password:
-            return "ENV ERROR: GMAIL_EMAIL / GMAIL_APP_PASSWORD not set", 500
-
-        msg = MIMEText(text)
-        msg["Subject"] = "Новый заказ Wallcraft"
-        msg["From"] = email
-        msg["To"] = email
-
-        try:
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
-                server.login(email, password)
-                server.send_message(msg)
-        except Exception as e:
-            return f"MAIL ERROR: {e}", 500
+        send_telegram(text)
 
         session["cart"] = {}
         success = True

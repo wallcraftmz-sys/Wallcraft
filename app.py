@@ -141,17 +141,23 @@ def order():
             f"\n\nИТОГО: {total:.2f} €"
         )
 
-        msg = MIMEText(text)
-        msg["Subject"] = "Новый заказ Wallcraft"
-        msg["From"] = os.environ["GMAIL_EMAIL"]
-        msg["To"] = os.environ["GMAIL_EMAIL"]
+        email = os.getenv("GMAIL_EMAIL")
+password = os.getenv("GMAIL_APP_PASSWORD")
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(
-                os.environ["GMAIL_EMAIL"],
-                os.environ["GMAIL_APP_PASSWORD"]
-            )
-            server.send_message(msg)
+if not email or not password:
+    return "GMAIL_EMAIL or GMAIL_APP_PASSWORD not set", 500
+
+msg = MIMEText(text)
+msg["Subject"] = "Новый заказ Wallcraft"
+msg["From"] = email
+msg["To"] = email
+
+try:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(email, password)
+        server.send_message(msg)
+except Exception as e:
+    return f"Email send error: {e}", 500
 
         session["cart"] = {}
         success = True

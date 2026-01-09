@@ -29,16 +29,6 @@
         <a href="?lang=lv">LV</a>
     </div>
 
-    <!-- КОРЗИНА -->
-    <div class="cart-link">
-        <a href="/cart" class="floating-cart">
-    🛒
-    <span id="cart-count">
-        {{ session.get("cart", {}).values() | sum }}
-    </span>
-</a>
-    </div>
-
 </header>
 
 <!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
@@ -64,6 +54,11 @@
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>
 </div>
-
+<a href="/cart" class="floating-cart">
+    🛒
+    <span id="cart-count">
+        {{ session.get("cart", {}).values() | sum }}
+    </span>
+</a>
 </body>
 </html>

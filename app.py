@@ -113,7 +113,6 @@ def cart():
 def order():
     lang = session.get("lang", "ru")
     success = False
-
     cart = session.get("cart", {})
 
     if request.method == "POST" and cart:
@@ -142,22 +141,22 @@ def order():
         )
 
         email = os.getenv("GMAIL_EMAIL")
-password = os.getenv("GMAIL_APP_PASSWORD")
+        password = os.getenv("GMAIL_APP_PASSWORD")
 
-if not email or not password:
-    return "GMAIL_EMAIL or GMAIL_APP_PASSWORD not set", 500
+        if not email or not password:
+            return "GMAIL EMAIL NOT SET", 500
 
-msg = MIMEText(text)
-msg["Subject"] = "Новый заказ Wallcraft"
-msg["From"] = email
-msg["To"] = email
+        msg = MIMEText(text)
+        msg["Subject"] = "Новый заказ Wallcraft"
+        msg["From"] = email
+        msg["To"] = email
 
-try:
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(email, password)
-        server.send_message(msg)
-except Exception as e:
-    return f"Email send error: {e}", 500
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(email, password)
+                server.send_message(msg)
+        except Exception as e:
+            return f"MAIL ERROR: {e}", 500
 
         session["cart"] = {}
         success = True

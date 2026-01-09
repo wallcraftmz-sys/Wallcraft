@@ -7,13 +7,26 @@
 
 <div class="product-grid">
     {% for product in products %}
-    <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">
-        <img src="{{ url_for('static', filename=product.image) }}" alt="">
-        <h3 class="product-title">
-            {{ product["name_" + lang] }}
-        </h3>
+    <div class="product-card">
+
+        <!-- КЛИК ПО КАРТИНКЕ / НАЗВАНИЮ -->
+        <a href="{{ url_for('product', product_id=product.id) }}" class="product-link">
+            <img src="{{ url_for('static', filename=product.image) }}" alt="">
+            <h3 class="product-title">
+                {{ product["name_" + lang] }}
+            </h3>
+        </a>
+
         <p class="price">{{ product.price }} €</p>
-    </a>
+
+        <!-- КНОПКА В КОРЗИНУ -->
+        <button
+            class="add-to-cart-btn"
+            onclick="addToCart({{ product.id }})">
+            🛒 В корзину
+        </button>
+
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

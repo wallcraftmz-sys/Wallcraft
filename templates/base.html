@@ -31,11 +31,12 @@
 
     <!-- КОРЗИНА -->
     <div class="cart-link">
-        <a href="/cart">
-            🛒 <span id="cart-count">
-                {{ session.get("cart", {}).values() | sum }}
-            </span>
-        </a>
+        <a href="/cart" class="floating-cart">
+    🛒
+    <span id="cart-count">
+        {{ session.get("cart", {}).values() | sum }}
+    </span>
+</a>
     </div>
 
 </header>

@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <title>Wallcraft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- ОСНОВНОЙ СТИЛЬ -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- ОСНОВНОЙ JS -->
+    <script defer src="{{ url_for('static', filename='main.js') }}"></script>
 </head>
 <body>
 
@@ -24,17 +29,23 @@
         <a href="?lang=lv">LV</a>
     </div>
 
+    <!-- КОРЗИНА -->
+    <div class="cart-link">
+        <a href="/cart">
+            🛒 <span id="cart-count">
+                {{ session.get("cart", {}).values() | sum }}
+            </span>
+        </a>
+    </div>
+
 </header>
 
 <!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
 <div id="sideMenu" class="side-menu">
     <a href="/" onclick="toggleMenu()">🏠 Главная</a>
     <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
-    <a href="/about" onclick="toggleMenu()">ℹ️ О компании</a>
-    <a href="/contact" onclick="toggleMenu()">📞 Контакты</a>
     <hr>
-    <a href="/login" onclick="toggleMenu()">👤 Вход</a>
-    <a href="/register" onclick="toggleMenu()">📝 Регистрация</a>
+    <a href="/cart" onclick="toggleMenu()">🛒 Корзина</a>
 </div>
 
 <main class="container">
@@ -44,23 +55,19 @@
 <!-- POPUP КОРЗИНЫ -->
 <div id="cart-popup" class="cart-popup">
     <div class="cart-popup-content">
-        <p>Товар добавлен в корзину</p>
+        <p>✅ Товар добавлен в корзину</p>
 
-        <a href="/catalog" class="popup-btn">Вернуться в каталог</a>
+        <a href="/catalog" class="popup-btn">Продолжить покупки</a>
         <a href="/cart" class="popup-btn primary">Перейти в корзину</a>
 
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>
 </div>
 
+<!-- МЕНЮ + POPUP -->
 <script>
 function toggleMenu() {
     document.getElementById("sideMenu").classList.toggle("open");
-}
-
-function addToCart(productId) {
-    fetch(`/api/add_to_cart/${productId}`, { method: "POST" })
-        .then(() => openCartPopup());
 }
 
 function openCartPopup() {

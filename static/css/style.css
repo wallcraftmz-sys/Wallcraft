@@ -339,3 +339,26 @@ body {
     border-radius: 8px;
     border: 1px solid #ccc;
 }
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-green {
+    background: #25a244;
+    color: #fff;
+}
+
+.btn-disabled {
+    background: #9ca3af;
+    color: #fff;
+    cursor: default;
+}

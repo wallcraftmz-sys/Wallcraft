@@ -101,7 +101,7 @@ body {
 
 .menu-overlay.show {
     opacity: 1;
-    pointer-events: auto;
+    pointer-events: all;
 }
 /* ===== CONTENT ===== */
 .container {

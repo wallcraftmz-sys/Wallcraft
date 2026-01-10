@@ -26,16 +26,16 @@
     <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
 </div>
 
-        <div class="cart-subtotal">
-            {{ "%.2f"|format(item.product.price * item.qty) }} €
-        </div>
+        <div class="cart-subtotal" id="subtotal-{{ item.product.id }}">
+    {{ "%.2f"|format(item.product.price * item.qty) }} €
+</div>
     </div>
     {% endfor %}
 </div>
 
 <div class="cart-total">
     {% if lang == "ru" %}Итого:{% else %}Kopā:{% endif %}
-    <b>{{ "%.2f"|format(total) }} €</b>
+    <b id="cart-total">{{ "%.2f"|format(total) }} €</b>
 </div>
 
 <div class="cart-actions">
@@ -58,5 +58,44 @@
 </a>
 
 {% endif %}
+    
+<script>
+function updateQty(productId, action) {
+    fetch(`/api/update_cart/${productId}/${action}`, {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        // количество
+        const qtyEl = document.getElementById(`qty-${productId}`);
+        if (qtyEl) {
+            qtyEl.innerText = data.qty;
+        }
 
+        // строка товара
+        const subtotalEl = document.getElementById(`subtotal-${productId}`);
+        if (subtotalEl) {
+            subtotalEl.innerText = data.subtotal.toFixed(2) + " €";
+        }
+
+        // общий итог
+        const totalEl = document.getElementById("cart-total");
+        if (totalEl) {
+            totalEl.innerText = data.total.toFixed(2) + " €";
+        }
+
+        // счётчик корзины (плавающая)
+        const cartCount = document.getElementById("cart-count");
+        if (cartCount) {
+            cartCount.innerText = data.cart_total_items;
+        }
+
+        // если товар удалился
+        if (data.qty === 0) {
+            location.reload();
+        }
+    });
+}
+</script>
+    
 {% endblock %}

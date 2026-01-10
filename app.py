@@ -211,5 +211,4 @@ def admin_orders():
     orders=orders,
     lang=session.get("lang", "ru")
 )
-    )
     

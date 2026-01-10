@@ -1,9 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 style="text-align:center;">Добро пожаловать, {{ admin }}</h1>
-<div style="display:flex;flex-direction:column;align-items:center;gap:15px;margin-top:30px;">
-    <a href="/admin/logout" class="buy-btn">Выйти</a>
-    <a href="/catalog?lang={{ lang }}" class="buy-btn">Новый заказ</a>
-</div>
-{% endblock %}
 
+<h1 class="page-title">
+    {% if lang == "ru" %}Личный кабинет{% else %}Admin Panel{% endif %}
+</h1>
+
+<div class="dashboard-box">
+
+    <p>
+        {% if lang == "ru" %}
+        Вы вошли как администратор
+        {% else %}
+        You are logged in as admin
+        {% endif %}
+    </p>
+
+    <div class="dashboard-actions">
+        <a href="/catalog" class="popup-btn">
+            {% if lang == "ru" %}Перейти в каталог{% else %}Catalog{% endif %}
+        </a>
+
+        <a href="/logout" class="popup-btn primary">
+            {% if lang == "ru" %}Выйти{% else %}Logout{% endif %}
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

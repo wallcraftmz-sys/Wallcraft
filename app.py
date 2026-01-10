@@ -1,9 +1,14 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import os
 import requests
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_secret_key")
+
+# ===== ADMIN =====
+ADMIN_LOGIN = "admin"
+ADMIN_PASSWORD = "123456"
 
 # ===== PRODUCTS =====
 products = [
@@ -35,11 +40,18 @@ def send_telegram(message: str):
     }
 
     try:
-        r = requests.post(url, json=payload, timeout=10)
-        if r.status_code != 200:
-            print("TG ERROR:", r.text)
+        requests.post(url, json=payload, timeout=10)
     except Exception as e:
-        print("TG EXCEPTION:", e)
+        print("TG ERROR:", e)
+
+# ===== AUTH DECORATOR =====
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("is_admin"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapper
 
 # ===== LANGUAGE =====
 @app.before_request
@@ -62,6 +74,36 @@ def product(product_id):
         return redirect(url_for("catalog"))
     return render_template("product.html", product=item, lang=session["lang"])
 
+# ===== LOGIN =====
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        login = request.form.get("login")
+        password = request.form.get("password")
+
+        if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
+            session["is_admin"] = True
+            return redirect(url_for("dashboard"))
+
+        return render_template(
+            "login.html",
+            error="Неверный логин или пароль",
+            lang=session.get("lang", "ru")
+        )
+
+    return render_template("login.html", lang=session.get("lang", "ru"))
+
+@app.route("/logout")
+def logout():
+    session.pop("is_admin", None)
+    return redirect(url_for("index"))
+
+# ===== DASHBOARD =====
+@app.route("/dashboard")
+@admin_required
+def dashboard():
+    return render_template("dashboard.html", lang=session["lang"])
+
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
@@ -74,29 +116,28 @@ def add_to_cart(product_id):
 @app.route("/api/update_cart/<int:pid>/<action>", methods=["POST"])
 def update_cart(pid, action):
     cart = session.get("cart", {})
-    pid_str = str(pid)
+    pid = str(pid)
 
-    if pid_str in cart:
+    if pid in cart:
         if action == "plus":
-            cart[pid_str] += 1
+            cart[pid] += 1
         elif action == "minus":
-            cart[pid_str] -= 1
-            if cart[pid_str] <= 0:
-                del cart[pid_str]
+            cart[pid] -= 1
+            if cart[pid] <= 0:
+                del cart[pid]
 
     session["cart"] = cart
 
-    total = 0.0
-    subtotal = 0.0
-    qty = cart.get(pid_str, 0)
+    total = 0
+    subtotal = 0
+    qty = cart.get(pid, 0)
 
     for k, q in cart.items():
         pr = next((p for p in products if p["id"] == int(k)), None)
-        if not pr:
-            continue
-        total += pr["price"] * q
-        if k == pid_str:
-            subtotal = pr["price"] * q
+        if pr:
+            total += pr["price"] * q
+            if k == pid:
+                subtotal = pr["price"] * q
 
     return jsonify(
         qty=qty,
@@ -112,8 +153,8 @@ def cart():
     items = []
     total = 0.0
 
-    for pid_str, qty in cart.items():
-        pr = next((p for p in products if p["id"] == int(pid_str)), None)
+    for pid, qty in cart.items():
+        pr = next((p for p in products if p["id"] == int(pid)), None)
         if pr:
             items.append({"product": pr, "qty": qty})
             total += pr["price"] * qty
@@ -128,33 +169,29 @@ def order():
     cart = session.get("cart", {})
 
     if request.method == "POST" and cart:
-        name = request.form.get("name", "").strip()
-        contact = request.form.get("contact", "").strip()
+        name = request.form.get("name", "")
+        contact = request.form.get("contact", "")
 
         lines = []
         total = 0.0
 
-        for pid_str, qty in cart.items():
-            pr = next((p for p in products if p["id"] == int(pid_str)), None)
-            if not pr:
-                continue
-            subtotal = pr["price"] * qty
-            total += subtotal
-            lines.append(
-                f"{pr['name_ru']} — {qty} шт × {pr['price']} € = {subtotal:.2f} €"
-            )
+        for pid, qty in cart.items():
+            pr = next((p for p in products if p["id"] == int(pid)), None)
+            if pr:
+                subtotal = pr["price"] * qty
+                total += subtotal
+                lines.append(f"{pr['name_ru']} — {qty} × {pr['price']} €")
 
         message = (
             "🛒 НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
             f"👤 Имя: {name}\n"
             f"📞 Контакт: {contact}\n\n"
-            "📦 СОСТАВ ЗАКАЗА:\n"
+            "📦 Заказ:\n"
             + "\n".join(lines)
-            + f"\n\n💰 ИТОГО: {total:.2f} €"
+            + f"\n\n💰 Итого: {total:.2f} €"
         )
 
         send_telegram(message)
-
         session["cart"] = {}
         success = True
 

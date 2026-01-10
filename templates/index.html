@@ -2,37 +2,11 @@
 
 {% block content %}
 
-<style>
-    .hero {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 60px 20px;
-        background: radial-gradient(circle at center, #1a1a1a, #0b0b0b);
-    }
-
-    .hero img {
-        max-width: 100%;
-        width: 520px;
-        height: auto;
-    }
-
-    .page-title {
-        text-align: center;
-        margin-top: 30px;
-        font-size: 28px;
-        font-weight: 600;
-    }
-
-    .product-grid {
-        margin-top: 40px;
-    }
-</style>
-
-<!-- HERO С МЕДВЕДЕМ -->
 <div class="hero">
-    <img src="{{ url_for('static', filename='images/bear_wallcraft.png') }}"
-         alt="Wallcraft Bear">
+    <img
+        src="{{ url_for('static', filename='images/bear_wallcraft.png') }}"
+        alt="Wallcraft Bear"
+    >
 </div>
 
 <h1 class="page-title">
@@ -43,7 +17,6 @@
     {% endif %}
 </h1>
 
-<!-- КАТАЛОГ -->
 <div class="product-grid">
     {% for product in products %}
     <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">

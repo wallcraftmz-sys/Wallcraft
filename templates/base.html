@@ -20,8 +20,13 @@
     </button>
 
     <div class="logo-center">
-        <a href="/">WALLCRAFT</a>
-    </div>
+    <a href="/" class="logo-link">
+        <img src="{{ url_for('static', filename='images/logo_wallcraft.png') }}"
+             alt="Wallcraft logo"
+             class="logo-img">
+        <span class="logo-text">Wallcraft</span>
+    </a>
+</div>
 
     <div class="lang-switch">
         <a href="?lang=ru">RU</a> |

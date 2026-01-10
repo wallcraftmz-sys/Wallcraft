@@ -33,10 +33,18 @@
 
 <!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
 <div id="sideMenu" class="side-menu">
+
+    <!-- АВТОРИЗАЦИЯ -->
+    <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
+    <a href="/dashboard" onclick="toggleMenu()">👤 Личный кабинет</a>
+
+    <hr>
+
+    <!-- ОСНОВНОЕ -->
     <a href="/" onclick="toggleMenu()">🏠 Главная</a>
     <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
-    <hr>
-    <a href="/cart" onclick="toggleMenu()">🛒 Корзина</a>
+    <a href="/about" onclick="toggleMenu()">ℹ️ О компании</a>
+
 </div>
 
 <main class="container">

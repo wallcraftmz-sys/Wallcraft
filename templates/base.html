@@ -42,9 +42,9 @@
     {% if session.get("is_admin") %}
         <a href="/dashboard" onclick="closeMenu()">🛠️ Кабинет</a>
         <a href="/admin/orders" onclick="closeMenu()">📋 Заказы</a>
-        <a href="/logout" onclick="closeeMenu()">🚪 Выйти</a>
+        <a href="/logout" onclick="closeMenu()">🚪 Выйти</a>
     {% else %}
-        <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
+        <a href="/login" onclick="closeMenu()">🔐 Вход</a>
     {% endif %}
 </div>
 

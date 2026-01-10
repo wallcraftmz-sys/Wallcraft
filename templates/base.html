@@ -15,25 +15,25 @@
 <body>
 
 <header class="top-header">
+    <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">
+        ☰
+    </button>
 
-    <!-- ☰ МЕНЮ -->
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-    <!-- ЛОГО -->
     <div class="logo-center">
         <a href="/">WALLCRAFT</a>
     </div>
 
-    <!-- ЯЗЫК -->
     <div class="lang-switch">
         <a href="?lang=ru">RU</a> |
         <a href="?lang=lv">LV</a>
     </div>
-
 </header>
 
 <!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
-    <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+    <!-- затемнение фона, клик = закрыть меню -->
+<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+
+<!-- боковое меню -->
 <div id="sideMenu" class="side-menu">
     <a href="/" onclick="toggleMenu()">🏠 Главная</a>
     <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
@@ -42,12 +42,12 @@
     <hr>
 
     {% if session.get("is_admin") %}
-    <a href="/dashboard" onclick="toggleMenu()">🛠️ Кабинет</a>
-    <a href="/admin/orders" onclick="toggleMenu()">📋 Заказы</a>
-    <a href="/logout" onclick="toggleMenu()">🚪 Выйти</a>
-{% else %}
-    <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
-{% endif %}
+        <a href="/dashboard" onclick="toggleMenu()">🛠️ Кабинет</a>
+        <a href="/admin/orders" onclick="toggleMenu()">📋 Заказы</a>
+        <a href="/logout" onclick="toggleMenu()">🚪 Выйти</a>
+    {% else %}
+        <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
+    {% endif %}
 </div>
 
 <main class="container">

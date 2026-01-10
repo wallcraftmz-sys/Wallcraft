@@ -217,3 +217,8 @@ body {
     border-bottom: 1px solid #eee;
     display: block;
 }
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}

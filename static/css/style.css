@@ -340,3 +340,16 @@ body {
     gap: 15px;
     margin-top: 20px;
 }
+/* ===== ADMIN ORDERS ===== */
+.admin-orders {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

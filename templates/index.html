@@ -2,29 +2,46 @@
 
 {% block content %}
 
-<div class="hero">
-    <img src="{{ url_for('static', filename='images/IMG_0856.png') }}"
-        alt="Wallcraft Bear">
-</div>
+<section class="hero">
+    <div class="hero-overlay"></div>
 
-<h1 class="page-title">
-    {% if lang == "ru" %}
-        Жидкие обои
-    {% else %}
-        Šķidrās tapetes
-    {% endif %}
-</h1>
+    <img
+        src="{{ url_for('static', filename='images/IMG_0900.jpeg') }}"
+        alt="Wallcraft Liquid Wallpaper"
+        class="hero-bg"
+    >
 
-<div class="product-grid">
-    {% for product in products %}
-    <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">
-        <img src="{{ url_for('static', filename=product.image) }}" alt="">
-        <h3 class="product-title">
-            {{ product["name_" + lang] }}
-        </h3>
-        <p class="price">{{ product.price }} €</p>
-    </a>
-    {% endfor %}
-</div>
+    <div class="hero-content">
+        <h1 class="hero-title">WALLCRAFT</h1>
+
+        <p class="hero-subtitle">
+            {% if lang == "ru" %}
+                Жидкие обои премиум-класса
+            {% else %}
+                Premium liquid wallpapers
+            {% endif %}
+        </p>
+
+        <a href="/catalog" class="hero-btn">
+            {% if lang == "ru" %}Перейти в каталог{% else %}Catalog{% endif %}
+        </a>
+    </div>
+</section>
+
+<section class="catalog-preview">
+    <h2 class="section-title">
+        {% if lang == "ru" %}Каталог{% else %}Catalog{% endif %}
+    </h2>
+
+    <div class="product-grid">
+        {% for product in products %}
+        <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">
+            <img src="{{ url_for('static', filename=product.image) }}" alt="">
+            <h3>{{ product["name_" + lang] }}</h3>
+            <span class="price">{{ product.price }} €</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
 
 {% endblock %}

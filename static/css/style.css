@@ -207,3 +207,13 @@ body {
     text-align: center;
     position: relative;
 }
+/* =========================
+   PRODUCT CARD IMAGES
+========================= */
+.product-card img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+    display: block;
+}

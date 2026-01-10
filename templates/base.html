@@ -40,11 +40,12 @@
     <hr>
 
     {% if session.get("is_admin") %}
-        <a href="/dashboard" onclick="toggleMenu()">🛠️ Кабинет</a>
-        <a href="/logout" onclick="toggleMenu()">🚪 Выйти</a>
-    {% else %}
-        <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
-    {% endif %}
+    <a href="/dashboard" onclick="toggleMenu()">🛠️ Кабинет</a>
+    <a href="/admin/orders" onclick="toggleMenu()">📋 Заказы</a>
+    <a href="/logout" onclick="toggleMenu()">🚪 Выйти</a>
+{% else %}
+    <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
+{% endif %}
 </div>
 
 <main class="container">

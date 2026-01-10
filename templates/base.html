@@ -30,19 +30,19 @@
     </div>
 </header>
 
-<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
 <div id="sideMenu" class="side-menu">
-    <a href="/" onclick="toggleMenu()">🏠 Главная</a>
-    <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
-    <a href="/about" onclick="toggleMenu()">ℹ️ О компании</a>
+    <a href="/" onclick="closeMenu()">🏠 Главная</a>
+    <a href="/catalog" onclick="closeeMenu()">📦 Каталог</a>
+    <a href="/about" onclick="closeMenu()">ℹ️ О компании</a>
 
     <hr>
 
     {% if session.get("is_admin") %}
-        <a href="/dashboard" onclick="toggleMenu()">🛠️ Кабинет</a>
-        <a href="/admin/orders" onclick="toggleMenu()">📋 Заказы</a>
-        <a href="/logout" onclick="toggleMenu()">🚪 Выйти</a>
+        <a href="/dashboard" onclick="closeMenu()">🛠️ Кабинет</a>
+        <a href="/admin/orders" onclick="closeMenu()">📋 Заказы</a>
+        <a href="/logout" onclick="closeeMenu()">🚪 Выйти</a>
     {% else %}
         <a href="/login" onclick="toggleMenu()">🔐 Вход</a>
     {% endif %}

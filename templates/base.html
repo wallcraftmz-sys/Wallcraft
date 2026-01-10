@@ -7,7 +7,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}?v=999">
+          href="{{ url_for('static', filename='css/style.css') }}?v=1001">
 
     <!-- JS -->
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -19,14 +19,17 @@
         ☰
     </button>
 
+    <!-- ЛОГО + НАЗВАНИЕ -->
     <div class="logo-center">
-    <a href="/" class="logo-link">
-        <img src="{{ url_for('static', filename='images/logo_wallcraft.png') }}"
-             alt="Wallcraft logo"
-             class="logo-img">
-        <span class="logo-text">Wallcraft</span>
-    </a>
-</div>
+        <a href="/" class="logo-link">
+            <img
+                src="{{ url_for('static', filename='images/logo_wallcraft.png') }}"
+                alt="Wallcraft logo"
+                class="logo-img"
+            >
+            <span class="logo-text">Wallcraft</span>
+        </a>
+    </div>
 
     <div class="lang-switch">
         <a href="?lang=ru">RU</a> |
@@ -34,11 +37,10 @@
     </div>
 </header>
 
-<!-- ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
-    <!-- затемнение фона, клик = закрыть меню -->
+<!-- ЗАТЕМНЕНИЕ -->
 <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 
-<!-- боковое меню -->
+<!-- БОКОВОЕ МЕНЮ -->
 <div id="sideMenu" class="side-menu">
     <a href="/" onclick="toggleMenu()">🏠 Главная</a>
     <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
@@ -70,11 +72,14 @@
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>
 </div>
+
+<!-- ПЛАВАЮЩАЯ КОРЗИНА -->
 <a href="/cart" class="floating-cart">
     🛒
     <span id="cart-count">
         {{ session.get("cart", {}).values() | sum }}
     </span>
 </a>
+
 </body>
 </html>

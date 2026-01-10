@@ -305,3 +305,22 @@ body {
     display: flex;
     gap: 12px;
 }
+.cart-qty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cart-qty button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    font-size: 18px;
+    background: #eee;
+    cursor: pointer;
+}
+
+.cart-qty button:hover {
+    background: #ddd;
+}

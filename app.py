@@ -47,7 +47,7 @@ def send_telegram(message: str):
     except Exception as e:
         print("TG ERROR:", e)
 
-# ===== AUTH DECORATOR =====
+# ===== AUTH =====
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -185,22 +185,22 @@ def order():
                 total += subtotal
                 lines.append(f"{pr['name_ru']} — {qty} × {pr['price']} €")
 
+        items_text = "\n".join(lines)
+
+        send_telegram(
+            f"🛒 Новый заказ\n"
+            f"Имя: {name}\n"
+            f"Контакт: {contact}\n\n"
+            f"Товары:\n{items_text}\n\n"
+            f"Итого: {total:.2f} €"
+        )
+
         orders.append({
             "name": name,
             "contact": contact,
             "items": lines,
             "total": total
         })
-
-        items_text = "\n".join(lines)
-
-send_telegram(
-    f"🛒 Новый заказ\n"
-    f"Имя: {name}\n"
-    f"Контакт: {contact}\n\n"
-    f"Товары:\n{items_text}\n\n"
-    f"Итого: {total:.2f} €"
-)
 
         session["cart"] = {}
         success = True
@@ -211,10 +211,8 @@ send_telegram(
 @app.route("/admin/orders")
 @admin_required
 def admin_orders():
-    # пока без базы — просто заглушка
     return render_template(
-    "admin_orders.html",
-    orders=orders,
-    lang=session.get("lang", "ru")
-)
-    
+        "admin_orders.html",
+        orders=orders,
+        lang=session.get("lang", "ru")
+    )

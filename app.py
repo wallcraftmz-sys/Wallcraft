@@ -107,16 +107,6 @@ def logout():
 def dashboard():
     return render_template("dashboard.html", lang=session["lang"])
 
-# ===== ADMIN ORDERS =====
-@app.route("/admin/orders")
-@admin_required
-def admin_orders():
-    return render_template(
-        "admin_orders.html",
-        orders=orders,
-        lang=session["lang"]
-    )
-
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):

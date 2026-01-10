@@ -20,7 +20,7 @@ products = [
         "description_ru": "Высококачественные жидкие обои",
         "description_lv": "Augstas kvalitātes tapetes",
         "price": 25.00,
-        "image": "images/hero1.jpg"
+        "image": "images/IMG_0900.jpeg"
     }
 ]
 
@@ -213,7 +213,9 @@ def order():
 def admin_orders():
     # пока без базы — просто заглушка
     return render_template(
-        "admin_orders.html",
-        lang=session.get("lang", "ru")
+    "admin_orders.html",
+    orders=orders,
+    lang=session.get("lang", "ru")
+)
     )
     

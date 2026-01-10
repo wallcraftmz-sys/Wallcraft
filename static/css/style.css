@@ -89,7 +89,20 @@ body {
 .side-menu hr {
     margin: 15px 0;
 }
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1500;
+}
 
+.menu-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
 /* ===== CONTENT ===== */
 .container {
     padding: 16px;

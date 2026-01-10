@@ -6,11 +6,25 @@
     <div class="hero-overlay"></div>
 
     <img
-        src="{{ url_for('static', filename='images/IMG_0856.png') }}"
+        src="{{ url_for('static', filename='images/IMG_0900.jpeg') }}"
         alt="Wallcraft Liquid Wallpaper"
         class="hero-bg"
     >
 
+    <div class="hero-content">
+        <h1 class="hero-title">WALLCRAFT</h1>
+
+        <p class="hero-subtitle">
+            {% if lang == "ru" %}
+                Жидкие обои премиум-класса
+            {% else %}
+                Premium liquid wallpapers
+            {% endif %}
+        </p>
+
+        <a href="/catalog" class="hero-btn">
+            {% if lang == "ru" %}Перейти в каталог{% else %}Catalog{% endif %}
+        </a>
     </div>
 </section>
 

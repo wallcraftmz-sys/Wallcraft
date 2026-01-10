@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="page-title">
+    {% if lang == "ru" %}Заказы{% else %}Orders{% endif %}
+</h1>
+
+{% if orders %}
+
+<div class="admin-orders">
+    {% for o in orders %}
+    <div class="order-card">
+
+        <p><b>Имя:</b> {{ o.name }}</p>
+        <p><b>Контакт:</b> {{ o.contact }}</p>
+
+        <ul>
+            {% for item in o.items %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <p><b>Итого:</b> {{ "%.2f"|format(o.total) }} €</p>
+
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<p style="text-align:center;">Заказов пока нет</p>
+{% endif %}
+
+{% endblock %}

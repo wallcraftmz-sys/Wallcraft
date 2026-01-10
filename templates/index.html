@@ -2,23 +2,21 @@
 
 {% block content %}
 
-<section class="hero">
+<<section class="hero">
     <div class="hero-content">
         <h1 class="hero-title">WALLCRAFT</h1>
-
         <p class="hero-subtitle">
             {% if lang == "ru" %}
                 Жидкие обои премиум-класса
             {% else %}
-                Premium šķidrās tapetes
+                Premium liquid wallpaper
             {% endif %}
         </p>
-
-        <a href="{{ url_for('catalog') }}" class="hero-btn">
+        <a href="/catalog" class="hero-btn">
             {% if lang == "ru" %}
                 Перейти в каталог
             {% else %}
-                Atvērt katalogu
+                Go to catalog
             {% endif %}
         </a>
     </div>

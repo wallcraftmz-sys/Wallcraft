@@ -5,10 +5,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: #f5f5f5;
     color: #222;
 }
@@ -17,12 +17,13 @@ body {
    HEADER
 ========================= */
 .top-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    width: 100%;
     height: 56px;
-    background: #ffffff;
+    background: #fff;
     border-bottom: 1px solid #eee;
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .menu-btn {
@@ -67,131 +68,158 @@ body {
     transform: translateY(-50%);
 }
 
-.lang-switch a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    margin-left: 6px;
+/* =========================
+   SIDE MENU
+========================= */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 260px;
+    height: 100%;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.25);
+    transition: left 0.3s ease;
+    z-index: 3000;
+}
+
+.side-menu.open {
+    left: 0;
+}
+
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 2500;
+}
+
+.menu-overlay.show {
+    opacity: 1;
+    pointer-events: all;
 }
 
 /* =========================
-   HERO (ПРАВИЛЬНО)
+   CONTENT OFFSET
+========================= */
+.container {
+    padding: 80px 16px 16px;
+}
+
+/* =========================
+   HERO
 ========================= */
 .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 0 20px;
+    position: relative;
+    height: 80vh;
+    min-height: 420px;
+    overflow: hidden;
+}
 
-    background:
-        linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.35)),
-        url("../images/IMG_0954.jpeg") center / cover no-repeat;
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
 }
 
 .hero-content {
-    max-width: 720px;
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     color: #fff;
 }
 
 .hero-title {
-    font-size: 48px;
-    letter-spacing: 3px;
-    margin-bottom: 12px;
+    font-size: 42px;
+    margin-bottom: 10px;
 }
 
 .hero-subtitle {
-    font-size: 18px;
-    opacity: 0.9;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
 
 .hero-btn {
-    display: inline-block;
-    padding: 14px 32px;
+    padding: 14px 28px;
     background: #27ae60;
     color: #fff;
-    text-decoration: none;
     border-radius: 30px;
-    font-weight: 600;
-    transition: background 0.3s, transform 0.2s;
-}
-
-.hero-btn:hover {
-    background: #219150;
-    transform: translateY(-2px);
-}
-
-/* =========================
-   SECTIONS
-========================= */
-.container {
-    padding: 24px 16px;
-}
-
-.section-title {
-    text-align: center;
-    font-size: 26px;
-    margin: 40px 0 24px;
-}
-
-/* =========================
-   PRODUCT GRID
-========================= */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 18px;
-}
-
-.product-card {
-    background: #fff;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     text-decoration: none;
-    color: #222;
-    transition: transform 0.25s, box-shadow 0.25s;
-}
-
-.product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 34px rgba(0,0,0,0.15);
-}
-
-.product-card img {
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-}
-
-.product-info {
-    padding: 14px;
-    text-align: center;
-}
-
-.product-info h3 {
-    font-size: 15px;
-    margin-bottom: 6px;
-}
-
-.product-info .price {
-    font-weight: 700;
-    color: #27ae60;
-    font-size: 16px;
+    font-weight: bold;
 }
 
 /* =========================
-   MOBILE FIXES
+   FLOATING CART
 ========================= */
-@media (max-width: 480px) {
-    .hero-title {
-        font-size: 34px;
-        letter-spacing: 2px;
-    }
+.floating-cart {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 64px;
+    height: 64px;
+    background: #27ae60;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    z-index: 4000;
+}
 
-    .hero-subtitle {
-        font-size: 16px;
-    }
+.floating-cart span {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: red;
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+   POPUP
+========================= */
+.cart-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 5000;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-popup.show {
+    display: flex;
+}
+
+.cart-popup-content {
+    background: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
 }

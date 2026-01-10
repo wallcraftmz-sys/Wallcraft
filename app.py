@@ -20,7 +20,7 @@ products = [
         "description_ru": "Высококачественные жидкие обои",
         "description_lv": "Augstas kvalitātes tapetes",
         "price": 25.00,
-        "image": "images/main1.jpg"
+        "image": "images/hero1.jpg"
     }
 ]
 

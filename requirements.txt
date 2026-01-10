@@ -2,3 +2,4 @@ Flask==2.3.2
 gunicorn
 stripe
 python-dotenv
+requests

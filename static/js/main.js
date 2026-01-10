@@ -37,6 +37,6 @@ function closeCartPopup() {
 // MENU
 // =========================
 function toggleMenu() {
-    const menu = document.getElementById("sideMenu");
-    if (menu) menu.classList.toggle("open");
+    document.getElementById("sideMenu").classList.toggle("open");
+    document.getElementById("menuOverlay").classList.toggle("show");
 }

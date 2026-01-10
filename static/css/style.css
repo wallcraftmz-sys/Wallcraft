@@ -402,3 +402,29 @@ textarea {
     letter-spacing: 1px;
     color: #ffffff;
 }
+.hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    background: radial-gradient(circle at center, #1a1a1a, #0b0b0b);
+}
+
+.hero img {
+    max-width: 100%;
+    width: 520px;
+    height: auto;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.logo-link img {
+    height: 32px;
+    width: auto;
+}

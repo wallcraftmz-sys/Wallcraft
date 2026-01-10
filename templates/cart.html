@@ -16,10 +16,15 @@
             <div class="cart-name">
                 {{ item.product["name_"+lang] }}
             </div>
-            <div class="cart-price">
-                {{ item.product.price }} € × {{ item.qty }}
-            </div>
-        </div>
+            <div class="cart-qty">
+    <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
+
+    <span id="qty-{{ item.product.id }}">
+        {{ item.qty }}
+    </span>
+
+    <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
+</div>
 
         <div class="cart-subtotal">
             {{ "%.2f"|format(item.product.price * item.qty) }} €

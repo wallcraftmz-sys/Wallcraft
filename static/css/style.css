@@ -28,9 +28,11 @@ body {
     transform: translateY(-50%);
     font-size: 26px;
     cursor: pointer;
+    background: none;
+    border: none;
 }
 
-/* WALLCRAFT по центру */
+/* LOGO по центру */
 .logo-center {
     position: absolute;
     left: 50%;
@@ -38,10 +40,23 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.logo-center a {
-    font-size: 20px;
-    font-weight: bold;
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     text-decoration: none;
+    color: inherit;
+}
+
+.logo-link img {
+    height: 32px;
+    width: auto;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
     color: #222;
 }
 
@@ -89,6 +104,8 @@ body {
 .side-menu hr {
     margin: 15px 0;
 }
+
+/* затемнение */
 .menu-overlay {
     position: fixed;
     inset: 0;
@@ -103,6 +120,7 @@ body {
     opacity: 1;
     pointer-events: all;
 }
+
 /* ===== CONTENT ===== */
 .container {
     padding: 16px;
@@ -110,8 +128,23 @@ body {
 
 .page-title {
     text-align: center;
-    margin-bottom: 20px;
+    margin: 30px 0 20px;
     font-size: 22px;
+}
+
+/* ===== HERO / ОБЛОЖКА ===== */
+.hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    background: radial-gradient(circle at center, #1a1a1a, #0b0b0b);
+}
+
+.hero img {
+    max-width: 100%;
+    width: 520px;
+    height: auto;
 }
 
 /* ===== PRODUCTS GRID ===== */
@@ -126,9 +159,6 @@ body {
     padding: 12px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.product-link {
     text-decoration: none;
     color: inherit;
 }
@@ -166,7 +196,7 @@ body {
     line-height: 1.4;
 }
 
-/* ===== BUTTONS (ЕДИНЫЙ СТИЛЬ) ===== */
+/* ===== BUTTONS ===== */
 .btn,
 .add-to-cart-btn {
     display: block;
@@ -304,40 +334,23 @@ body {
     font-weight: bold;
 }
 
-.cart-subtotal {
-    font-weight: bold;
-}
-
 .cart-total {
     text-align: center;
     font-size: 18px;
     margin: 20px 0;
 }
 
-.cart-actions {
-    display: flex;
-    gap: 12px;
-}
-.cart-qty {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.cart-qty button {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: none;
-    font-size: 18px;
-    background: #eee;
-    cursor: pointer;
+/* ===== FORMS ===== */
+textarea,
+input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
 }
 
-.cart-qty button:hover {
-    background: #ddd;
-}
-/* ===== DASHBOARD ===== */
+/* ===== ADMIN ===== */
 .dashboard-box {
     background: #fff;
     padding: 20px;
@@ -347,13 +360,6 @@ body {
     text-align: center;
 }
 
-.dashboard-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-}
-/* ===== ADMIN ORDERS ===== */
 .admin-orders {
     display: flex;
     flex-direction: column;
@@ -365,66 +371,4 @@ body {
     padding: 16px;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-/* ===== HERO / ОБЛОЖКА НА ГЛАВНОЙ ===== */
-.hero img {
-    width: 100%;
-    max-height: 320px;
-    object-fit: cover;
-    border-radius: 0 0 20px 20px;
-}
-
-/* ===== БОЛЬШИЕ ПОЛЯ В ОФОРМЛЕНИИ ЗАКАЗА ===== */
-textarea {
-    width: 100%;
-    min-height: 80px;
-    padding: 14px;
-    font-size: 16px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    resize: vertical;
-}
-.logo-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-
-.logo-img {
-    height: 36px;
-    width: auto;
-}
-
-.logo-text {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #ffffff;
-}
-.hero {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 60px 20px;
-    background: radial-gradient(circle at center, #1a1a1a, #0b0b0b);
-}
-
-.hero img {
-    max-width: 100%;
-    width: 520px;
-    height: auto;
-}
-
-.logo-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: inherit;
-}
-
-.logo-link img {
-    height: 32px;
-    width: auto;
 }

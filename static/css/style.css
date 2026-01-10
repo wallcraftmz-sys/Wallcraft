@@ -78,29 +78,27 @@ body {
     width: 260px;
     height: 100%;
     background: #fff;
-    padding: 20px;
+    padding: 24px 20px;
     box-shadow: 2px 0 12px rgba(0,0,0,0.25);
     transition: left 0.3s ease;
-    z-index: 3000;
+    z-index: 2000;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
 .side-menu.open {
     left: 0;
 }
 
-.menu-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: 2500;
-}
-
-.menu-overlay.show {
-    opacity: 1;
-    pointer-events: all;
+.side-menu a {
+    font-size: 16px;
+    text-decoration: none;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* =========================

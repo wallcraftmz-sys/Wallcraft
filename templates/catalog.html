@@ -1,24 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="page-title">
-    {% if lang == "ru" %}Каталог товаров{% else %}Produktu katalogs{% endif %}
-</h1>
 
-<div class="product-card">
-    <div class="product-image">
-        <img src="{{ product.image }}" alt="{{ product.name }}">
-    </div>
+<div class="product-grid">
 
-    <div class="product-info">
-        <h3 class="product-title">{{ product.name }}</h3>
-        <div class="product-price">{{ product.price }} €</div>
+    {% for product in products %}
 
-        <button class="add-to-cart-btn"
-                onclick="addToCart({{ product.id }})">
-            🛒 В корзину
-        </button>
-    </div>
+        <div class="product-card">
+            <div class="product-image">
+                <img src="{{ url_for('static', filename=product.image) }}"
+                     alt="{{ product.name_ru }}">
+            </div>
+
+            <div class="product-info">
+                <h3 class="product-title">
+                    {{ product["name_" + lang] }}
+                </h3>
+
+                <div class="product-price">
+                    {{ product.price }} €
+                </div>
+
+                <button class="add-to-cart-btn"
+                        onclick="addToCart({{ product.id }})">
+                    🛒 В корзину
+                </button>
+            </div>
+        </div>
+
+    {% endfor %}
+
 </div>
-{% endblock %}
 
+{% endblock %}

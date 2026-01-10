@@ -132,21 +132,6 @@ body {
     font-size: 22px;
 }
 
-/* ===== HERO / ОБЛОЖКА ===== */
-.hero {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 60px 20px;
-    background: radial-gradient(circle at center, #1a1a1a, #0b0b0b);
-}
-
-.hero img {
-    max-width: 100%;
-    width: 520px;
-    height: auto;
-}
-
 /* ===== PRODUCTS GRID ===== */
 .product-grid {
     display: grid;
@@ -371,4 +356,19 @@ input {
     padding: 16px;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+/* ===== HERO (ГЛАВНАЯ ОБЛОЖКА) ===== */
+.hero {
+    width: 100%;
+    padding: 40px 16px;
+    background: radial-gradient(circle at center, #1a1a1a, #0b0b0b);
+    display: flex;
+    justify-content: center;
+}
+
+.hero img {
+    width: 100%;
+    max-width: 520px;
+    height: auto;
+    display: block;
 }

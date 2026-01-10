@@ -5,28 +5,21 @@
     <title>Wallcraft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- CSS -->
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}?v=1001">
+          href="{{ url_for('static', filename='css/style.css') }}?v=1002">
 
-    <!-- JS -->
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 
 <header class="top-header">
-    <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">
-        ☰
-    </button>
+    <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">☰</button>
 
-    <!-- ЛОГО + НАЗВАНИЕ -->
     <div class="logo-center">
         <a href="/" class="logo-link">
-            <img
-                src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}"
-                alt="Wallcraft logo"
-                class="logo-img"
-            >
+            <img src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}"
+                 alt="Wallcraft logo"
+                 class="logo-img">
             <span class="logo-text">Wallcraft</span>
         </a>
     </div>
@@ -37,10 +30,8 @@
     </div>
 </header>
 
-<!-- ЗАТЕМНЕНИЕ -->
 <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 
-<!-- БОКОВОЕ МЕНЮ -->
 <div id="sideMenu" class="side-menu">
     <a href="/" onclick="toggleMenu()">🏠 Главная</a>
     <a href="/catalog" onclick="toggleMenu()">📦 Каталог</a>
@@ -57,23 +48,21 @@
     {% endif %}
 </div>
 
-<main class="container">
+<main>
     {% block content %}{% endblock %}
 </main>
 
-<!-- POPUP КОРЗИНЫ -->
+{% if request.path != '/' %}
 <div id="cart-popup" class="cart-popup">
     <div class="cart-popup-content">
         <p>✅ Товар добавлен в корзину</p>
-
         <a href="/catalog" class="popup-btn">Продолжить покупки</a>
         <a href="/cart" class="popup-btn primary">Перейти в корзину</a>
-
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>
 </div>
+{% endif %}
 
-<!-- ПЛАВАЮЩАЯ КОРЗИНА -->
 <a href="/cart" class="floating-cart">
     🛒
     <span id="cart-count">

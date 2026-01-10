@@ -40,3 +40,8 @@ function toggleMenu() {
     document.getElementById("sideMenu").classList.toggle("open");
     document.getElementById("menuOverlay").classList.toggle("show");
 }
+
+function closeMenu() {
+    document.getElementById("sideMenu").classList.remove("open");
+    document.getElementById("menuOverlay").classList.remove("show");
+}

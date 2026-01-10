@@ -24,6 +24,9 @@ products = [
     }
 ]
 
+# ===== ORDERS STORAGE =====
+orders = []
+
 # ===== TELEGRAM =====
 def send_telegram(message: str):
     token = os.getenv("TG_BOT_TOKEN")
@@ -104,6 +107,16 @@ def logout():
 def dashboard():
     return render_template("dashboard.html", lang=session["lang"])
 
+# ===== ADMIN ORDERS =====
+@app.route("/admin/orders")
+@admin_required
+def admin_orders():
+    return render_template(
+        "admin_orders.html",
+        orders=orders,
+        lang=session["lang"]
+    )
+
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
@@ -181,6 +194,13 @@ def order():
                 subtotal = pr["price"] * qty
                 total += subtotal
                 lines.append(f"{pr['name_ru']} — {qty} × {pr['price']} €")
+
+        orders.append({
+            "name": name,
+            "contact": contact,
+            "items": lines,
+            "total": total
+        })
 
         message = (
             "🛒 НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"

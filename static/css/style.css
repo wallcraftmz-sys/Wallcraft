@@ -100,6 +100,20 @@ body {
     align-items: center;
     gap: 10px;
 }
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1500;
+}
+
+.menu-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+}
 
 /* =========================
    CONTENT OFFSET

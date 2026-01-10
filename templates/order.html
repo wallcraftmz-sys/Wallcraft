@@ -26,15 +26,9 @@
 {% else %}
 
 <form method="POST" class="order-form" style="max-width:400px; margin:0 auto;">
-    <input type="text"
-           name="name"
-           placeholder="{% if lang=='ru' %}Ваше имя{% else %}Vārds{% endif %}"
-           required>
+    <textarea name="name" placeholder="Ваше имя" required></textarea>
 
-    <input type="text"
-           name="contact"
-           placeholder="{% if lang=='ru' %}Телефон / WhatsApp / Telegram{% else %}Kontakts{% endif %}"
-           required>
+<textarea name="contact" placeholder="Телефон / WhatsApp" required></textarea>
 
     <button type="submit" class="add-to-cart-btn">
         {% if lang == "ru" %}Отправить{% else %}Nosūtīt{% endif %}

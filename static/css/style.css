@@ -155,23 +155,24 @@ body {
     text-align: center;
     color: #fff;
     padding: 0 20px;
+    max-width: 520px;
 }
 
 .hero-content h1 {
     font-size: 42px;
     letter-spacing: 4px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .hero-content p {
     font-size: 17px;
     opacity: 0.95;
+    margin-bottom: 36px; /* ← ВАЖНО: отделили от кнопки */
 }
 
 .hero-btn {
-    margin-top: 32px;
-    padding: 16px 38px;
-    background: #27ae60;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
     color: #fff;
     text-decoration: none;
     border-radius: 999px;
@@ -183,18 +184,30 @@ body {
 }
 
 .hero-btn:hover {
-    background: #219150;
+    background: linear-gradient(135deg, #27ae60, #219150);
     transform: translateY(-2px);
     box-shadow: 0 14px 36px rgba(0,0,0,0.5);
 }
 
 /* =========================
-   PRODUCT GRID
+   PRODUCT GRID (FIXED)
 ========================= */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1100px) {
+    .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 /* =========================

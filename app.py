@@ -192,9 +192,15 @@ def order():
             "total": total
         })
 
-        send_telegram(
-            f"🛒 Новый заказ\nИмя: {name}\nКонтакт: {contact}\nИтого: {total:.2f} €"
-        )
+        items_text = "\n".join(lines)
+
+send_telegram(
+    f"🛒 Новый заказ\n"
+    f"Имя: {name}\n"
+    f"Контакт: {contact}\n\n"
+    f"Товары:\n{items_text}\n\n"
+    f"Итого: {total:.2f} €"
+)
 
         session["cart"] = {}
         success = True

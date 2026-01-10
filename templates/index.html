@@ -5,24 +5,22 @@
 <section class="hero">
     <div class="hero-content">
         <h1 class="hero-title">WALLCRAFT</h1>
-        <p class="hero-subtitle">Жидкие обои премиум-класса</p>
-        <a href="/catalog" class="hero-btn">Перейти в каталог</a>
-    </div>
-</section>
 
-<section class="catalog-preview">
-    <h2 class="section-title">
-        {% if lang == "ru" %}Каталог{% else %}Catalog{% endif %}
-    </h2>
+        <p class="hero-subtitle">
+            {% if lang == "ru" %}
+                Жидкие обои премиум-класса
+            {% else %}
+                Premium šķidrās tapetes
+            {% endif %}
+        </p>
 
-    <div class="product-grid">
-        {% for product in products %}
-        <a href="{{ url_for('product', product_id=product.id) }}" class="product-card">
-            <img src="{{ url_for('static', filename=product.image) }}" alt="">
-            <h3>{{ product["name_" + lang] }}</h3>
-            <span class="price">{{ product.price }} €</span>
+        <a href="{{ url_for('catalog') }}" class="hero-btn">
+            {% if lang == "ru" %}
+                Перейти в каталог
+            {% else %}
+                Atvērt katalogu
+            {% endif %}
         </a>
-        {% endfor %}
     </div>
 </section>
 

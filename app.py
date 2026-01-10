@@ -217,5 +217,3 @@ def admin_orders():
         lang=session.get("lang", "ru")
     )
     
-if __name__ == "__main__":
-    app.run(debug=True)

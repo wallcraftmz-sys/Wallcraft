@@ -217,5 +217,15 @@ def order():
 
     return render_template("order.html", success=success, lang=lang)
 
+# ===== ADMIN ORDERS =====
+@app.route("/admin/orders")
+@admin_required
+def admin_orders():
+    # пока без базы — просто заглушка
+    return render_template(
+        "admin_orders.html",
+        lang=session.get("lang", "ru")
+    )
+    
 if __name__ == "__main__":
     app.run(debug=True)

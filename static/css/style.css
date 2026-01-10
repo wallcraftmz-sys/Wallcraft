@@ -232,9 +232,8 @@ body {
 
 .product-card img {
     width: 100%;
-    height: 160px;
+    height: auto;
     object-fit: contain;
-    background: #f2f2f2;
 }
 
 .product-card h3 {

@@ -324,3 +324,19 @@ body {
 .cart-qty button:hover {
     background: #ddd;
 }
+/* ===== DASHBOARD ===== */
+.dashboard-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dashboard-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}

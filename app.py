@@ -192,16 +192,10 @@ def order():
             "total": total
         })
 
-        message = (
-            "🛒 НОВЫЙ ЗАКАЗ WALLCRAFT\n\n"
-            f"👤 Имя: {name}\n"
-            f"📞 Контакт: {contact}\n\n"
-            "📦 Заказ:\n"
-            + "\n".join(lines)
-            + f"\n\n💰 Итого: {total:.2f} €"
+        send_telegram(
+            f"🛒 Новый заказ\nИмя: {name}\nКонтакт: {contact}\nИтого: {total:.2f} €"
         )
 
-        send_telegram(message)
         session["cart"] = {}
         success = True
 

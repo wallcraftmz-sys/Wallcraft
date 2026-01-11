@@ -142,7 +142,19 @@ def dashboard():
 def profile():
     if session["user"]["role"] != "user":
         return redirect(url_for("dashboard"))
-    return render_template("profile.html", user=session["user"], lang=session["lang"])
+    username = session["user"]["username"]
+
+my_orders = [
+    o for o in orders
+    if o["user"] == username
+]
+
+return render_template(
+    "profile.html",
+    user=session["user"],
+    orders=my_orders,
+    lang=session["lang"]
+)
 
 # ===== CART =====
 @app.route("/cart")
@@ -166,26 +178,45 @@ def order():
     cart = session.get("cart", {})
 
     if request.method == "POST" and cart:
-        name = request.form["name"]
-        contact = request.form["contact"]
+    if "user" not in session:
+        return redirect(url_for("login"))
 
-        lines, total = [], 0
-        for pid, qty in cart.items():
-            pr = next((p for p in products if p["id"] == int(pid)), None)
-            if pr:
-                total += pr["price"] * qty
-                lines.append(f"{pr['name_ru']} × {qty}")
+    name = request.form["name"]
+    contact = request.form["contact"]
 
-        send_telegram(
-            f"🛒 Новый заказ\nИмя: {name}\nКонтакт: {contact}\n"
-            f"{chr(10).join(lines)}\nИтого: {total:.2f} €"
-        )
+    lines = []
+    total = 0.0
 
-        session["cart"] = {}
-        success = True
+    for pid, qty in cart.items():
+        pr = next((p for p in products if p["id"] == int(pid)), None)
+        if pr:
+            subtotal = pr["price"] * qty
+            total += subtotal
+            lines.append(f"{pr['name_ru']} × {qty}")
 
-    return render_template("order.html", success=success, lang=lang)
+    # 🔥 СОХРАНЯЕМ ЗАКАЗ
+    orders.append({
+        "user": session["user"]["username"],
+        "role": session["user"]["role"],
+        "name": name,
+        "contact": contact,
+        "items": lines,
+        "total": total
+    })
 
+    # 🔔 TELEGRAM
+    send_telegram(
+        f"🛒 Новый заказ\n"
+        f"Пользователь: {session['user']['username']}\n"
+        f"Имя: {name}\n"
+        f"Контакт: {contact}\n\n"
+        f"{chr(10).join(lines)}\n"
+        f"Итого: {total:.2f} €"
+    )
+
+    session["cart"] = {}
+    success = True
+    
 # ===== ADMIN ORDERS =====
 @app.route("/admin/orders")
 @admin_required

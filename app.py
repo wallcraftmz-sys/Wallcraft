@@ -21,14 +21,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
-def admin_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if "user" not in session or session["user"]["role"] != "admin":
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return wrapper
-
 # ===== PRODUCTS =====
 products = [
     {
@@ -171,7 +163,8 @@ def cart():
 
     return render_template("cart.html", cart_items=items, total=total, lang=session["lang"])
 
-# ===== ORDER =====@app.route("/order", methods=["GET", "POST"])
+# ===== ORDER =====
+@app.route("/order", methods=["GET", "POST"])
 def order():
     lang = session["lang"]
     success = False

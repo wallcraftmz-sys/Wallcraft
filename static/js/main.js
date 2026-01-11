@@ -3,7 +3,8 @@
 // =========================
 function addToCart(productId) {
     fetch(`/api/add_to_cart/${productId}`, {
-        method: "POST"
+        method: "POST",
+        credentials: "same-origin"
     })
     .then(res => res.json())
     .then(data => {
@@ -44,4 +45,3 @@ function toggleMenu() {
 function closeMenu() {
     document.getElementById("sideMenu").classList.remove("open");
     document.getElementById("menuOverlay").classList.remove("show");
-}

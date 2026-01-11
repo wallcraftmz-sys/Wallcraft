@@ -746,3 +746,80 @@ body {
     background: #27ae60;
     color: #fff;
 }
+/* =========================
+   PAGE CARD (cart / order / empty)
+========================= */
+.page-card-wrapper {
+    min-height: calc(100vh - 56px);
+    margin-top: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.page-card {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    padding: 28px 24px;
+    border-radius: 18px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.12);
+    text-align: center;
+}
+
+/* title */
+.page-card h1 {
+    font-size: 22px;
+    margin-bottom: 14px;
+}
+
+/* text */
+.page-card p {
+    font-size: 16px;
+    margin-bottom: 22px;
+    color: #444;
+}
+
+/* actions */
+.page-card-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+/* buttons */
+.page-btn {
+    padding: 12px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+
+.page-btn.green {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+.page-btn.gray {
+    background: #eee;
+    color: #333;
+}
+
+/* form */
+.order-form textarea,
+.order-form input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    margin-bottom: 14px;
+    resize: none;
+}

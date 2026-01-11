@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}?v=1002">
+          href="{{ url_for('static', filename='css/style.css') }}?v=1003">
 
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
@@ -30,11 +30,13 @@
     </div>
 </header>
 
+<!-- OVERLAY -->
 <div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
+<!-- SIDE MENU -->
 <div id="sideMenu" class="side-menu">
     <a href="/" onclick="closeMenu()">🏠 Главная</a>
-    <a href="/catalog" onclick="closeeMenu()">📦 Каталог</a>
+    <a href="/catalog" onclick="closeMenu()">📦 Каталог</a>
     <a href="/about" onclick="closeMenu()">ℹ️ О компании</a>
 
     <hr>
@@ -48,21 +50,24 @@
     {% endif %}
 </div>
 
-<main>
+<!-- 🔥 КЛЮЧЕВОЙ ФИКС -->
+<main class="container">
     {% block content %}{% endblock %}
 </main>
 
-{% if request.path != '/' %}
+<!-- CART POPUP -->
 <div id="cart-popup" class="cart-popup">
     <div class="cart-popup-content">
         <p>✅ Товар добавлен в корзину</p>
+
         <a href="/catalog" class="popup-btn">Продолжить покупки</a>
         <a href="/cart" class="popup-btn primary">Перейти в корзину</a>
+
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>
 </div>
-{% endif %}
 
+<!-- FLOATING CART -->
 <a href="/cart" class="floating-cart">
     🛒
     <span id="cart-count">

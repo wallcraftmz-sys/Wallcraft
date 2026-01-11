@@ -21,6 +21,14 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user" not in session or session["user"]["role"] != "admin":
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapper
+    
 # ===== PRODUCTS =====
 products = [
     {

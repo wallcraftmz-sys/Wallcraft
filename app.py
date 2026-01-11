@@ -87,24 +87,26 @@ def login():
         user = USERS.get(username)
 
         if user and user["password"] == password:
+            old_lang = session.get("lang", "ru")
             session.clear()
+            session["lang"] = old_lang
             session["user"] = {
                 "username": username,
                 "role": user["role"]
             }
 
-            return redirect(
-                url_for("dashboard") if user["role"] == "admin"
-                else url_for("profile")
-            )
+            if user["role"] == "admin":
+                return redirect(url_for("dashboard"))
+            else:
+                return redirect(url_for("profile"))
 
         return render_template(
             "login.html",
             error="Неверный логин или пароль",
-            lang=session["lang"]
+            lang=session.get("lang", "ru")
         )
 
-    return render_template("login.html", lang=session["lang"])
+    return render_template("login.html", lang=session.get("lang", "ru"))
 
 # ===== LOGOUT =====
 @app.route("/logout")

@@ -486,3 +486,136 @@ body {
 .login-box button:hover {
     background: #219150;
 }
+
+/* =========================
+   CART PAGE (FIXED & CLEAN)
+========================= */
+
+.page-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 24px;
+}
+
+/* LIST */
+.cart-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ROW */
+.cart-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    padding: 14px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* IMAGE */
+.cart-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+/* INFO */
+.cart-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cart-name {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* QTY */
+.cart-qty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cart-qty button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #eee;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cart-qty span {
+    font-size: 15px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* PRICE */
+.cart-subtotal {
+    font-size: 15px;
+    font-weight: 800;
+    color: #27ae60;
+    margin-top: 6px;
+}
+
+/* TOTAL */
+.cart-total {
+    max-width: 900px;
+    margin: 24px auto 16px;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* ACTIONS */
+.cart-actions {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    gap: 12px;
+}
+
+.cart-actions .popup-btn {
+    flex: 1;
+    text-align: center;
+    padding: 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    background: #eee;
+    color: #222;
+}
+
+.cart-actions .popup-btn.primary {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .cart-row {
+        align-items: flex-start;
+    }
+
+    .cart-actions {
+        flex-direction: column;
+    }
+}

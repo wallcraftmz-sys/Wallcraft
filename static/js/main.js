@@ -45,3 +45,4 @@ function toggleMenu() {
 function closeMenu() {
     document.getElementById("sideMenu").classList.remove("open");
     document.getElementById("menuOverlay").classList.remove("show");
+}

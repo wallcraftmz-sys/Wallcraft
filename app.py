@@ -4,15 +4,15 @@ import requests
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.getenv("SECRET_KEY")  # ОБЯЗАТЕЛЬНО задан в Railway
 
-# ===== USERS (ВРЕМЕННО БЕЗ БД) =====
+# ===== USERS (временно без БД) =====
 USERS = {
     "admin": {"password": "123456", "role": "admin"},
     "user": {"password": "111111", "role": "user"}
 }
 
-# ===== AUTH DECORATORS =====
+# ===== DECORATORS =====
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -29,7 +29,7 @@ def admin_required(f):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return wrapper
-    
+
 # ===== PRODUCTS =====
 products = [
     {
@@ -54,11 +54,14 @@ def send_telegram(message: str):
     if not token or not chat_id:
         return
 
-    requests.post(
-        f"https://api.telegram.org/bot{token}/sendMessage",
-        json={"chat_id": chat_id, "text": message},
-        timeout=10
-    )
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": message},
+            timeout=10
+        )
+    except Exception as e:
+        print("TG ERROR:", e)
 
 # ===== LANGUAGE =====
 @app.before_request
@@ -68,7 +71,7 @@ def set_lang():
 # ===== PAGES =====
 @app.route("/")
 def index():
-    return render_template("index.html", products=products, lang=session["lang"])
+    return render_template("index.html", lang=session["lang"])
 
 @app.route("/catalog")
 def catalog():
@@ -84,24 +87,24 @@ def login():
         user = USERS.get(username)
 
         if user and user["password"] == password:
-            session.clear()  # 💥 ВАЖНО
+            session.clear()
             session["user"] = {
                 "username": username,
                 "role": user["role"]
             }
 
-            if user["role"] == "admin":
-                return redirect(url_for("dashboard"))
-            else:
-                return redirect(url_for("profile"))
+            return redirect(
+                url_for("dashboard") if user["role"] == "admin"
+                else url_for("profile")
+            )
 
         return render_template(
             "login.html",
             error="Неверный логин или пароль",
-            lang=session.get("lang", "ru")
+            lang=session["lang"]
         )
 
-    return render_template("login.html", lang=session.get("lang", "ru"))
+    return render_template("login.html", lang=session["lang"])
 
 # ===== LOGOUT =====
 @app.route("/logout")
@@ -135,6 +138,7 @@ def register():
             "role": "user"
         }
 
+        session.clear()
         session["user"] = {
             "username": username,
             "role": "user"
@@ -143,18 +147,19 @@ def register():
         return redirect(url_for("profile"))
 
     return render_template("register.html", lang=session["lang"])
-    
-# ===== DASHBOARD =====
+
+# ===== DASHBOARD (ADMIN) =====
 @app.route("/dashboard")
 @admin_required
 def dashboard():
     return render_template(
         "dashboard.html",
         user=session["user"],
-        lang=session.get("lang", "ru")
+        orders=orders,
+        lang=session["lang"]
     )
 
-# ===== PROFILE =====
+# ===== PROFILE (USER) =====
 @app.route("/profile")
 @login_required
 def profile():
@@ -174,11 +179,12 @@ def profile():
         orders=user_orders,
         lang=session["lang"]
     )
+
 # ===== CART =====
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
-    items, total = [], 0
+    items, total = [], 0.0
 
     for pid, qty in cart.items():
         pr = next((p for p in products if p["id"] == int(pid)), None)
@@ -186,22 +192,23 @@ def cart():
             items.append({"product": pr, "qty": qty})
             total += pr["price"] * qty
 
-    return render_template("cart.html", cart_items=items, total=total, lang=session["lang"])
+    return render_template(
+        "cart.html",
+        cart_items=items,
+        total=total,
+        lang=session["lang"]
+    )
 
 # ===== ORDER =====
 @app.route("/order", methods=["GET", "POST"])
+@login_required
 def order():
-    lang = session["lang"]
-    success = False
     cart = session.get("cart", {})
+    success = False
 
     if request.method == "POST" and cart:
-
-        if "user" not in session:
-            return redirect(url_for("login"))
-
-        name = request.form["name"]
-        contact = request.form["contact"]
+        name = request.form.get("name")
+        contact = request.form.get("contact")
 
         lines = []
         total = 0.0
@@ -209,22 +216,23 @@ def order():
         for pid, qty in cart.items():
             pr = next((p for p in products if p["id"] == int(pid)), None)
             if pr:
-                subtotal = pr["price"] * qty
-                total += subtotal
+                total += pr["price"] * qty
                 lines.append(f"{pr['name_ru']} × {qty}")
 
-        orders.append({
+        order_data = {
             "user": session["user"]["username"],
             "role": session["user"]["role"],
             "name": name,
             "contact": contact,
             "items": lines,
             "total": total
-        })
+        }
+
+        orders.append(order_data)
 
         send_telegram(
             f"🛒 Новый заказ\n"
-            f"Пользователь: {session['user']['username']}\n"
+            f"Пользователь: {order_data['user']}\n"
             f"Имя: {name}\n"
             f"Контакт: {contact}\n\n"
             f"{chr(10).join(lines)}\n"
@@ -234,10 +242,18 @@ def order():
         session["cart"] = {}
         success = True
 
-    return render_template("order.html", success=success, lang=lang)
-    
+    return render_template(
+        "order.html",
+        success=success,
+        lang=session["lang"]
+    )
+
 # ===== ADMIN ORDERS =====
 @app.route("/admin/orders")
 @admin_required
 def admin_orders():
-    return render_template("admin_orders.html", orders=orders, lang=session["lang"])
+    return render_template(
+        "admin_orders.html",
+        orders=orders,
+        lang=session["lang"]
+    )

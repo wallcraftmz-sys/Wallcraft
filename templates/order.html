@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="order-container">
-    <div class="order-box">
+<div class="page-card-wrapper">
+    <div class="page-card">
 
-        <h1 class="order-title">
+        <h1>
             {% if lang == "ru" %}
                 Оформление заказа
             {% else %}
@@ -14,7 +14,7 @@
 
         {% if success %}
 
-            <p class="order-success">
+            <p>
                 {% if lang == "ru" %}
                     Заявка отправлена! Мы свяжемся с вами.
                 {% else %}
@@ -22,12 +22,11 @@
                 {% endif %}
             </p>
 
-            <div class="order-actions">
-                <a href="/?lang={{ lang }}" class="order-btn gray">
+            <div class="page-card-actions">
+                <a href="/?lang={{ lang }}" class="page-btn gray">
                     {% if lang == "ru" %}На главную{% else %}Uz sākumu{% endif %}
                 </a>
-
-                <a href="/catalog?lang={{ lang }}" class="order-btn green">
+                <a href="/catalog?lang={{ lang }}" class="page-btn green">
                     {% if lang == "ru" %}В каталог{% else %}Uz katalogu{% endif %}
                 </a>
             </div>
@@ -35,21 +34,17 @@
         {% else %}
 
             <form method="POST" class="order-form">
+                <input type="text" name="name"
+                       placeholder="{% if lang=='ru' %}Ваше имя{% else %}Vārds{% endif %}"
+                       required>
 
-                <label>
-                    {% if lang == "ru" %}Ваше имя{% else %}Vārds{% endif %}
-                </label>
-                <input type="text" name="name" required>
+                <input type="text" name="contact"
+                       placeholder="{% if lang=='ru' %}Телефон / WhatsApp{% else %}Telefons{% endif %}"
+                       required>
 
-                <label>
-                    {% if lang == "ru" %}Телефон / WhatsApp / Telegram{% else %}Tālrunis / WhatsApp{% endif %}
-                </label>
-                <input type="text" name="contact" required>
-
-                <button type="submit" class="order-submit">
+                <button type="submit" class="page-btn green" style="width:100%; margin-top:10px;">
                     {% if lang == "ru" %}Отправить{% else %}Nosūtīt{% endif %}
                 </button>
-
             </form>
 
         {% endif %}

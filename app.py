@@ -8,16 +8,11 @@ app.secret_key = os.getenv("SECRET_KEY", "wallcraft_secret_key")
 
 # ===== USERS (ВРЕМЕННО БЕЗ БД) =====
 USERS = {
-    "admin": {
-        "password": "123456",
-        "role": "admin"
-    },
-    "user": {
-        "password": "111111",
-        "role": "user"
-    }
+    "admin": {"password": "123456", "role": "admin"},
+    "user": {"password": "111111", "role": "user"}
 }
 
+# ===== AUTH DECORATORS =====
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -25,7 +20,6 @@ def login_required(f):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return wrapper
-
 
 def admin_required(f):
     @wraps(f)
@@ -49,37 +43,21 @@ products = [
     }
 ]
 
-# ===== ORDERS STORAGE =====
+# ===== ORDERS =====
 orders = []
 
 # ===== TELEGRAM =====
 def send_telegram(message: str):
     token = os.getenv("TG_BOT_TOKEN")
     chat_id = os.getenv("TG_CHAT_ID")
-
     if not token or not chat_id:
-        print("TG ERROR: env vars not set")
         return
 
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": message
-    }
-
-    try:
-        requests.post(url, json=payload, timeout=10)
-    except Exception as e:
-        print("TG ERROR:", e)
-
-# ===== AUTH =====
-def admin_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if not session.get("is_admin"):
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return wrapper
+    requests.post(
+        f"https://api.telegram.org/bot{token}/sendMessage",
+        json={"chat_id": chat_id, "text": message},
+        timeout=10
+    )
 
 # ===== LANGUAGE =====
 @app.before_request
@@ -95,99 +73,47 @@ def index():
 def catalog():
     return render_template("catalog.html", products=products, lang=session["lang"])
 
-@app.route("/product/<int:product_id>")
-def product(product_id):
-    item = next((p for p in products if p["id"] == product_id), None)
-    if not item:
-        return redirect(url_for("catalog"))
-    return render_template("product.html", product=item, lang=session["lang"])
-
 # ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("login")
         password = request.form.get("password")
-
         user = USERS.get(username)
 
         if user and user["password"] == password:
-            session["user"] = {
-                "username": username,
-                "role": user["role"]
-            }
+            session["user"] = {"username": username, "role": user["role"]}
+            return redirect(url_for("dashboard" if user["role"] == "admin" else "profile"))
 
-            if user["role"] == "admin":
-                return redirect(url_for("dashboard"))
-            else:
-                return redirect(url_for("profile"))
+        return render_template("login.html", error="Неверный логин", lang=session["lang"])
 
-        return render_template(
-            "login.html",
-            error="Неверный логин или пароль",
-            lang=session.get("lang", "ru")
-        )
+    return render_template("login.html", lang=session["lang"])
 
-    return render_template("login.html", lang=session.get("lang", "ru"))
+# ===== LOGOUT =====
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
 
 # ===== DASHBOARD =====
 @app.route("/dashboard")
 @admin_required
 def dashboard():
-    return render_template(
-        "dashboard.html",
-        user=session["user"],
-        lang=session["lang"]
-    )
+    return render_template("dashboard.html", user=session["user"], lang=session["lang"])
 
-# ===== CART API =====
-@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
-def add_to_cart(product_id):
-    cart = session.get("cart", {})
-    pid = str(product_id)
-    cart[pid] = cart.get(pid, 0) + 1
-    session["cart"] = cart
-    return jsonify(success=True, cart_total_items=sum(cart.values()))
+# ===== PROFILE =====
+@app.route("/profile")
+@login_required
+def profile():
+    if session["user"]["role"] != "user":
+        return redirect(url_for("dashboard"))
+    return render_template("profile.html", user=session["user"], lang=session["lang"])
 
-@app.route("/api/update_cart/<int:pid>/<action>", methods=["POST"])
-def update_cart(pid, action):
-    cart = session.get("cart", {})
-    pid = str(pid)
-
-    if pid in cart:
-        if action == "plus":
-            cart[pid] += 1
-        elif action == "minus":
-            cart[pid] -= 1
-            if cart[pid] <= 0:
-                del cart[pid]
-
-    session["cart"] = cart
-
-    total = 0
-    subtotal = 0
-    qty = cart.get(pid, 0)
-
-    for k, q in cart.items():
-        pr = next((p for p in products if p["id"] == int(k)), None)
-        if pr:
-            total += pr["price"] * q
-            if k == pid:
-                subtotal = pr["price"] * q
-
-    return jsonify(
-        qty=qty,
-        subtotal=subtotal,
-        total=total,
-        cart_total_items=sum(cart.values())
-    )
-
-# ===== CART PAGE =====
+# ===== CART =====
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
-    items = []
-    total = 0.0
+    items, total = [], 0
 
     for pid, qty in cart.items():
         pr = next((p for p in products if p["id"] == int(pid)), None)
@@ -200,40 +126,25 @@ def cart():
 # ===== ORDER =====
 @app.route("/order", methods=["GET", "POST"])
 def order():
-    lang = session.get("lang", "ru")
+    lang = session["lang"]
     success = False
     cart = session.get("cart", {})
 
     if request.method == "POST" and cart:
-        name = request.form.get("name", "")
-        contact = request.form.get("contact", "")
+        name = request.form["name"]
+        contact = request.form["contact"]
 
-        lines = []
-        total = 0.0
-
+        lines, total = [], 0
         for pid, qty in cart.items():
             pr = next((p for p in products if p["id"] == int(pid)), None)
             if pr:
-                subtotal = pr["price"] * qty
-                total += subtotal
-                lines.append(f"{pr['name_ru']} — {qty} × {pr['price']} €")
-
-        items_text = "\n".join(lines)
+                total += pr["price"] * qty
+                lines.append(f"{pr['name_ru']} × {qty}")
 
         send_telegram(
-            f"🛒 Новый заказ\n"
-            f"Имя: {name}\n"
-            f"Контакт: {contact}\n\n"
-            f"Товары:\n{items_text}\n\n"
-            f"Итого: {total:.2f} €"
+            f"🛒 Новый заказ\nИмя: {name}\nКонтакт: {contact}\n"
+            f"{chr(10).join(lines)}\nИтого: {total:.2f} €"
         )
-
-        orders.append({
-            "name": name,
-            "contact": contact,
-            "items": lines,
-            "total": total
-        })
 
         session["cart"] = {}
         success = True
@@ -244,27 +155,4 @@ def order():
 @app.route("/admin/orders")
 @admin_required
 def admin_orders():
-    return render_template(
-        "admin_orders.html",
-        orders=orders,
-        lang=session.get("lang", "ru")
-    )
-    
-# ===== Logout =====
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("index"))
-
-#===== Profile =====
-    @app.route("/profile")
-@login_required
-def profile():
-    if session["user"]["role"] != "user":
-        return redirect(url_for("dashboard"))
-
-    return render_template(
-        "profile.html",
-        user=session["user"],
-        lang=session.get("lang", "ru")
-    )
+    return render_template("admin_orders.html", orders=orders, lang=session["lang"])

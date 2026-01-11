@@ -8,8 +8,11 @@
 
         <div class="product-card">
             <div class="product-image">
-                <img src="{{ url_for('static', filename=product.image) }}"
-                     alt="{{ product.name_ru }}">
+                <img 
+  src="{{ url_for('static', filename=item.product.image) }}"
+  loading="lazy"
+  decoding="async"
+>
             </div>
 
             <div class="product-info">

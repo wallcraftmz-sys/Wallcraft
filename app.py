@@ -134,21 +134,20 @@ def dashboard():
 def profile():
     if session["user"]["role"] != "user":
         return redirect(url_for("dashboard"))
-        
+
     username = session["user"]["username"]
 
-my_orders = [
-    o for o in orders
-    if o["user"] == username
-]
+    user_orders = [
+        o for o in orders
+        if o["user"] == username
+    ]
 
-return render_template(
-    "profile.html",
-    user=session["user"],
-    orders=my_orders,
-    lang=session["lang"]
-)
-
+    return render_template(
+        "profile.html",
+        user=session["user"],
+        orders=user_orders,
+        lang=session["lang"]
+    )
 # ===== CART =====
 @app.route("/cart")
 def cart():

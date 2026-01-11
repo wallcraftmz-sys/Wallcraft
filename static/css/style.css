@@ -687,3 +687,62 @@ body {
         padding: 24px 18px;
     }
 }
+/* =========================
+   ORDER SUCCESS STYLE
+========================= */
+
+.order-box {
+    animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ACTION BUTTONS */
+.order-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.order-btn {
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* PRIMARY */
+.order-btn.primary {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+}
+
+.order-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+/* OUTLINE */
+.order-btn.outline {
+    background: #fff;
+    color: #27ae60;
+    border: 2px solid #27ae60;
+}
+
+.order-btn.outline:hover {
+    background: #27ae60;
+    color: #fff;
+}

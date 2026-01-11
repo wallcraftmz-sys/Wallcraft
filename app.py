@@ -142,6 +142,7 @@ def dashboard():
 def profile():
     if session["user"]["role"] != "user":
         return redirect(url_for("dashboard"))
+        
     username = session["user"]["username"]
 
 my_orders = [
@@ -170,8 +171,7 @@ def cart():
 
     return render_template("cart.html", cart_items=items, total=total, lang=session["lang"])
 
-# ===== ORDER =====
-@app.route("/order", methods=["GET", "POST"])
+# ===== ORDER =====@app.route("/order", methods=["GET", "POST"])
 def order():
     lang = session["lang"]
     success = False
@@ -195,7 +195,6 @@ def order():
                 total += subtotal
                 lines.append(f"{pr['name_ru']} × {qty}")
 
-        # СОХРАНЯЕМ ЗАКАЗ
         orders.append({
             "user": session["user"]["username"],
             "role": session["user"]["role"],
@@ -205,7 +204,6 @@ def order():
             "total": total
         })
 
-        # TELEGRAM
         send_telegram(
             f"🛒 Новый заказ\n"
             f"Пользователь: {session['user']['username']}\n"

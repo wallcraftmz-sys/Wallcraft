@@ -4,7 +4,7 @@ import requests
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")  # ОБЯЗАТЕЛЬНО задан в Railway
+app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")  # ОБЯЗАТЕЛЬНО задан в Railway
 
 # ===== USERS (временно без БД) =====
 USERS = {

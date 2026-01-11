@@ -914,3 +914,22 @@ body {
     font-size: 16px;
     opacity: 0.7;
 }
+/* DIVIDER */
+.side-menu hr {
+    border: none;
+    height: 1px;
+    background: #eee;
+    margin: 12px 0;
+}
+
+/* ACTIVE LINK */
+.side-menu a.active {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* ICON ALIGN */
+.side-menu a span {
+    font-size: 18px;
+}

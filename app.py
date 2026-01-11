@@ -171,10 +171,9 @@ def profile():
     username = session["user"]["username"]
 
     user_orders = [
-        o for o in orders
-        if o["user"] == username
-    ]
-
+    o for o in orders
+    if o.get("user") == username
+]
     return render_template(
         "profile.html",
         user=session["user"],

@@ -69,50 +69,53 @@ body {
 }
 
 /* =========================
-   SIDE MENU
+   SIDE MENU — FIXED & SMOOTH
 ========================= */
+
 .side-menu {
     position: fixed;
     top: 0;
-    left: -260%;
+    left: 0;
+
     width: 260px;
-    height: 100%;
-    background: #fff;
+    height: 100vh;
+
+    background: #ffffff;
     padding: 80px 20px 24px;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.25);
-    transition: left 0.3s ease;
-    z-index: 3100;
+
+    box-shadow: 8px 0 30px rgba(0,0,0,0.25);
+
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+    z-index: 4000;
+
     display: flex;
     flex-direction: column;
     gap: 18px;
 }
 
+/* OPEN STATE */
 .side-menu.open {
-    left: 0;
+    transform: translateX(0);
 }
 
+/* LINKS */
 .side-menu a {
     font-size: 16px;
+    font-weight: 600;
     text-decoration: none;
     color: #222;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+
+    padding: 12px 14px;
+    border-radius: 12px;
+
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.menu-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    z-index: 3000;
-}
-
-.menu-overlay.show {
-    opacity: 1;
-    pointer-events: auto;
+.side-menu a:hover {
+    background: #f2f2f2;
+    transform: translateX(4px);
 }
 
 /* =========================

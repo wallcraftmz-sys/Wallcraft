@@ -6,9 +6,34 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_secret_key")
 
-# ===== ADMIN =====
-ADMIN_LOGIN = "admin"
-ADMIN_PASSWORD = "123456"
+# ===== USERS (ВРЕМЕННО БЕЗ БД) =====
+USERS = {
+    "admin": {
+        "password": "123456",
+        "role": "admin"
+    },
+    "user": {
+        "password": "111111",
+        "role": "user"
+    }
+}
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user" not in session or session["user"]["role"] != "admin":
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapper
 
 # ===== PRODUCTS =====
 products = [
@@ -81,12 +106,21 @@ def product(product_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        login = request.form.get("login")
+        username = request.form.get("login")
         password = request.form.get("password")
 
-        if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
-            session["is_admin"] = True
-            return redirect(url_for("dashboard"))
+        user = USERS.get(username)
+
+        if user and user["password"] == password:
+            session["user"] = {
+                "username": username,
+                "role": user["role"]
+            }
+
+            if user["role"] == "admin":
+                return redirect(url_for("dashboard"))
+            else:
+                return redirect(url_for("profile"))
 
         return render_template(
             "login.html",
@@ -96,16 +130,15 @@ def login():
 
     return render_template("login.html", lang=session.get("lang", "ru"))
 
-@app.route("/logout")
-def logout():
-    session.pop("is_admin", None)
-    return redirect(url_for("index"))
-
 # ===== DASHBOARD =====
 @app.route("/dashboard")
 @admin_required
 def dashboard():
-    return render_template("dashboard.html", lang=session["lang"])
+    return render_template(
+        "dashboard.html",
+        user=session["user"],
+        lang=session["lang"]
+    )
 
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
@@ -214,5 +247,24 @@ def admin_orders():
     return render_template(
         "admin_orders.html",
         orders=orders,
+        lang=session.get("lang", "ru")
+    )
+    
+# ===== Logout =====
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("index"))
+
+#===== Profile =====
+    @app.route("/profile")
+@login_required
+def profile():
+    if session["user"]["role"] != "user":
+        return redirect(url_for("dashboard"))
+
+    return render_template(
+        "profile.html",
+        user=session["user"],
         lang=session.get("lang", "ru")
     )

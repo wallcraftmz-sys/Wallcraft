@@ -94,7 +94,42 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("index"))
-    
+
+# ===== REGISTER =====
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("login")
+        password = request.form.get("password")
+
+        if not username or not password:
+            return render_template(
+                "register.html",
+                error="Заполните все поля",
+                lang=session["lang"]
+            )
+
+        if username in USERS:
+            return render_template(
+                "register.html",
+                error="Пользователь уже существует",
+                lang=session["lang"]
+            )
+
+        USERS[username] = {
+            "password": password,
+            "role": "user"
+        }
+
+        session["user"] = {
+            "username": username,
+            "role": "user"
+        }
+
+        return redirect(url_for("profile"))
+
+    return render_template("register.html", lang=session["lang"])
+
     # ===== REGISTER =====
 @app.route("/register", methods=["GET", "POST"])
 def register():

@@ -24,7 +24,8 @@ def login_required(f):
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if "user" not in session or session["user"]["role"] != "admin":
+        user = session.get("user")
+        if not user or user.get("role") != "admin":
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return wrapper
@@ -79,15 +80,28 @@ def login():
     if request.method == "POST":
         username = request.form.get("login")
         password = request.form.get("password")
+
         user = USERS.get(username)
 
         if user and user["password"] == password:
-            session["user"] = {"username": username, "role": user["role"]}
-            return redirect(url_for("dashboard" if user["role"] == "admin" else "profile"))
+            session.clear()  # 💥 ВАЖНО
+            session["user"] = {
+                "username": username,
+                "role": user["role"]
+            }
 
-        return render_template("login.html", error="Неверный логин", lang=session["lang"])
+            if user["role"] == "admin":
+                return redirect(url_for("dashboard"))
+            else:
+                return redirect(url_for("profile"))
 
-    return render_template("login.html", lang=session["lang"])
+        return render_template(
+            "login.html",
+            error="Неверный логин или пароль",
+            lang=session.get("lang", "ru")
+        )
+
+    return render_template("login.html", lang=session.get("lang", "ru"))
 
 # ===== LOGOUT =====
 @app.route("/logout")
@@ -134,7 +148,11 @@ def register():
 @app.route("/dashboard")
 @admin_required
 def dashboard():
-    return render_template("dashboard.html", user=session["user"], lang=session["lang"])
+    return render_template(
+        "dashboard.html",
+        user=session["user"],
+        lang=session.get("lang", "ru")
+    )
 
 # ===== PROFILE =====
 @app.route("/profile")

@@ -42,16 +42,17 @@
     <hr>
 
     {% if session.get("user") %}
-    {% if session.user.role == "admin" %}
-        
+        {% if session.get("user", {}).get("role") == "admin" %}
+            <a href="/dashboard" onclick="closeMenu()">🛠️ Админка</a>
+            <a href="/admin/orders" onclick="closeMenu()">📋 Заказы</a>
+        {% else %}
+            <a href="/profile" onclick="closeMenu()">👤 Профиль</a>
+        {% endif %}
+        <a href="/logout" onclick="closeMenu()">🚪 Выйти</a>
     {% else %}
-        <a href="/profile" onclick="closeMenu()">👤 Профиль</a>
+        <a href="/login" onclick="closeMenu()">🔐 Вход</a>
+        <a href="/register" onclick="closeMenu()">📝 Регистрация</a>
     {% endif %}
-    <a href="/logout" onclick="closeMenu()">🚪 Выйти</a>
-{% else %}
-    <a href="/login" onclick="closeMenu()">🔐 Вход</a>
-<a href="/register" onclick="closeMenu()">📝 Регистрация</a>
-{% endif %}
 </div>
 
 <!-- 🔥 КЛЮЧЕВОЙ ФИКС -->

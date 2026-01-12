@@ -46,6 +46,8 @@ class Order(db.Model):
     total = db.Column(db.Float)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+    with app.app_context():
+    db.create_all()
     
    #===== LOGIN MANAGER LOADER =====
 @login_manager.user_loader
@@ -137,9 +139,9 @@ def login():
             session["user"] = {
                 "username": username,
                 "role": user["role"]
-            session.permanent = True
             }
-
+            session.permanent = True
+            
             if user["role"] == "admin":
                 return redirect(url_for("dashboard"))
             else:
@@ -316,8 +318,3 @@ def add_to_cart(product_id):
         success=True,
         cart_total_items=sum(cart.values())
     )
-
-
-
-    with app.app_context():
-       db.create_all()

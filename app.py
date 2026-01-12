@@ -302,8 +302,7 @@ def admin_orders():
         orders=orders,
         lang=session["lang"]
     )
-    with app.app_context():
-    db.create_all()
+    
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
@@ -317,3 +316,8 @@ def add_to_cart(product_id):
         success=True,
         cart_total_items=sum(cart.values())
     )
+
+
+
+    with app.app_context():
+       db.create_all()

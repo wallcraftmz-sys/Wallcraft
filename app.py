@@ -48,6 +48,10 @@ class User(UserMixin, db.Model):
     orders = db.relationship("Order", backref="user", lazy=True)
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+    
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)

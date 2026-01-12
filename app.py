@@ -202,7 +202,7 @@ def dashboard():
         "dashboard.html",
         user=session["user"],
         orders=orders,
-        lang=session["lang"]
+        lang=session.get("lang", "ru")
     )
 
 # ===== PROFILE (USER) =====

@@ -3,3 +3,6 @@ gunicorn
 stripe
 python-dotenv
 requests
+Flask-SQLAlchemy
+Flask-Login
+Flask-Session

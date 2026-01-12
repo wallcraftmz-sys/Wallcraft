@@ -1,0 +1,31 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+
+<h1 class="page-title">Заказы</h1>
+
+{% if orders %}
+
+<div class="cart-list">
+    {% for order in orders %}
+    <div class="cart-row">
+        <div class="cart-info">
+            <div class="cart-name">
+                👤 {{ order.user }}
+            </div>
+            <div>
+                💰 {{ "%.2f"|format(order.total) }} €
+            </div>
+            <div>
+                📦 {{ order.items | length }} товаров
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<p style="text-align:center;">Заказов пока нет</p>
+{% endif %}
+
+{% endblock %}

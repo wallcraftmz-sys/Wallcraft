@@ -12,9 +12,11 @@ from flask_login import (
     login_required
 )
 from flask_session import Session
+from datetime import timedelta
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")  # ОБЯЗАТЕЛЬНО задан в Railway
+app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key") # ОБЯЗАТЕЛЬНО задан в Railway
+app.permanent_session_lifetime = timedelta(days=7)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -132,11 +134,10 @@ def login():
 
         if user and user["password"] == password:
             old_lang = session.get("lang", "ru")
-            session.clear()
-            session["lang"] = old_lang
             session["user"] = {
                 "username": username,
                 "role": user["role"]
+            session.permanent = True
             }
 
             if user["role"] == "admin":

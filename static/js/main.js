@@ -46,3 +46,15 @@ function closeMenu() {
     document.getElementById("sideMenu").classList.remove("open");
     document.getElementById("menuOverlay").classList.remove("show");
 }
+
+function closeMenu() {
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+
+    if (menu) menu.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    closeMenu();
+});

@@ -1,29 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="page-title">
-    {% if lang == "ru" %}Заказы{% else %}Orders{% endif %}
-</h1>
+<h1 class="page-title">Админ — Заказы</h1>
 
 {% if orders %}
 
-<div class="admin-orders">
-    {% for o in orders %}
-    <div class="order-card">
+<div class="cart-list">
 
-        <p><b>Имя:</b> {{ o.name }}</p>
-        <p><b>Контакт:</b> {{ o.contact }}</p>
+    {% for order in orders %}
+    <div class="cart-row">
 
-        <ul>
-            {% for item in o.items %}
-            <li>{{ item }}</li>
-            {% endfor %}
-        </ul>
+        <div class="cart-info">
+            <div class="cart-name">
+                👤 Пользователь: <b>{{ order.user }}</b>
+            </div>
 
-        <p><b>Итого:</b> {{ "%.2f"|format(o.total) }} €</p>
+            <div style="font-size:14px; opacity:.7;">
+                📞 {{ order.contact }}
+            </div>
+
+            <div style="margin-top:10px;">
+                {% for item in order.items %}
+                    • {{ item }}<br>
+                {% endfor %}
+            </div>
+
+            <div class="cart-subtotal">
+                💰 Итого: {{ "%.2f"|format(order.total) }} €
+            </div>
+        </div>
 
     </div>
     {% endfor %}
+
 </div>
 
 {% else %}

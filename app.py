@@ -300,7 +300,7 @@ def admin_orders():
     return render_template(
         "admin_orders.html",
         orders=orders,
-        lang=session["lang"]
+        lang=session.get("lang", "ru")
     )
     
 # ===== CART API =====

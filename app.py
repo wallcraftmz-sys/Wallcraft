@@ -14,7 +14,7 @@ from flask_login import (
 from flask_session import Session
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")  # ОБЯЗАТЕЛЬНО задан в Railway
+app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")  # ОБЯЗАТЕЛЬНО задан в Railway
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

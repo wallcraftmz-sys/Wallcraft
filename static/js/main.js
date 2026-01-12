@@ -12,7 +12,6 @@ function addToCart(productId) {
         if (cartCount && data.cart_total_items !== undefined) {
             cartCount.textContent = data.cart_total_items;
         }
-
         openCartPopup();
     })
     .catch(err => {
@@ -22,7 +21,7 @@ function addToCart(productId) {
 }
 
 // =========================
-// POPUP
+// CART POPUP
 // =========================
 function openCartPopup() {
     const popup = document.getElementById("cart-popup");
@@ -35,16 +34,16 @@ function closeCartPopup() {
 }
 
 // =========================
-// MENU
+// MENU (ЕДИНСТВЕННАЯ ЛОГИКА)
 // =========================
 function toggleMenu() {
-    document.getElementById("sideMenu").classList.toggle("open");
-    document.getElementById("menuOverlay").classList.toggle("show");
-}
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
 
-function closeMenu() {
-    document.getElementById("sideMenu").classList.remove("open");
-    document.getElementById("menuOverlay").classList.remove("show");
+    if (!menu || !overlay) return;
+
+    menu.classList.toggle("open");
+    overlay.classList.toggle("show");
 }
 
 function closeMenu() {
@@ -55,6 +54,9 @@ function closeMenu() {
     if (overlay) overlay.classList.remove("show");
 }
 
+// =========================
+// SAFE INIT
+// =========================
 document.addEventListener("DOMContentLoaded", () => {
     closeMenu();
 });

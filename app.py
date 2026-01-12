@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import os
 import requests
-from functools import wraps
+from datetime import timedelta
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager,
@@ -12,23 +13,32 @@ from flask_login import (
     login_required
 )
 from flask_session import Session
-from datetime import timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
 
+# ======================
+# APP CONFIG
+# ======================
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key") # ОБЯЗАТЕЛЬНО задан в Railway
-app.permanent_session_lifetime = timedelta(days=7)
+app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# server-side session (пока filesystem, потом Redis)
 app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+app.permanent_session_lifetime = timedelta(days=7)
 
+Session(app)
 db = SQLAlchemy(app)
 
-login_manager = LoginManager()
+# ======================
+# LOGIN MANAGER
+# ======================
+login_manager = LoginManager(app)
 login_manager.login_view = "login"
-login_manager.init_app(app)
+
+# ======================
+# MODELS
+# ======================
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -36,6 +46,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="user")
 
     orders = db.relationship("Order", backref="user", lazy=True)
+
+
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -46,63 +58,55 @@ class Order(db.Model):
     total = db.Column(db.Float)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    with app.app_context():
+
+
+# ======================
+# DB INIT (ОДИН РАЗ!)
+# ======================
+with app.app_context():
     db.create_all()
-    
-   #===== LOGIN MANAGER LOADER =====
+
+# ======================
+# USER LOADER
+# ======================
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id)) 
+    return User.query.get(int(user_id))
 
-# ===== PRODUCTS =====
+# ======================
+# LANGUAGE
+# ======================
+@app.before_request
+def set_lang():
+    session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
+
+# ======================
+# PRODUCTS (ПОКА В ПАМЯТИ)
+# ======================
 products = [
     {
         "id": 1,
-        "category": "walls",
         "name_ru": "Жидкие обои — Ocean",
-        "name_lv": "Šķidrie tapetes — Ocean",
-        "description_ru": "Высококачественные жидкие обои",
-        "description_lv": "Augstas kvalitātes tapetes",
         "price": 25.00,
         "image": "images/IMG_0900.jpeg"
     }
 ]
 
-# ===== ORDERS =====
-orders = []
-
-# ===== TELEGRAM =====
-def send_telegram(message: str):
-    token = os.getenv("TG_BOT_TOKEN")
-    chat_id = os.getenv("TG_CHAT_ID")
-    if not token or not chat_id:
-        return
-
-    try:
-        requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": message},
-            timeout=10
-        )
-    except Exception as e:
-        print("TG ERROR:", e)
-
-# ===== LANGUAGE =====
-@app.before_request
-def set_lang():
-    session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
-
-# ===== PAGES =====
+# ======================
+# ROUTES
+# ======================
 @app.route("/")
 def index():
     return render_template("index.html", lang=session["lang"])
+
 
 @app.route("/catalog")
 def catalog():
     return render_template("catalog.html", products=products, lang=session["lang"])
 
+
 # ===== LOGIN =====
-@@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("login")
@@ -110,23 +114,22 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        if user and user.password == password:
+        if user and check_password_hash(user.password, password):
             login_user(user, remember=True)
             return redirect(url_for("dashboard" if user.role == "admin" else "profile"))
 
-        return render_template(
-            "login.html",
-            error="Неверный логин или пароль",
-            lang=session.get("lang", "ru")
-        )
+        return render_template("login.html", error="Неверный логин", lang=session["lang"])
 
-    return render_template("login.html", lang=session.get("lang", "ru"))
+    return render_template("login.html", lang=session["lang"])
+
+
 # ===== LOGOUT =====
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
 
 # ===== REGISTER =====
 @app.route("/register", methods=["GET", "POST"])
@@ -135,36 +138,42 @@ def register():
         username = request.form.get("login")
         password = request.form.get("password")
 
-        if not username or not password:
-            return render_template(
-                "register.html",
-                error="Заполните все поля",
-                lang=session["lang"]
-            )
+        if User.query.filter_by(username=username).first():
+            return render_template("register.html", error="Пользователь существует", lang=session["lang"])
 
-        if username in USERS:
-            return render_template(
-                "register.html",
-                error="Пользователь уже существует",
-                lang=session["lang"]
-            )
+        user = User(
+            username=username,
+            password=generate_password_hash(password),
+            role="user"
+        )
 
-        USERS[username] = {
-            "password": password,
-            "role": "user"
-        }
+        db.session.add(user)
+        db.session.commit()
 
-        session.clear()
-        session["user"] = {
-            "username": username,
-            "role": "user"
-        }
-
+        login_user(user)
         return redirect(url_for("profile"))
 
     return render_template("register.html", lang=session["lang"])
 
-# ===== DASHBOARD (ADMIN) =====
+
+# ===== PROFILE =====
+@app.route("/profile")
+@login_required
+def profile():
+    if current_user.role != "user":
+        return redirect(url_for("dashboard"))
+
+    orders = Order.query.filter_by(user_id=current_user.id).all()
+
+    return render_template(
+        "profile.html",
+        user=current_user,
+        orders=orders,
+        lang=session["lang"]
+    )
+
+
+# ===== DASHBOARD =====
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -172,116 +181,14 @@ def dashboard():
         return redirect(url_for("profile"))
 
     orders = Order.query.all()
+    return render_template("dashboard.html", orders=orders, lang=session["lang"])
 
-    return render_template(
-        "dashboard.html",
-        orders=orders,
-        lang=session["lang"]
-    )
 
-# ===== PROFILE (USER) =====
-@app.route("/profile")
-@login_required
-def profile():
-    if current_user.role != "user":
-        return redirect(url_for("dashboard"))
-
-    user_orders = Order.query.filter_by(user_id=current_user.id).all()
-
-    return render_template(
-        "profile.html",
-        user=current_user,
-        orders=user_orders,
-        lang=session["lang"]
-    )
-# ===== CART =====
-@app.route("/cart")
-def cart():
-    cart = session.get("cart", {})
-    items, total = [], 0.0
-
-    for pid, qty in cart.items():
-        pr = next((p for p in products if p["id"] == int(pid)), None)
-        if pr:
-            items.append({"product": pr, "qty": qty})
-            total += pr["price"] * qty
-
-    return render_template(
-        "cart.html",
-        cart_items=items,
-        total=total,
-        lang=session["lang"]
-    )
-
-# ===== ORDER =====
-@app.route("/order", methods=["GET", "POST"])
-@login_required
-def order():
-    cart = session.get("cart", {})
-    success = False
-
-    if request.method == "POST" and cart:
-        name = request.form.get("name")
-        contact = request.form.get("contact")
-
-        lines = []
-        total = 0.0
-
-        for pid, qty in cart.items():
-            pr = next((p for p in products if p["id"] == int(pid)), None)
-            if pr:
-                total += pr["price"] * qty
-                lines.append(f"{pr['name_ru']} × {qty}")
-
-        order_data = {
-            "user": session["user"]["username"],
-            "role": session["user"]["role"],
-            "name": name,
-            "contact": contact,
-            "items": lines,
-            "total": total
-        }
-
-        orders.append(order_data)
-
-        send_telegram(
-            f"🛒 Новый заказ\n"
-            f"Пользователь: {order_data['user']}\n"
-            f"Имя: {name}\n"
-            f"Контакт: {contact}\n\n"
-            f"{chr(10).join(lines)}\n"
-            f"Итого: {total:.2f} €"
-        )
-
-        session["cart"] = {}
-        success = True
-
-    return render_template(
-        "order.html",
-        success=success,
-        lang=session["lang"]
-    )
-
-# ===== ADMIN ORDERS =====
-@app.route("/admin/orders")
-@admin_required
-def admin_orders():
-    return render_template(
-        "admin_orders.html",
-        orders=orders,
-        lang=session.get("lang", "ru")
-    )
-    
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     cart = session.get("cart", {})
     pid = str(product_id)
-
     cart[pid] = cart.get(pid, 0) + 1
     session["cart"] = cart
-
-    return jsonify(
-        success=True,
-        cart_total_items=sum(cart.values())
-    )
+    return jsonify(success=True, cart_total_items=sum(cart.values()))

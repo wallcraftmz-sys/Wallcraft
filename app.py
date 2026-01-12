@@ -12,7 +12,6 @@ from flask_login import (
     current_user,
     login_required
 )
-from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # ======================
@@ -23,8 +22,6 @@ app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-app.config["SESSION_TYPE"] = "filesystem"
 app.permanent_session_lifetime = timedelta(days=7)
 
 Session(app)
@@ -33,6 +30,9 @@ db = SQLAlchemy(app)
 # ======================
 # LOGIN MANAGER
 # ======================
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for("login", lang=session.get("lang", "ru")))
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
@@ -46,9 +46,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="user")
 
     orders = db.relationship("Order", backref="user", lazy=True)
-
-
-@login_manager.user_loader
+    
+    @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
     
@@ -69,13 +68,6 @@ class Order(db.Model):
 # ======================
 with app.app_context():
     db.create_all()
-
-# ======================
-# USER LOADER
-# ======================
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 # ======================
 # LANGUAGE

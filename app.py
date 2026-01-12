@@ -54,30 +54,6 @@ class Order(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id)) 
 
-# ===== USERS (временно без БД) =====
-USERS = {
-    "admin": {"password": "123456", "role": "admin"},
-    "user": {"password": "111111", "role": "user"}
-}
-
-# ===== DECORATORS =====
-def login_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if "user" not in session:
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return wrapper
-
-def admin_required(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        user = session.get("user")
-        if not user or user.get("role") != "admin":
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return wrapper
-
 # ===== PRODUCTS =====
 products = [
     {
@@ -126,26 +102,17 @@ def catalog():
     return render_template("catalog.html", products=products, lang=session["lang"])
 
 # ===== LOGIN =====
-@app.route("/login", methods=["GET", "POST"])
+@@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("login")
         password = request.form.get("password")
 
-        user = USERS.get(username)
+        user = User.query.filter_by(username=username).first()
 
-        if user and user["password"] == password:
-            old_lang = session.get("lang", "ru")
-            session["user"] = {
-                "username": username,
-                "role": user["role"]
-            }
-            session.permanent = True
-            
-            if user["role"] == "admin":
-                return redirect(url_for("dashboard"))
-            else:
-                return redirect(url_for("profile"))
+        if user and user.password == password:
+            login_user(user, remember=True)
+            return redirect(url_for("dashboard" if user.role == "admin" else "profile"))
 
         return render_template(
             "login.html",
@@ -154,11 +121,11 @@ def login():
         )
 
     return render_template("login.html", lang=session.get("lang", "ru"))
-
 # ===== LOGOUT =====
 @app.route("/logout")
+@login_required
 def logout():
-    session.clear()
+    logout_user()
     return redirect(url_for("index"))
 
 # ===== REGISTER =====
@@ -199,34 +166,34 @@ def register():
 
 # ===== DASHBOARD (ADMIN) =====
 @app.route("/dashboard")
-@admin_required
+@login_required
 def dashboard():
+    if current_user.role != "admin":
+        return redirect(url_for("profile"))
+
+    orders = Order.query.all()
+
     return render_template(
         "dashboard.html",
         orders=orders,
-        lang=session.get("lang", "ru")
+        lang=session["lang"]
     )
 
 # ===== PROFILE (USER) =====
 @app.route("/profile")
 @login_required
 def profile():
-    if session["user"]["role"] != "user":
+    if current_user.role != "user":
         return redirect(url_for("dashboard"))
 
-    username = session["user"]["username"]
+    user_orders = Order.query.filter_by(user_id=current_user.id).all()
 
-    user_orders = [
-    o for o in orders
-    if o.get("user") == username
-]
     return render_template(
         "profile.html",
-        user=session["user"],
+        user=current_user,
         orders=user_orders,
         lang=session["lang"]
     )
-
 # ===== CART =====
 @app.route("/cart")
 def cart():

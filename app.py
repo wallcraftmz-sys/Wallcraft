@@ -2,9 +2,53 @@ from flask import Flask, render_template, request, session, redirect, url_for, j
 import os
 import requests
 from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    logout_user,
+    current_user,
+    login_required
+)
+from flask_session import Session
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")  # ОБЯЗАТЕЛЬНО задан в Railway
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# server-side session (пока filesystem, потом Redis)
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
+db = SQLAlchemy(app)
+
+login_manager = LoginManager()
+login_manager.login_view = "login"
+login_manager.init_app(app)
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), default="user")
+
+    orders = db.relationship("Order", backref="user", lazy=True)
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    name = db.Column(db.String(100))
+    contact = db.Column(db.String(100))
+    items = db.Column(db.Text)
+    total = db.Column(db.Float)
+
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    
+   #===== LOGIN MANAGER LOADER =====
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id)) 
 
 # ===== USERS (временно без БД) =====
 USERS = {
@@ -258,6 +302,8 @@ def admin_orders():
         orders=orders,
         lang=session["lang"]
     )
+    with app.app_context():
+    db.create_all()
 # ===== CART API =====
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):

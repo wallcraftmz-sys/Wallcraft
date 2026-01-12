@@ -200,7 +200,6 @@ def register():
 def dashboard():
     return render_template(
         "dashboard.html",
-        user=session["user"],
         orders=orders,
         lang=session.get("lang", "ru")
     )

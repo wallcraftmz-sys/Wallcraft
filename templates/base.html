@@ -43,8 +43,7 @@
 
     {% if session.get("user") %}
     {% if session.user.role == "admin" %}
-        <a href="/dashboard" onclick="closeMenu()">🛠️ Админка</a>
-        <a href="/admin/orders" onclick="closeMenu()">📋 Заказы</a>
+        
     {% else %}
         <a href="/profile" onclick="closeMenu()">👤 Профиль</a>
     {% endif %}

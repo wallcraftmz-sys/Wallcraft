@@ -18,29 +18,29 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # APP CONFIG
 # ======================
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
+
+# ВАЖНО: для Railway / HTTPS / Proxy
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+# ⚠️ НЕ ВКЛЮЧАЕМ Secure, пока нет своего домена
 app.config.update(
-    SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-
-    REMEMBER_COOKIE_SECURE=True,
     REMEMBER_COOKIE_HTTPONLY=True,
     REMEMBER_COOKIE_SAMESITE="Lax",
 )
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 app.permanent_session_lifetime = timedelta(days=7)
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)
 
+# ======================
+# DB + LOGIN MANAGER
+# ======================
 db = SQLAlchemy(app)
 
-# ======================
-# LOGIN MANAGER
-# ======================
 login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)

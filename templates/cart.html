@@ -1,45 +1,129 @@
 {% extends "base.html" %}
-{% block content %}
+{% if cart_items %}
 
-<h1 class="page-title">
-    {{ "Корзина" if lang == "ru" else "Cart" }}
-</h1>
-
-{% if items %}
 <div class="cart-list">
-    {% for item in items %}
+
+    {% for item in cart_items %}
     <div class="cart-row">
+        <img src="{{ url_for('static', filename=item.product.image) }}" class="cart-img">
+    <div class="cart-row" id="row-{{ item.product.id }}">
+
         <img
             src="{{ url_for('static', filename=item.product.image) }}"
             class="cart-img"
+            loading="lazy"
         >
 
         <div class="cart-info">
             <div class="cart-name">
-                {{ item.product['name_' ~ lang] }}
+                {{ item.product["name_"+lang] }}
             </div>
 
             <div class="cart-qty">
-                {{ item.qty }} × {{ item.product.price }} €
-            </div>
+    <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
+                <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
 
-            <div class="cart-subtotal">
-                {{ item.subtotal }} €
+    <span id="qty-{{ item.product.id }}">
+        {{ item.qty }}
+    </span>
+                <span id="qty-{{ item.product.id }}">
+                    {{ item.qty }}
+                </span>
+
+    <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
+</div>
+                <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
             </div>
         </div>
+
+        <div class="cart-subtotal" id="subtotal-{{ item.product.id }}">
+    {{ "%.2f"|format(item.product.price * item.qty) }} €
+</div>
+            {{ "%.2f"|format(item.product.price * item.qty) }} €
+        </div>
+
     </div>
     {% endfor %}
+
 </div>
 
 <div class="cart-total">
-    <strong>{{ "Итого" if lang == "ru" else "Total" }}:</strong>
-    {{ total }} €
-</div>
+@@ -49,7 +59,7 @@ <h1 class="page-title">
 
 {% else %}
+
+<p style="text-align:center;">
 <p class="empty-cart">
-    {{ "Корзина пуста" if lang == "ru" else "Cart is empty" }}
+    {% if lang == "ru" %}Корзина пуста{% else %}Grozs ir tukšs{% endif %}
 </p>
+
+@@ -58,44 +68,33 @@ <h1 class="page-title">
+</a>
+
 {% endif %}
+    
+
+<script>
+function updateQty(productId, action) {
+    fetch(`/api/update_cart/${productId}/${action}`, {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        // количество
+        const qtyEl = document.getElementById(`qty-${productId}`);
+        if (qtyEl) {
+            qtyEl.innerText = data.qty;
+        }
+
+        // строка товара
+        const subtotalEl = document.getElementById(`subtotal-${productId}`);
+        if (subtotalEl) {
+            subtotalEl.innerText = data.subtotal.toFixed(2) + " €";
+        }
+
+        // общий итог
+        const totalEl = document.getElementById("cart-total");
+        if (totalEl) {
+            totalEl.innerText = data.total.toFixed(2) + " €";
+        }
+
+        // счётчик корзины (плавающая)
+        const cartCount = document.getElementById("cart-count");
+        if (cartCount) {
+            cartCount.innerText = data.cart_total_items;
+        }
+
+        // если товар удалился
+        if (data.qty === 0) {
+            location.reload();
+        }
+    });
+    fetch(`/api/update_cart/${productId}/${action}`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+
+            const row = document.getElementById(`row-${productId}`);
+
+            if (data.qty === 0) {
+                // ПЛАВНОЕ УДАЛЕНИЕ
+                row.classList.add("cart-row-remove");
+                setTimeout(() => row.remove(), 300);
+                return;
+            }
+
+            document.getElementById(`qty-${productId}`).textContent = data.qty;
+            document.getElementById(`subtotal-${productId}`).textContent =
+                data.subtotal.toFixed(2) + " €";
+
+            document.getElementById("cart-total").textContent =
+                data.total.toFixed(2) + " €";
+
+            document.getElementById("cart-count").textContent =
+                data.cart_total_items;
+        });
+}
+</script>
+    
 
 {% endblock %}

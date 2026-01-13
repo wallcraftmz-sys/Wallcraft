@@ -95,6 +95,7 @@ products = [
     {
         "id": 1,
         "name_ru": "Жидкие обои — Ocean",
+        "name_lv": "Šķidrie tapetes — Ocean",
         "price": 25.00,
         "image": "images/IMG_0900.jpeg"
     }

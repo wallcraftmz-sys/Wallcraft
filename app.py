@@ -1,3 +1,4 @@
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import os
 from datetime import timedelta
@@ -17,6 +18,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # APP CONFIG
 # ======================
 app = Flask(__name__)
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+
+    REMEMBER_COOKIE_SECURE=True,
+    REMEMBER_COOKIE_HTTPONLY=True,
+    REMEMBER_COOKIE_SAMESITE="Lax",
+)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"

@@ -62,7 +62,6 @@ class Order(db.Model):
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-
 # ======================
 # DB INIT (ОДИН РАЗ!)
 # ======================

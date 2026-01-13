@@ -2,99 +2,44 @@
 {% block content %}
 
 <h1 class="page-title">
-    {% if lang == "ru" %}Корзина{% else %}Grozs{% endif %}
+    {{ "Корзина" if lang == "ru" else "Cart" }}
 </h1>
 
-{% if cart_items %}
-
+{% if items %}
 <div class="cart-list">
-
-    {% for item in cart_items %}
-    <div class="cart-row" id="row-{{ item.product.id }}">
-
+    {% for item in items %}
+    <div class="cart-row">
         <img
             src="{{ url_for('static', filename=item.product.image) }}"
             class="cart-img"
-            loading="lazy"
         >
 
         <div class="cart-info">
             <div class="cart-name">
-                {{ item.product["name_"+lang] }}
+                {{ item.product['name_' ~ lang] }}
             </div>
 
             <div class="cart-qty">
-                <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
+                {{ item.qty }} × {{ item.product.price }} €
+            </div>
 
-                <span id="qty-{{ item.product.id }}">
-                    {{ item.qty }}
-                </span>
-
-                <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
+            <div class="cart-subtotal">
+                {{ item.subtotal }} €
             </div>
         </div>
-
-        <div class="cart-subtotal" id="subtotal-{{ item.product.id }}">
-            {{ "%.2f"|format(item.product.price * item.qty) }} €
-        </div>
-
     </div>
     {% endfor %}
-
 </div>
 
 <div class="cart-total">
-    {% if lang == "ru" %}Итого:{% else %}Kopā:{% endif %}
-    <b id="cart-total">{{ "%.2f"|format(total) }} €</b>
-</div>
-
-<div class="cart-actions">
-    <a href="/catalog" class="popup-btn">
-        {% if lang == "ru" %}Продолжить покупки{% else %}Turpināt{% endif %}
-    </a>
-    <a href="/order" class="popup-btn primary">
-        {% if lang == "ru" %}Оформить заказ{% else %}Pasūtīt{% endif %}
-    </a>
+    <strong>{{ "Итого" if lang == "ru" else "Total" }}:</strong>
+    {{ total }} €
 </div>
 
 {% else %}
-
 <p class="empty-cart">
-    {% if lang == "ru" %}Корзина пуста{% else %}Grozs ir tukšs{% endif %}
+    {{ "Корзина пуста" if lang == "ru" else "Cart is empty" }}
 </p>
-
-<a href="/catalog" class="popup-btn">
-    {% if lang == "ru" %}Перейти в каталог{% else %}Uz katalogu{% endif %}
-</a>
-
 {% endif %}
-
-<script>
-function updateQty(productId, action) {
-    fetch(`/api/update_cart/${productId}/${action}`, { method: "POST" })
-        .then(res => res.json())
-        .then(data => {
-
-            const row = document.getElementById(`row-${productId}`);
-
-            if (data.qty === 0) {
-                // ПЛАВНОЕ УДАЛЕНИЕ
-                row.classList.add("cart-row-remove");
-                setTimeout(() => row.remove(), 300);
-                return;
-            }
-
-            document.getElementById(`qty-${productId}`).textContent = data.qty;
-            document.getElementById(`subtotal-${productId}`).textContent =
-                data.subtotal.toFixed(2) + " €";
-
-            document.getElementById("cart-total").textContent =
-                data.total.toFixed(2) + " €";
-
-            document.getElementById("cart-count").textContent =
-                data.cart_total_items;
-        });
-}
-</script>
 
 {% endblock %}

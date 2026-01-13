@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import os
-import requests
 from datetime import timedelta
 
 from flask_sqlalchemy import SQLAlchemy
@@ -12,6 +11,7 @@ from flask_login import (
     current_user,
     login_required
 )
+from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # ======================
@@ -22,6 +22,7 @@ app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SESSION_TYPE"] = "filesystem"
 app.permanent_session_lifetime = timedelta(days=7)
 
 Session(app)
@@ -30,11 +31,13 @@ db = SQLAlchemy(app)
 # ======================
 # LOGIN MANAGER
 # ======================
+login_manager = LoginManager()
+login_manager.login_view = "login"
+login_manager.init_app(app)
+
 @login_manager.unauthorized_handler
 def unauthorized():
     return redirect(url_for("login", lang=session.get("lang", "ru")))
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
 
 # ======================
 # MODELS
@@ -46,11 +49,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="user")
 
     orders = db.relationship("Order", backref="user", lazy=True)
-    
-    @login_manager.user_loader
-       def load_user(user_id):
-    return User.query.get(int(user_id))
-    
+
+
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -59,11 +59,17 @@ class Order(db.Model):
     contact = db.Column(db.String(100))
     items = db.Column(db.Text)
     total = db.Column(db.Float)
-
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 # ======================
-# DB INIT (ОДИН РАЗ!)
+# USER LOADER
+# ======================
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# ======================
+# DB INIT (ОДИН РАЗ)
 # ======================
 with app.app_context():
     db.create_all()
@@ -113,7 +119,11 @@ def login():
             login_user(user, remember=True)
             return redirect(url_for("dashboard" if user.role == "admin" else "profile"))
 
-        return render_template("login.html", error="Неверный логин", lang=session["lang"])
+        return render_template(
+            "login.html",
+            error="Неверный логин или пароль",
+            lang=session["lang"]
+        )
 
     return render_template("login.html", lang=session["lang"])
 
@@ -134,7 +144,11 @@ def register():
         password = request.form.get("password")
 
         if User.query.filter_by(username=username).first():
-            return render_template("register.html", error="Пользователь существует", lang=session["lang"])
+            return render_template(
+                "register.html",
+                error="Пользователь уже существует",
+                lang=session["lang"]
+            )
 
         user = User(
             username=username,
@@ -145,7 +159,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        login_user(user)
+        login_user(user, remember=True)
         return redirect(url_for("profile"))
 
     return render_template("register.html", lang=session["lang"])
@@ -176,7 +190,11 @@ def dashboard():
         return redirect(url_for("profile"))
 
     orders = Order.query.all()
-    return render_template("dashboard.html", orders=orders, lang=session["lang"])
+    return render_template(
+        "dashboard.html",
+        orders=orders,
+        lang=session["lang"]
+    )
 
 
 # ===== CART API =====
@@ -184,6 +202,11 @@ def dashboard():
 def add_to_cart(product_id):
     cart = session.get("cart", {})
     pid = str(product_id)
+
     cart[pid] = cart.get(pid, 0) + 1
     session["cart"] = cart
-    return jsonify(success=True, cart_total_items=sum(cart.values()))
+
+    return jsonify(
+        success=True,
+        cart_total_items=sum(cart.values())
+    )

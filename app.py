@@ -58,8 +58,6 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="user")
 
-    orders = db.relationship("Order", backref="user", lazy=True)
-
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -69,17 +67,16 @@ class Order(db.Model):
     contact = db.Column(db.String(100))
     items = db.Column(db.Text)
     total = db.Column(db.Float)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 # ======================
-# USER LOADER
+# USER LOADER (СТРОГО ЗДЕСЬ)
 # ======================
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 # ======================
-# DB INIT (ОДИН РАЗ)
+# INIT DB (1 РАЗ)
 # ======================
 with app.app_context():
     db.create_all()
@@ -88,12 +85,11 @@ with app.app_context():
 # LANGUAGE
 # ======================
 @app.before_request
-def before_request():
-    session.permanent = True
+def set_lang():
     session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
 
 # ======================
-# PRODUCTS (ПОКА В ПАМЯТИ)
+# PRODUCTS (TEMP)
 # ======================
 products = [
     {
@@ -128,7 +124,7 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user, remember=True)
-            return redirect(url_for("dashboard" if user.role == "admin" else "profile"))
+            return redirect(url_for("profile"))
 
         return render_template(
             "login.html",
@@ -180,30 +176,9 @@ def register():
 @app.route("/profile")
 @login_required
 def profile():
-    if current_user.role != "user":
-        return redirect(url_for("dashboard"))
-
-    orders = Order.query.filter_by(user_id=current_user.id).all()
-
     return render_template(
         "profile.html",
         user=current_user,
-        orders=orders,
-        lang=session["lang"]
-    )
-
-
-# ===== DASHBOARD =====
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    if current_user.role != "admin":
-        return redirect(url_for("profile"))
-
-    orders = Order.query.all()
-    return render_template(
-        "dashboard.html",
-        orders=orders,
         lang=session["lang"]
     )
 
@@ -213,7 +188,6 @@ def dashboard():
 def add_to_cart(product_id):
     cart = session.get("cart", {})
     pid = str(product_id)
-
     cart[pid] = cart.get(pid, 0) + 1
     session["cart"] = cart
 

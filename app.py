@@ -11,7 +11,6 @@ from flask_login import (
     current_user,
     login_required
 )
-from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # ======================
@@ -22,10 +21,8 @@ app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SESSION_TYPE"] = "filesystem"
 app.permanent_session_lifetime = timedelta(days=7)
 
-Session(app)
 db = SQLAlchemy(app)
 
 # ======================

@@ -34,6 +34,8 @@
 <div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
 <!-- SIDE MENU -->
+{% from "flask_login.html" import current_user %}
+
 <div id="sideMenu" class="side-menu">
     <a href="/" onclick="closeMenu()">🏠 Главная</a>
     <a href="/catalog" onclick="closeMenu()">📦 Каталог</a>
@@ -42,9 +44,8 @@
     <hr>
 
     {% if current_user.is_authenticated %}
-        {% if session.get("user", {}).get("role") == "admin" %}
-            <a href="/dashboard" onclick="closeMenu()">🛠️ Админка</a>
-            <a href="/admin/orders" onclick="closeMenu()">📋 Заказы</a>
+        {% if current_user.role == "admin" %}
+            <a href="/dashboard" onclick="closeMenu()">🛠 Админка</a>
         {% else %}
             <a href="/profile" onclick="closeMenu()">👤 Профиль</a>
         {% endif %}

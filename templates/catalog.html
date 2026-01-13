@@ -9,15 +9,14 @@
         <div class="product-image">
             <img
                 src="{{ url_for('static', filename=product.image) }}"
-                alt="{{ product['name_' + lang] }}"
+                alt="{{ product['name_' ~ lang] }}"
                 loading="lazy"
-                decoding="async"
             >
         </div>
 
         <div class="product-info">
             <h3 class="product-title">
-                {{ product['name_' + lang] }}
+                {{ product['name_' ~ lang] }}
             </h3>
 
             <div class="product-price">
@@ -25,10 +24,11 @@
             </div>
 
             <button
+                type="button"
                 class="add-to-cart-btn"
                 onclick="addToCart({{ product.id }})"
             >
-                🛒 {% if lang == 'ru' %}В корзину{% else %}Add to cart{% endif %}
+                🛒 {{ "В корзину" if lang == "ru" else "Add to cart" }}
             </button>
         </div>
 

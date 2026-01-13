@@ -183,13 +183,18 @@ def profile():
     )
 
 
-# ===== CART API =====
-@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
+# ===== CART API =====@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
-    cart = session.get("cart", {})
+    cart = session.get("cart")
+
+    if cart is None:
+        cart = {}
+
     pid = str(product_id)
     cart[pid] = cart.get(pid, 0) + 1
+
     session["cart"] = cart
+    session.modified = True   # 🔥 КРИТИЧЕСКИ ВАЖНО
 
     return jsonify(
         success=True,

@@ -41,7 +41,7 @@
 
     <hr>
 
-    {% if session.get("user") %}
+    {% if current_user.is_authenticated %}
         {% if session.get("user", {}).get("role") == "admin" %}
             <a href="/dashboard" onclick="closeMenu()">🛠️ Админка</a>
             <a href="/admin/orders" onclick="closeMenu()">📋 Заказы</a>

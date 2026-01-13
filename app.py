@@ -21,7 +21,9 @@ app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 app.permanent_session_lifetime = timedelta(days=7)
+app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)
 
 db = SQLAlchemy(app)
 
@@ -75,7 +77,8 @@ with app.app_context():
 # LANGUAGE
 # ======================
 @app.before_request
-def set_lang():
+def before_request():
+    session.permanent = True
     session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
 
 # ======================

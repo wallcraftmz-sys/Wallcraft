@@ -115,32 +115,7 @@ class Order(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-# ======================
-# INIT DB + ADMIN (1 РАЗ)
-# ======================
-def create_admin_if_not_exists():
-    admin_username = os.getenv("ADMIN_LOGIN", "admin")
-    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
-
-    admin = User.query.filter_by(username=admin_username).first()
-    if not admin:
-        admin = User(
-            username=admin_username,
-            password=generate_password_hash(admin_password),
-            role="admin"
-        )
-        db.session.add(admin)
-        db.session.commit()
-        print("✅ ADMIN CREATED")
-    else:
-        print("ℹ️ Admin already exists")
-
-
-with app.app_context():
-    db.create_all()
-    create_admin_if_not_exists()
-    
+   
 # ======================
 # LANGUAGE
 # ======================

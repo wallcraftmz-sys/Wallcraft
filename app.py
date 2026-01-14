@@ -72,7 +72,7 @@ app.config.update(
     REMEMBER_COOKIE_SAMESITE="Lax",
 )
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///wallcraft.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.permanent_session_lifetime = timedelta(days=7)
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)

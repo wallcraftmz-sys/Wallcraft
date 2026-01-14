@@ -8,7 +8,6 @@
 {% if cart_items %}
 
 <div class="cart-list">
-
     {% for item in cart_items %}
     <div class="cart-row" id="row-{{ item.product.id }}">
 
@@ -25,11 +24,7 @@
 
             <div class="cart-qty">
                 <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
-
-                <span id="qty-{{ item.product.id }}">
-                    {{ item.qty }}
-                </span>
-
+                <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
                 <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
             </div>
 
@@ -40,12 +35,28 @@
 
     </div>
     {% endfor %}
-
 </div>
 
 <div class="cart-total">
     <strong>{{ "Итого" if lang == "ru" else "Total" }}:</strong>
     <span id="cart-total">{{ "%.2f"|format(total) }} €</span>
+</div>
+
+<!-- 🔥 КНОПКИ ДЕЙСТВИЙ -->
+<div class="cart-actions">
+    <a href="/catalog" class="popup-btn">
+        ← {{ "Продолжить покупки" if lang == "ru" else "Continue shopping" }}
+    </a>
+
+    {% if current_user.is_authenticated %}
+        <a href="/order" class="popup-btn primary">
+            {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
+        </a>
+    {% else %}
+        <a href="/login" class="popup-btn primary">
+            {{ "Войти для заказа" if lang == "ru" else "Login to checkout" }}
+        </a>
+    {% endif %}
 </div>
 
 {% else %}
@@ -64,15 +75,11 @@ function updateQty(productId, action) {
     })
     .then(res => res.json())
     .then(data => {
-
         if (!data.success) return;
 
         if (data.qty === 0) {
             const row = document.getElementById(`row-${productId}`);
-            if (row) {
-                row.classList.add("cart-row-remove");
-                setTimeout(() => row.remove(), 300);
-            }
+            if (row) row.remove();
         } else {
             document.getElementById(`qty-${productId}`).textContent = data.qty;
             document.getElementById(`subtotal-${productId}`).textContent =

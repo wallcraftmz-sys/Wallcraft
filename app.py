@@ -15,7 +15,23 @@ from flask_login import (
     login_required
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
+# ======================
+# ADMIN ACCESS CONTROL
+# ======================
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for("login"))
+
+        if current_user.role != "admin":
+            return redirect(url_for("profile"))
+
+        return f(*args, **kwargs)
+    return decorated
+    
 # ======================
 # TELEGRAM
 # ======================

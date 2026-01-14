@@ -125,15 +125,19 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user, remember=True)
-            return redirect(url_for("profile"))
+
+            next_page = request.args.get("next")
+            return redirect(next_page or url_for(
+                "dashboard" if user.role == "admin" else "profile"
+            ))
 
         return render_template(
             "login.html",
             error="Неверный логин или пароль",
-            lang=session["lang"]
+            lang=session.get("lang", "ru")
         )
 
-    return render_template("login.html", lang=session["lang"])
+    return render_template("login.html", lang=session.get("lang", "ru"))
 
 
 # ===== LOGOUT =====

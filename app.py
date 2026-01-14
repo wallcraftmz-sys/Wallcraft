@@ -337,3 +337,20 @@ def order():
 
     return render_template("order.html", lang=session.get("lang", "ru"))
     
+db.session.add(order)
+db.session.commit()
+
+# 🔔 TELEGRAM УВЕДОМЛЕНИЕ
+send_telegram(
+    f"🛒 НОВЫЙ ЗАКАЗ\n"
+    f"Пользователь: {current_user.username}\n"
+    f"Имя: {name}\n"
+    f"Контакт: {contact}\n\n"
+    f"{chr(10).join(items)}\n"
+    f"Итого: {total:.2f} €"
+)
+
+session["cart"] = {}
+session.modified = True
+
+return redirect(url_for("profile"))

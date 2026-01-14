@@ -227,3 +227,17 @@ def cart():
         total=total,
         lang=session.get("lang", "ru")
     )
+    
+  @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
+def add_to_cart(product_id):
+    cart = session.get("cart", {})
+    pid = str(product_id)
+
+    cart[pid] = cart.get(pid, 0) + 1
+    session["cart"] = cart
+    session.modified = True
+
+    return jsonify(
+        success=True,
+        cart_total_items=sum(cart.values())
+    )

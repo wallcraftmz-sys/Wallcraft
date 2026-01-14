@@ -183,52 +183,9 @@ def profile():
         lang=session["lang"]
     )
 
-
-# ===== CART API =====@app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
-def add_to_cart(product_id):
-    cart = session.get("cart")
-
-    if cart is None:
-        cart = {}
-
-    pid = str(product_id)
-    cart[pid] = cart.get(pid, 0) + 1
-
-    session["cart"] = cart
-    session.modified = True   # 🔥 КРИТИЧЕСКИ ВАЖНО
-
-    return jsonify(
-        success=True,
-        cart_total_items=sum(cart.values())
-    )
-    
-@app.route("/cart")
-def cart():
-    cart = session.get("cart", {})
-
-    items = []
-    total = 0.0
-
-    for pid, qty in cart.items():
-        product = next((p for p in products if p["id"] == int(pid)), None)
-        if product:
-            subtotal = product["price"] * qty
-            total += subtotal
-
-            items.append({
-                "product": product,
-                "qty": qty,
-                "subtotal": subtotal
-            })
-
-    return render_template(
-        "cart.html",
-        items=items,
-        total=total,
-        lang=session.get("lang", "ru")
-    )
-    
-# ===== ADD TO CART =====
+# ======================
+# ADD TO CART
+# ======================
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     cart = session.get("cart", {})
@@ -236,14 +193,45 @@ def add_to_cart(product_id):
 
     cart[pid] = cart.get(pid, 0) + 1
     session["cart"] = cart
-    session.modified = True
+    session.modified = True  # 🔥 ОБЯЗАТЕЛЬНО
 
     return jsonify(
         success=True,
         cart_total_items=sum(cart.values())
     )
 
-# ===== UPDATE CART =====
+
+# ======================
+# CART PAGE
+# ======================
+@app.route("/cart")
+def cart():
+    cart = session.get("cart", {})
+    cart_items = []
+    total = 0.0
+
+    for pid, qty in cart.items():
+        product = next((p for p in products if p["id"] == int(pid)), None)
+        if product:
+            subtotal = product["price"] * qty
+            total += subtotal
+            cart_items.append({
+                "product": product,
+                "qty": qty,
+                "subtotal": subtotal
+            })
+
+    return render_template(
+        "cart.html",
+        cart_items=cart_items,   # ⚠️ ВАЖНО: cart_items
+        total=total,
+        lang=session.get("lang", "ru")
+    )
+
+
+# ======================
+# UPDATE CART
+# ======================
 @app.route("/api/update_cart/<int:product_id>/<action>", methods=["POST"])
 def update_cart(product_id, action):
     cart = session.get("cart", {})
@@ -262,15 +250,15 @@ def update_cart(product_id, action):
     session["cart"] = cart
     session.modified = True
 
-    total = 0
     qty = cart.get(pid, 0)
-
-    for k, v in cart.items():
-        product = next(p for p in products if p["id"] == int(k))
-        total += product["price"] * v
 
     product = next((p for p in products if p["id"] == product_id), None)
     subtotal = (product["price"] * qty) if product else 0
+
+    total = sum(
+        next(p["price"] for p in products if p["id"] == int(k)) * v
+        for k, v in cart.items()
+    )
 
     return jsonify(
         success=True,

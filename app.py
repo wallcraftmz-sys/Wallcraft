@@ -117,10 +117,8 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # ======================
-# INIT DB (1 РАЗ)
+# INIT DB + ADMIN (1 РАЗ)
 # ======================
-with app.app_context():
-    db.create_all()
 def create_admin_if_not_exists():
     admin_username = os.getenv("ADMIN_LOGIN", "admin")
     admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
@@ -135,6 +133,9 @@ def create_admin_if_not_exists():
         db.session.add(admin)
         db.session.commit()
         print("✅ ADMIN CREATED")
+    else:
+        print("ℹ️ Admin already exists")
+
 
 with app.app_context():
     db.create_all()

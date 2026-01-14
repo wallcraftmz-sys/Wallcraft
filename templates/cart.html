@@ -50,11 +50,11 @@
 
     {% if current_user.is_authenticated %}
         <a href="/order" class="popup-btn primary">
-            {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
+            {{ "Оформить заказ" if lang == "ru" sign up" }}
         </a>
     {% else %}
-        <a href="/login" class="popup-btn primary">
-            {{ "Войти для заказа" if lang == "ru" else "Login to checkout" }}
+        <a href="/register" class="popup-btn primary">
+            {{ "зарегистрироваться для заказа" if lang == "ru" else "to checkout" }}
         </a>
     {% endif %}
 </div>

@@ -4,7 +4,7 @@
 function addToCart(productId) {
     fetch(`/api/add_to_cart/${productId}`, {
         method: "POST",
-        credentials: "same-origin"
+        credentials: "include"
     })
     .then(res => res.json())
     .then(data => {

@@ -311,3 +311,19 @@ def order():
         return redirect(url_for("profile"))
 
     return render_template("order.html", lang=session.get("lang", "ru"))
+    
+# ===== TELEGRAM =====
+def send_telegram(message: str):
+    token = os.getenv("TG_BOT_TOKEN")
+    chat_id = os.getenv("TG_CHAT_ID")
+    if not token or not chat_id:
+        return
+
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": message},
+            timeout=10
+        )
+    except Exception as e:
+        print("TG ERROR:", e)

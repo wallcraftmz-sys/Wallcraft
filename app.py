@@ -432,3 +432,17 @@ def edit_product(id):
 
     db.session.commit()
     return redirect(url_for("admin_products"))
+    
+@app.route("/admin/products/add", methods=["POST"])
+@login_required
+@admin_required
+def add_product():
+    p = Product(
+        name_ru=request.form["name_ru"],
+        name_lv=request.form["name_lv"],
+        price=request.form["price"],
+        image=request.form["image"]
+    )
+    db.session.add(p)
+    db.session.commit()
+    return jsonify(success=True)

@@ -386,6 +386,7 @@ def admin_panel():
 
 #===== dashboard =====
 @app.route("/dashboard")
+@login_required
 @admin_required
 def dashboard():
     return render_template("admin/dashboard.html")

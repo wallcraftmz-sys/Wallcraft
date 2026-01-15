@@ -383,3 +383,9 @@ def order():
 def admin_panel():
     orders = Order.query.order_by(Order.id.desc()).all()
     return render_template("admin.html", orders=orders)
+
+#===== dashboard =====
+@app.route("/dashboard")
+@admin_required
+def dashboard():
+    return render_template("admin/dashboard.html")

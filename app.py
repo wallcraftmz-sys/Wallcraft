@@ -381,4 +381,5 @@ def order():
 @login_required
 @admin_required
 def admin_panel():
-    return render_template("admin.html")
+    orders = Order.query.order_by(Order.id.desc()).all()
+    return render_template("admin.html", orders=orders)

@@ -954,16 +954,41 @@ body {
     pointer-events: all;
 }
 
-.admin-container {
-    max-width: 1000px;
-    margin: auto;
+.top-header {
+    background: #fff;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.logo-text {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
     padding: 20px;
 }
 
-.admin-card {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: #fff;
+.admin-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.admin-btn {
+    display: inline-block;
+    padding: 10px 16px;
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.admin-btn:hover {
+    background: #000;
 }

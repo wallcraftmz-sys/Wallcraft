@@ -1,0 +1,21 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<h3>Товары</h3>
+
+<form method="post">
+    <input name="name_ru" placeholder="Название RU" required><br>
+    <input name="name_lv" placeholder="Название LV" required><br>
+    <input name="price" type="number" step="0.01" placeholder="Цена" required><br>
+    <input name="image" placeholder="Путь к картинке"><br>
+    <button type="submit">➕ Добавить товар</button>
+</form>
+
+<hr>
+
+<ul>
+{% for p in products %}
+    <li>{{ p.name_ru }} — {{ p.price }} €</li>
+{% endfor %}
+</ul>
+{% endblock %}

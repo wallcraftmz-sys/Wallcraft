@@ -373,3 +373,9 @@ def order():
         return redirect(url_for("profile"))
 
     return render_template("order.html", lang=session.get("lang", "ru"))
+    
+       #===== Admin =====
+    @app.route("/admin")
+@admin_required
+def admin_panel():
+    return "ADMIN PANEL"

@@ -992,3 +992,7 @@ body {
 .admin-btn:hover {
     background: #000;
 }
+
+.admin-container {
+    margin-top: 56px;
+}

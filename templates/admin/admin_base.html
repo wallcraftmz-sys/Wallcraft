@@ -5,25 +5,47 @@
     <title>Admin | Wallcraft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body style="background:#f2f2f2">
+<body>
 
 <header class="top-header">
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
     <div class="logo-center">
         <span class="logo-text">ADMIN PANEL</span>
     </div>
+
     <div class="lang-switch">
         <a href="{{ url_for('catalog') }}">Каталог</a>
-        <a href="{{ url_for('admin_products') }}">Товары</a> |
-        <a href="/logout">Выйти</a>
+        |
+        <a href="{{ url_for('admin_products') }}">Товары</a>
+        |
+        <a href="{{ url_for('logout') }}">Выйти</a>
     </div>
 </header>
+
+<!-- SIDE MENU -->
+<div class="side-menu" id="sideMenu">
+    <a href="{{ url_for('dashboard') }}">🏠 Админка</a>
+    <a href="{{ url_for('admin_products') }}">📦 Товары</a>
+    <a href="{{ url_for('catalog') }}">🛒 Каталог</a>
+    <hr>
+    <a href="{{ url_for('logout') }}">🚪 Выйти</a>
+</div>
+
+<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 
 <main class="container">
     {% block content %}{% endblock %}
 </main>
+
+<script>
+function toggleMenu() {
+    document.getElementById('sideMenu').classList.toggle('open');
+    document.getElementById('menuOverlay').classList.toggle('show');
+}
+</script>
 
 </body>
 </html>

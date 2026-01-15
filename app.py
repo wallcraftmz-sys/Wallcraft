@@ -374,8 +374,11 @@ def order():
 
     return render_template("order.html", lang=session.get("lang", "ru"))
     
-       #===== Admin =====
-    @app.route("/admin")
+# ======================
+# ADMIN PANEL
+# ======================
+@app.route("/admin")
+@login_required
 @admin_required
 def admin_panel():
-    return "ADMIN PANEL"
+    return render_template("admin.html")

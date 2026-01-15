@@ -407,3 +407,13 @@ def admin_products():
 
     products = Product.query.all()
     return render_template("admin/products.html", products=products)
+
+#===== admin-products-delete =====
+@app.route("/admin/products/delete/<int:id>", methods=["POST"])
+@login_required
+@admin_required
+def delete_product(id):
+    product = Product.query.get_or_404(id)
+    db.session.delete(product)
+    db.session.commit()
+    return jsonify(success=True)

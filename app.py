@@ -26,7 +26,7 @@ def admin_required(f):
         if not current_user.is_authenticated:
             return redirect(url_for("login"))
 
-        if current_user.role != "admin":
+        if getattr(current_user, "role", None) != "admin":
             return redirect(url_for("profile"))
 
         return f(*args, **kwargs)
@@ -108,7 +108,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), default="user")
+    role = db.Column(db.String(20), default="admin")
 
 
 class Order(db.Model):
@@ -176,20 +176,12 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            login_user(user, remember=True)
+    login_user(user, remember=True)
 
-            next_page = request.args.get("next")
-            return redirect(next_page or url_for(
-                "dashboard" if user.role == "admin" else "profile"
-            ))
-
-        return render_template(
-            "login.html",
-            error="Неверный логин или пароль",
-            lang=session.get("lang", "ru")
-        )
-
-    return render_template("login.html", lang=session.get("lang", "ru"))
+    if user.role == "admin":
+        return redirect(url_for("admin_panel"))
+    else:
+        return redirect(url_for("profile"))
 
 
 # ===== LOGOUT =====

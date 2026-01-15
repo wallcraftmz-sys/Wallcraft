@@ -61,10 +61,10 @@ def send_telegram(message: str):
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 
-# ВАЖНО: для Railway / HTTPS / Proxy
+# Railway / ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# ⚠️ НЕ ВКЛЮЧАЕМ Secure, пока нет своего домена
+# Cookies
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
@@ -72,8 +72,15 @@ app.config.update(
     REMEMBER_COOKIE_SAMESITE="Lax",
 )
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+# 🔥 DATABASE (КРИТИЧНО)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Sessions
 app.permanent_session_lifetime = timedelta(days=7)
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)
 

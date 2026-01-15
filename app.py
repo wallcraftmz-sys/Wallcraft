@@ -147,29 +147,21 @@ def set_lang():
     session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
 
 # ======================
-# PRODUCTS (TEMP)
-# ======================
-products = [
-    {
-        "id": 1,
-        "name_ru": "Жидкие обои — Ocean",
-        "name_lv": "Šķidrie tapetes — Ocean",
-        "price": 25.00,
-        "image": "images/IMG_0900.jpeg"
-    }
-]
-
-# ======================
 # ROUTES
 # ======================
 @app.route("/")
 def index():
     return render_template("index.html", lang=session["lang"])
 
-
+#==== catalog =====
 @app.route("/catalog")
 def catalog():
-    return render_template("catalog.html", products=products, lang=session["lang"])
+    products = Product.query.all()
+    return render_template(
+        "catalog.html",
+        products=products,
+        lang=session["lang"]
+    )
 
 
 # ===== LOGIN =====

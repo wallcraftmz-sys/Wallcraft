@@ -1,42 +1,20 @@
-{% extends "base.html" %}
+{% extends "admin/admin_base.html" %}
 {% block content %}
 
-<h1 class="page-title">Админ — Заказы</h1>
+<h2>Заказы</h2>
 
 {% if orders %}
-
-<div class="cart-list">
-
-    {% for order in orders %}
-    <div class="cart-row">
-
-        <div class="cart-info">
-            <div class="cart-name">
-                👤 Пользователь: <b>{{ order.user }}</b>
-            </div>
-
-            <div style="font-size:14px; opacity:.7;">
-                📞 {{ order.contact }}
-            </div>
-
-            <div style="margin-top:10px;">
-                {% for item in order.items %}
-                    • {{ item }}<br>
-                {% endfor %}
-            </div>
-
-            <div class="cart-subtotal">
-                💰 Итого: {{ "%.2f"|format(order.total) }} €
-            </div>
+    {% for o in orders %}
+        <div class="admin-card">
+            <b>#{{ o.id }}</b><br>
+            {{ o.name }}<br>
+            {{ o.contact }}<br>
+            <pre>{{ o.items }}</pre>
+            <b>{{ o.total }} €</b>
         </div>
-
-    </div>
     {% endfor %}
-
-</div>
-
 {% else %}
-<p style="text-align:center;">Заказов пока нет</p>
+    <p>Заказов нет</p>
 {% endif %}
 
 {% endblock %}

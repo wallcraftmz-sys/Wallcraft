@@ -119,7 +119,13 @@ class Order(db.Model):
     contact = db.Column(db.String(100))
     items = db.Column(db.Text)
     total = db.Column(db.Float)
-
+    
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name_ru = db.Column(db.String(200), nullable=False)
+    name_lv = db.Column(db.String(200), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    image = db.Column(db.String(200))
 # ======================
 # USER LOADER (СТРОГО ЗДЕСЬ)
 # ======================
@@ -390,3 +396,22 @@ def admin_panel():
 @admin_required
 def dashboard():
     return render_template("admin/dashboard.html")
+
+#===== admin-products =====
+@app.route("/admin/products", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_products():
+    if request.method == "POST":
+        product = Product(
+            name_ru=request.form["name_ru"],
+            name_lv=request.form["name_lv"],
+            price=float(request.form["price"]),
+            image=request.form["image"]
+        )
+        db.session.add(product)
+        db.session.commit()
+        return redirect(url_for("admin_products"))
+
+    products = Product.query.all()
+    return render_template("admin/products.html", products=products)

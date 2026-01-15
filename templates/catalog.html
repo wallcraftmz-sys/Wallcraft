@@ -9,14 +9,14 @@
         <div class="product-image">
             <img
                 src="{{ url_for('static', filename=product.image) }}"
-                alt="{{ product['name_' ~ lang] }}"
+                alt="{{ product.name_ru if lang == 'ru' else product.name_lv }}"
                 loading="lazy"
             >
         </div>
 
         <div class="product-info">
             <h3 class="product-title">
-                {{ product['name_' ~ lang] }}
+                {{ product.name_ru if lang == "ru" else product.name_lv }}
             </h3>
 
             <div class="product-price">

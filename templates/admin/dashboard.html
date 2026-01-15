@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Админ-панель</title>
-</head>
-<body>
-    <h1>Админка</h1>
-    <p>Добро пожаловать, {{ current_user.username }}</p>
+{% extends "admin/admin_base.html" %}
 
-    <a href="/admin">Заказы</a><br>
-    <a href="/logout">Выйти</a>
-</body>
-</html>
+{% block content %}
+<h3>Добро пожаловать в админку</h3>
+<p>Вы вошли как администратор</p>
+{% endblock %}

@@ -953,3 +953,17 @@ body {
     opacity: 1;
     pointer-events: all;
 }
+
+.admin-container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+.admin-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #fff;
+}

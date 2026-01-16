@@ -10,7 +10,22 @@
 <body>
 
 <header class="top-header">
+
+    <!-- MENU BUTTON -->
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+    <!-- LOGO CENTER -->
+    <div class="logo-center">
+        <a href="{{ url_for('admin_panel') }}" class="logo-link">
+            <img
+                src="{{ url_for('static', filename='images/logo.png') }}"
+                alt="Wallcraft"
+                class="logo-img"
+            >
+            <span class="logo-text">Wallcraft</span>
+        </a>
+    </div>
+
 </header>
 
 <!-- SIDE MENU -->

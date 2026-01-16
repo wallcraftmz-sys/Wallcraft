@@ -325,7 +325,7 @@ def update_cart(product_id, action):
         cart_total_items=sum(cart.values())
     )
     
-#===== order =====
+# ===== order =====
 @app.route("/order", methods=["GET", "POST"])
 @login_required
 def order():
@@ -342,10 +342,10 @@ def order():
         items = []
 
         for pid, qty in cart.items():
-    product = Product.query.get(int(pid))
-    if product:
-        total += product.price * qty
-        items.append(f"{product.name_ru} × {qty}")
+            product = Product.query.get(int(pid))
+            if product:
+                total += product.price * qty
+                items.append(f"{product.name_ru} × {qty}")
 
         order = Order(
             user_id=current_user.id,
@@ -355,6 +355,15 @@ def order():
             total=total
         )
 
+        db.session.add(order)
+        db.session.commit()
+
+        session["cart"] = {}
+        session.modified = True
+
+        return redirect(url_for("profile"))
+
+    return render_template("order.html")
         db.session.add(order)
         db.session.commit()
 

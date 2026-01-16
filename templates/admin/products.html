@@ -27,35 +27,35 @@
     {% for product in products %}
     <div class="product-card">
 
-        <div class="product-image">
-            <img src="{{ url_for('static', filename=product.image) }}">
+    <div class="product-image">
+        <img src="{{ url_for('static', filename=product.image) }}">
+    </div>
+
+    <div class="product-info">
+        <h3 class="product-title">
+            {{ product.name_ru }}
+        </h3>
+
+        <div class="product-price">
+            {{ product.price }} €
         </div>
 
-        <div class="product-info">
-            <h3 class="product-title">
-                {{ product.name_ru }}
-            </h3>
+        <div class="admin-product-actions">
 
-            <div class="product-price">
-                {{ product.price }} €
-            </div>
-
-            <div class="admin-product-actions">
-                <a href="{{ url_for('edit_product', id=product.id) }}"
-                   class="admin-btn edit">
-                    ✏️
-                </a>
-
-                <button type="button"
-                        onclick="deleteProduct({{ product.id }})"
-                        class="admin-btn delete">
+            <!-- ❌ УДАЛИТЬ -->
+            <form action="/admin/products/delete/{{ product.id }}"
+                  method="post"
+                  style="display:inline;">
+                <button type="submit" class="admin-btn delete">
                     ❌
                 </button>
-            </div>
-        </div>
+            </form>
 
+        </div>
     </div>
-    {% endfor %}
+
+</div>
+{% endfor %}
 
 </div>
 

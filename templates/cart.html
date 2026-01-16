@@ -12,10 +12,10 @@
     <div class="cart-row" id="row-{{ item.id }}">
 
         <img
-            src="{{ url_for('static', filename=item.image) }}"
-            class="cart-img"
-            loading="lazy"
-        >
+    src="{{ url_for('static', filename=item.image or 'images/no-image.png') }}"
+    class="cart-img"
+    loading="lazy"
+>
 
         <div class="cart-info">
             <div class="cart-name">

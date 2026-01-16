@@ -29,13 +29,9 @@
 </header>
 
 <!-- SIDE MENU -->
-<div class="lang-switch admin-nav">
-    <a href="{{ url_for('catalog') }}" class="admin-link">
-        🛒 Каталог
-    </a>
-    <a href="{{ url_for('admin_products') }}" class="admin-link primary">
-        📦 Товары
-    </a>
+<div class="side-menu" id="sideMenu">
+    <a href="{{ url_for('catalog') }}">🛒 Каталог</a>
+    <a href="{{ url_for('admin_products') }}">📦 Товары</a>
 </div>
 
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
@@ -45,14 +41,12 @@
 </main>
 
 <script>
-function deleteProduct(id) {
-    if (!confirm("Удалить товар?")) return;
+function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
 
-    fetch(`/admin/product/delete/${id}`, {
-        method: "POST"
-    }).then(() => {
-        location.reload();
-    });
+    menu.classList.toggle("open");
+    overlay.classList.toggle("show");
 }
 </script>
 

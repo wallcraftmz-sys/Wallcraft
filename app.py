@@ -342,10 +342,10 @@ def order():
         items = []
 
         for pid, qty in cart.items():
-            product = next((p for p in products if p["id"] == int(pid)), None)
-            if product:
-                total += product["price"] * qty
-                items.append(f"{product['name_ru']} × {qty}")
+    product = Product.query.get(int(pid))
+    if product:
+        total += product.price * qty
+        items.append(f"{product.name_ru} × {qty}")
 
         order = Order(
             user_id=current_user.id,

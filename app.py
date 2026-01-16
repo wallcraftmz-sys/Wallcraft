@@ -326,7 +326,6 @@ def update_cart(product_id, action):
     )
     
 # ===== order =====
-# ===== order =====
 @app.route("/order", methods=["GET", "POST"])
 @login_required
 def order():
@@ -367,7 +366,7 @@ def order():
     return render_template("order.html")
 
         # 🔔 TELEGRAM — СТРОГО ЗДЕСЬ
-        send_telegram(
+         send_telegram(
             f"🛒 НОВЫЙ ЗАКАЗ\n"
             f"Пользователь: {current_user.username}\n"
             f"Имя: {name}\n"

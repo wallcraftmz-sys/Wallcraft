@@ -23,13 +23,11 @@
                 {{ product.price }} €
             </div>
 
-            <button
-                type="button"
-                class="add-to-cart-btn"
-                onclick="addToCart({{ product.id }})"
-            >
-                🛒 {{ "В корзину" if lang == "ru" else "Add to cart" }}
-            </button>
+         <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="post">
+    <button type="submit" class="add-to-cart-btn">
+        В корзину
+    </button>
+</form>
         </div>
 
     </div>

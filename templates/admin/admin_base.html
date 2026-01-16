@@ -24,12 +24,13 @@
 </header>
 
 <!-- SIDE MENU -->
-<div class="side-menu" id="sideMenu">
-    <a href="{{ url_for('dashboard') }}">🏠 Админка</a>
-    <a href="{{ url_for('admin_products') }}">📦 Товары</a>
-    <a href="{{ url_for('catalog') }}">🛒 Каталог</a>
-    <hr>
-    <a href="{{ url_for('logout') }}">🚪 Выйти</a>
+<div class="lang-switch admin-nav">
+    <a href="{{ url_for('catalog') }}" class="admin-link">
+        🛒 Каталог
+    </a>
+    <a href="{{ url_for('admin_products') }}" class="admin-link primary">
+        📦 Товары
+    </a>
 </div>
 
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>

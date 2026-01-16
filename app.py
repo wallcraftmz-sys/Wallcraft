@@ -358,15 +358,8 @@ def order():
         db.session.add(order)
         db.session.commit()
 
-        session["cart"] = {}
-        session.modified = True
-
-        return redirect(url_for("profile"))
-
-    return render_template("order.html")
-
-        # 🔔 TELEGRAM — СТРОГО ЗДЕСЬ
-         send_telegram(
+        # 🔔 TELEGRAM — СТРОГО ЗДЕСЬ (БЕЗ ЛИШНИХ ОТСТУПОВ)
+        send_telegram(
             f"🛒 НОВЫЙ ЗАКАЗ\n"
             f"Пользователь: {current_user.username}\n"
             f"Имя: {name}\n"

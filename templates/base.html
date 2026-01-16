@@ -72,11 +72,8 @@
 </div>
 
 <!-- FLOATING CART -->
-<a href="/cart" class="floating-cart">
-    🛒
-    <span id="cart-count">
-        {{ session.get("cart", {}).values() | sum }}
-    </span>
+<a href="{{ url_for('cart') }}" class="cart-btn">
+    🛒 <span id="cart-count">0</span>
 </a>
 
 </body>

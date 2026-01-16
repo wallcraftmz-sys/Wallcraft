@@ -5,34 +5,33 @@
     {{ "Корзина" if lang == "ru" else "Cart" }}
 </h1>
 
-{% if cart_items %}
+{% if items %}
 
 <div class="cart-list">
-    {% for item in cart_items %}
-    <div class="cart-row" id="row-{{ item.product.id }}">
+    {% for item in items %}
+    <div class="cart-row" id="row-{{ item.id }}">
 
         <img
-            src="{{ url_for('static', filename=item.product.image) }}"
+            src="{{ url_for('static', filename=item.image) }}"
             class="cart-img"
             loading="lazy"
         >
 
         <div class="cart-info">
             <div class="cart-name">
-                {{ item.product["name_" + lang] }}
+                {{ item.name if lang == "ru" else item.name }}
             </div>
 
             <div class="cart-qty">
-                <button onclick="updateQty({{ item.product.id }}, 'minus')">−</button>
-                <span id="qty-{{ item.product.id }}">{{ item.qty }}</span>
-                <button onclick="updateQty({{ item.product.id }}, 'plus')">+</button>
+                <button onclick="updateQty({{ item.id }}, 'minus')">−</button>
+                <span id="qty-{{ item.id }}">{{ item.qty }}</span>
+                <button onclick="updateQty({{ item.id }}, 'plus')">+</button>
             </div>
 
-            <div class="cart-subtotal" id="subtotal-{{ item.product.id }}">
-                {{ "%.2f"|format(item.subtotal) }} €
+            <div class="cart-subtotal" id="subtotal-{{ item.id }}">
+                {{ "%.2f"|format(item.total) }} €
             </div>
         </div>
-
     </div>
     {% endfor %}
 </div>
@@ -42,7 +41,6 @@
     <span id="cart-total">{{ "%.2f"|format(total) }} €</span>
 </div>
 
-<!-- 🔥 КНОПКИ ДЕЙСТВИЙ -->
 <div class="cart-actions">
     <a href="/catalog" class="popup-btn">
         ← {{ "Продолжить покупки" if lang == "ru" else "Continue shopping" }}

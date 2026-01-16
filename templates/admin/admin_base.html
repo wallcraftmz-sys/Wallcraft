@@ -40,9 +40,14 @@
 </main>
 
 <script>
-function toggleMenu() {
-    document.getElementById('sideMenu').classList.toggle('open');
-    document.getElementById('menuOverlay').classList.toggle('show');
+function deleteProduct(id) {
+    if (!confirm("Удалить товар?")) return;
+
+    fetch(`/admin/product/delete/${id}`, {
+        method: "POST"
+    }).then(() => {
+        location.reload();
+    });
 }
 </script>
 

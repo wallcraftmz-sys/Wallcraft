@@ -1025,3 +1025,40 @@ body {
     background: linear-gradient(135deg, #2ecc71, #27ae60);
     color: #fff;
 }
+
+/* =========================
+   ADMIN PRODUCT ACTIONS
+========================= */
+.admin-products .product-info {
+    position: relative;
+}
+
+.admin-product-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.admin-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-btn.edit {
+    background: #3498db;
+    color: #fff;
+}
+
+.admin-btn.delete {
+    background: #e74c3c;
+    color: #fff;
+}

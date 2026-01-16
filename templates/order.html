@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-card-wrapper">
+    <div class="page-card">
+
+        <h1>
+            {% if lang == "ru" %}
+                Оформление заказа
+            {% else %}
+                Pasūtījuma noformēšana
+            {% endif %}
+        </h1>
+
+        {% if success %}
+
+            <p>
+                {% if lang == "ru" %}
+                    Заявка отправлена! Мы свяжемся с вами.
+                {% else %}
+                    Pieteikums nosūtīts! Mēs ar jums sazināsimies.
+                {% endif %}
+            </p>
+
+            <div class="page-card-actions">
+                <a href="/?lang={{ lang }}" class="page-btn gray">
+                    {% if lang == "ru" %}На главную{% else %}Uz sākumu{% endif %}
+                </a>
+                <a href="/catalog?lang={{ lang }}" class="page-btn green">
+                    {% if lang == "ru" %}В каталог{% else %}Uz katalogu{% endif %}
+                </a>
+            </div>
+
+        {% else %}
+
+            <form method="POST" class="order-form">
+                <input type="text" name="name"
+                       placeholder="{% if lang=='ru' %}Ваше имя{% else %}Vārds{% endif %}"
+                       required>
+
+                <input type="text" name="contact"
+                       placeholder="{% if lang=='ru' %}Телефон / WhatsApp{% else %}Telefons{% endif %}"
+                       required>
+
+                <button type="submit" class="page-btn green" style="width:100%; margin-top:10px;">
+                    {% if lang == "ru" %}Отправить{% else %}Nosūtīt{% endif %}
+                </button>
+            </form>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,21 +1,40 @@
-{% extends "admin/admin_base.html" %}
-
+{% extends "admin_base.html" %}
 {% block content %}
-<h3>Товары</h3>
 
-<form method="post" action="{{ url_for('edit_product', id=p.id) }}">
-    <input name="name_ru" value="{{ p.name_ru }}">
-    <input name="name_lv" value="{{ p.name_lv }}">
-    <input name="price" value="{{ p.price }}">
-    <input name="image" value="{{ p.image }}">
-    <button>💾</button>
-</form>
+<h1 class="page-title">Товары</h1>
 
-<hr>
+<div class="product-grid admin-products">
 
-<ul>
-{% for p in products %}
-    <li>{{ p.name_ru }} — {{ p.price }} €</li>
-{% endfor %}
-</ul>
+    {% for product in products %}
+    <div class="product-card">
+
+        <div class="product-image">
+            <img src="{{ url_for('static', filename=product.image) }}">
+        </div>
+
+        <div class="product-info">
+            <h3 class="product-title">
+                {{ product.name_ru }}
+            </h3>
+
+            <div class="product-price">
+                {{ product.price }} €
+            </div>
+
+            <div class="admin-product-actions">
+                <a href="{{ url_for('edit_product', id=product.id) }}" class="admin-btn edit">
+                    ✏️
+                </a>
+                <button onclick="deleteProduct({{ product.id }})"
+                        class="admin-btn delete">
+                    ❌
+                </button>
+            </div>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
 {% endblock %}

@@ -261,26 +261,28 @@ def add_to_cart(product_id):
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
-    cart_items = []
-    total = 0.0
+
+    items = []
+    total = 0
 
     for pid, qty in cart.items():
-        product = next((p for p in products if p["id"] == int(pid)), None)
-        if product:
-            subtotal = product["price"] * qty
-            total += subtotal
-            cart_items.append({
-                "product": product,
-                "qty": qty,
-                "subtotal": subtotal
-            })
+        product = Product.query.get(int(pid))
+        if not product:
+            continue
 
-    return render_template(
-        "cart.html",
-        cart_items=cart_items,   # ⚠️ ВАЖНО: cart_items
-        total=total,
-        lang=session.get("lang", "ru")
-    )
+        item_total = product.price * qty
+        total += item_total
+
+        items.append({
+            "id": product.id,
+            "name": product.name_ru,
+            "price": product.price,
+            "qty": qty,
+            "total": item_total,
+            "image": product.image
+        })
+
+    return render_template("cart.html", items=items, total=total)
 
 
 # ======================

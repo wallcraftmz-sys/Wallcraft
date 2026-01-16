@@ -996,3 +996,32 @@ body {
 .admin-container {
     margin-top: 56px;
 }
+
+/* =========================
+   ADMIN NAV BUTTONS
+========================= */
+.admin-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-link {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    background: #f2f2f2;
+    color: #222;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+.admin-link.primary {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+}

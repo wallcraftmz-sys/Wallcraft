@@ -446,3 +446,10 @@ def add_product():
     db.session.add(p)
     db.session.commit()
     return jsonify(success=True)
+
+#===== admin-orders =====
+@app.route("/admin/orders")
+@admin_required
+def admin_orders():
+    orders = Order.query.order_by(Order.id.desc()).all()
+    return render_template("admin/orders.html", orders=orders)

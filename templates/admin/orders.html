@@ -1,20 +1,30 @@
 {% extends "admin/admin_base.html" %}
 {% block content %}
 
-<h2>Заказы</h2>
+<h1>Заказы</h1>
 
 {% if orders %}
-    {% for o in orders %}
-        <div class="admin-card">
-            <b>#{{ o.id }}</b><br>
-            {{ o.name }}<br>
-            {{ o.contact }}<br>
-            <pre>{{ o.items }}</pre>
-            <b>{{ o.total }} €</b>
-        </div>
+<table border="1" cellpadding="8">
+    <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Контакт</th>
+        <th>Товары</th>
+        <th>Сумма</th>
+    </tr>
+
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.id }}</td>
+        <td>{{ order.name }}</td>
+        <td>{{ order.contact }}</td>
+        <td style="white-space: pre-line">{{ order.items }}</td>
+        <td>{{ order.total }} €</td>
+    </tr>
     {% endfor %}
+</table>
 {% else %}
-    <p>Заказов нет</p>
+<p>Заказов нет</p>
 {% endif %}
 
 {% endblock %}

@@ -308,13 +308,14 @@ def update_cart(product_id, action):
 
     qty = cart.get(pid, 0)
 
-    product = next((p for p in products if p["id"] == product_id), None)
-    subtotal = (product["price"] * qty) if product else 0
+    product = Product.query.get(product_id)
+    subtotal = product.price * qty if product else 0
 
-    total = sum(
-        next(p["price"] for p in products if p["id"] == int(k)) * v
-        for k, v in cart.items()
-    )
+    total = 0
+    for k, v in cart.items():
+        p = Product.query.get(int(k))
+        if p:
+            total += p.price * v
 
     return jsonify(
         success=True,

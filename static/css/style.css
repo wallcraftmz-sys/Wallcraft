@@ -1027,16 +1027,34 @@ body {
 }
 
 /* =========================
-   ADMIN PRODUCT ACTIONS
+   ADMIN PRODUCTS
 ========================= */
-.admin-products .product-info {
-    position: relative;
+
+.add-product-card {
+    border: 2px dashed #27ae60;
+    background: #f8fff9;
+}
+
+.add-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    font-weight: 800;
+    color: #27ae60;
+}
+
+.add-product-card input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
 }
 
 .admin-product-actions {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 14px;
     margin-top: 10px;
 }
 
@@ -1047,18 +1065,15 @@ body {
     border: none;
     cursor: pointer;
     font-size: 18px;
-    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .admin-btn.edit {
-    background: #3498db;
-    color: #fff;
+    background: #eee;
 }
 
 .admin-btn.delete {
-    background: #e74c3c;
-    color: #fff;
+    background: #ffdddd;
 }

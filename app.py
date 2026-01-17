@@ -289,7 +289,6 @@ def cart():
     lang=session.get("lang", "ru")
 )
 
-
 # ======================
 # UPDATE CART
 # ======================
@@ -329,7 +328,6 @@ def update_cart(product_id, action):
         total=total,
         cart_total_items=sum(cart.values())
     )
-    
 # ===== order =====
 @app.route("/order", methods=["GET", "POST"])
 @login_required

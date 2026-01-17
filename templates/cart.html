@@ -9,30 +9,32 @@
 
 <div class="cart-list">
     {% for item in items %}
-    <div class="cart-row" id="row-{{ item.id }}">
+   <div class="cart-row" id="row-{{ item.id }}">
 
-        <img
-    src="{{ url_for('static', filename=item['image']) }}"
-    class="cart-img"
-    loading="lazy"
-    onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
->
-     
-        <div class="cart-info">
-              {{ item.name }}
+    <img
+        src="{{ url_for('static', filename=item['image'] if item['image'] else 'images/no-image.png') }}"
+        class="cart-img"
+        loading="lazy"
+        onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
+    >
 
-            <div class="cart-qty">
-                <button onclick="updateQty({{ item.id }}, 'minus')">−</button>
-                <span id="qty-{{ item.id }}">{{ item.qty }}</span>
-                <button onclick="updateQty({{ item.id }}, 'plus')">+</button>
-            </div>
-
-            <div class="cart-subtotal" id="subtotal-{{ item.id }}">
-                {{ "%.2f"|format(item.total) }} €
-            </div>
+    <div class="cart-info">
+        <div class="cart-name">
+            {{ item.name }}
         </div>
 
+        <div class="cart-qty">
+            <button onclick="updateQty({{ item.id }}, 'minus')">−</button>
+            <span id="qty-{{ item.id }}">{{ item.qty }}</span>
+            <button onclick="updateQty({{ item.id }}, 'plus')">+</button>
+        </div>
+
+        <div class="cart-subtotal" id="subtotal-{{ item.id }}">
+            {{ "%.2f"|format(item.total) }} €
+        </div>
     </div>
+
+</div>
     {% endfor %}
 </div>
 

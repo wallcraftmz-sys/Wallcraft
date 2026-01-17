@@ -42,16 +42,22 @@
 
         <div class="admin-product-actions">
 
-            <!-- ❌ УДАЛИТЬ -->
-            <form action="/admin/products/delete/{{ product.id }}"
-                  method="post"
-                  style="display:inline;">
-                <button type="submit" class="admin-btn delete">
-                    ❌
-                </button>
-            </form>
+    <!-- ✏️ РЕДАКТИРОВАТЬ -->
+    <a href="{{ url_for('edit_product', id=product.id) }}"
+       class="admin-btn edit">
+        ✏️
+    </a>
 
-        </div>
+    <!-- ❌ УДАЛИТЬ -->
+    <form action="{{ url_for('delete_product', id=product.id) }}"
+          method="post"
+          style="display:inline;">
+        <button type="submit" class="admin-btn delete">
+            ❌
+        </button>
+    </form>
+
+</div>
     </div>
 
 </div>

@@ -419,37 +419,30 @@ def delete_product(id):
     product = Product.query.get_or_404(id)
     db.session.delete(product)
     db.session.commit()
-    return jsonify(success=True)
+    return redirect(url_for("admin_products"))
 
 
+# показать форму редактирования
+@app.route("/admin/products/edit/<int:id>", methods=["GET"])
+@login_required
+@admin_required
+def edit_product_form(id):
+    product = Product.query.get_or_404(id)
+    return render_template("admin/edit_product.html", product=product)
+
+# сохранить изменения
 @app.route("/admin/products/edit/<int:id>", methods=["POST"])
 @login_required
 @admin_required
 def edit_product(id):
     p = Product.query.get_or_404(id)
-
     p.name_ru = request.form["name_ru"]
     p.name_lv = request.form["name_lv"]
     p.price = request.form["price"]
     p.image = request.form["image"]
-
     db.session.commit()
     return redirect(url_for("admin_products"))
     
-@app.route("/admin/products/add", methods=["POST"])
-@login_required
-@admin_required
-def add_product():
-    p = Product(
-        name_ru=request.form["name_ru"],
-        name_lv=request.form["name_lv"],
-        price=request.form["price"],
-        image=request.form["image"]
-    )
-    db.session.add(p)
-    db.session.commit()
-    return jsonify(success=True)
-
 #===== admin-orders =====
 @app.route("/admin/orders")
 @admin_required

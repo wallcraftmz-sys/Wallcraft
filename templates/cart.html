@@ -12,15 +12,14 @@
     <div class="cart-row" id="row-{{ item.id }}">
 
         <img
-    src="{{ url_for('static', filename=item.image or 'images/no-image.png') }}"
+    src="{{ url_for('static', filename=item['image']) }}"
     class="cart-img"
     loading="lazy"
+    onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
 >
      
         <div class="cart-info">
-            <div class="cart-name">
-                {{ item.name }}
-            </div>
+              {{ item.name }}
 
             <div class="cart-qty">
                 <button onclick="updateQty({{ item.id }}, 'minus')">−</button>

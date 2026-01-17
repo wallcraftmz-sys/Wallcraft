@@ -404,17 +404,31 @@ def dashboard():
     return render_template("admin/dashboard.html")
 
 #===== admin-products =====
+#===== admin-products =====
 @app.route("/admin/products", methods=["GET", "POST"])
 @login_required
 @admin_required
 def admin_products():
     if request.method == "POST":
+        file = request.files.get("image")
+
+        image_path = None
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+            file.save(upload_path)
+
+            image_path = f"uploads/{filename}"
+
         product = Product(
             name_ru=request.form["name_ru"],
             name_lv=request.form["name_lv"],
             price=float(request.form["price"]),
-            image=request.form["image"]
+            image=image_path
         )
+
         db.session.add(product)
         db.session.commit()
         return redirect(url_for("admin_products"))

@@ -52,14 +52,20 @@
             </a>
 
             {% if current_user.is_authenticated %}
-                <a href="/order" class="popup-btn primary">
-                    {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
-                </a>
-            {% else %}
-                <a href="/register" class="popup-btn primary">
-                    {{ "Зарегистрироваться для заказа" if lang == "ru" else "Sign up to checkout" }}
-                </a>
-            {% endif %}
+    <a href="/order" class="popup-btn primary">
+        {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
+    </a>
+{% else %}
+    <div class="page-card-actions">
+        <a href="/login" class="page-btn gray">
+            {{ "Войти" if lang == "ru" else "Login" }}
+        </a>
+
+        <a href="/register" class="page-btn green">
+            {{ "Зарегистрироваться" if lang == "ru" else "Sign up" }}
+        </a>
+    </div>
+{% endif %}
         </div>
 
         {% else %}

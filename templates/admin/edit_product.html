@@ -1,0 +1,25 @@
+{% extends "admin/admin_base.html" %}
+{% block content %}
+
+<h1 class="page-title">Редактировать товар</h1>
+
+<form method="post" class="product-card add-product-card">
+
+    <div class="product-image">
+        <img src="{{ url_for('static', filename=product.image) }}" style="max-width:100%;">
+    </div>
+
+    <div class="product-info">
+        <input name="name_ru" value="{{ product.name_ru }}" required>
+        <input name="name_lv" value="{{ product.name_lv }}" required>
+        <input name="price" type="number" step="0.01" value="{{ product.price }}" required>
+        <input name="image" value="{{ product.image }}" required>
+
+        <button class="add-to-cart-btn">
+            Сохранить изменения
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}

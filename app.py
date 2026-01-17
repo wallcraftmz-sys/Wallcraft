@@ -16,6 +16,8 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import os
+from werkzeug.utils import secure_filename
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -60,6 +62,12 @@ def send_telegram(message: str):
 # ======================
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Railway / ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)

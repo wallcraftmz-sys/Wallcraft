@@ -282,7 +282,12 @@ def cart():
             "image": product.image
         })
 
-    return render_template("cart.html", items=items, total=total)
+    return render_template(
+    "cart.html",
+    items=items,
+    total=total,
+    lang=session.get("lang", "ru")
+)
 
 
 # ======================

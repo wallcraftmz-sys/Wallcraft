@@ -60,3 +60,43 @@ function closeMenu() {
 document.addEventListener("DOMContentLoaded", () => {
     closeMenu();
 });
+
+// =========================
+// UPDATE CART (+ / -)
+// =========================
+function updateQty(productId, action) {
+    console.log("UPDATE CART:", productId, action);
+
+    fetch(`/api/update_cart/${productId}/${action}`, {
+        method: "POST",
+        credentials: "include"
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("RESPONSE:", data);
+
+        if (!data.success) return;
+
+        if (data.qty === 0) {
+            const row = document.getElementById(`row-${productId}`);
+            if (row) row.remove();
+        } else {
+            document.getElementById(`qty-${productId}`).textContent = data.qty;
+            document.getElementById(`subtotal-${productId}`).textContent =
+                data.subtotal.toFixed(2) + " €";
+        }
+
+        document.getElementById("cart-total").textContent =
+            data.total.toFixed(2) + " €";
+
+        const counter = document.getElementById("cart-count");
+        if (counter) {
+            counter.textContent = data.cart_total_items;
+        }
+
+        if (data.cart_total_items === 0) {
+            location.reload();
+        }
+    })
+    .catch(err => console.error("UPDATE CART ERROR:", err));
+}

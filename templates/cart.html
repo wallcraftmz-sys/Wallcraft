@@ -1,104 +1,76 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="page-title">
-    {{ "Корзина" if lang == "ru" else "Cart" }}
-</h1>
+<div class="page-card-wrapper">
+    <div class="page-card">
 
-{% if items %}
+        <h1 class="page-title">
+            {{ "Корзина" if lang == "ru" else "Cart" }}
+        </h1>
 
-<div class="cart-list">
-    {% for item in items %}
-   <div class="cart-row" id="row-{{ item.id }}">
+        {% if items %}
 
-    <img
-        src="{{ url_for('static', filename=item['image'] if item['image'] else 'images/no-image.png') }}"
-        class="cart-img"
-        loading="lazy"
-        onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
-    >
+        <div class="cart-list">
+            {% for item in items %}
+            <div class="cart-row" id="row-{{ item.id }}">
 
-    <div class="cart-info">
-        <div class="cart-name">
-            {{ item.name }}
+                <img
+                    src="{{ url_for('static', filename=item['image'] if item['image'] else 'images/no-image.png') }}"
+                    class="cart-img"
+                    loading="lazy"
+                    onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
+                >
+
+                <div class="cart-info">
+                    <div class="cart-name">
+                        {{ item.name }}
+                    </div>
+
+                    <div class="cart-qty">
+                        <button onclick="updateQty({{ item.id }}, 'minus')">−</button>
+                        <span id="qty-{{ item.id }}">{{ item.qty }}</span>
+                        <button onclick="updateQty({{ item.id }}, 'plus')">+</button>
+                    </div>
+
+                    <div class="cart-subtotal" id="subtotal-{{ item.id }}">
+                        {{ "%.2f"|format(item.total) }} €
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
         </div>
 
-        <div class="cart-qty">
-            <button onclick="updateQty({{ item.id }}, 'minus')">−</button>
-            <span id="qty-{{ item.id }}">{{ item.qty }}</span>
-            <button onclick="updateQty({{ item.id }}, 'plus')">+</button>
+        <div class="cart-total">
+            <strong>{{ "Итого" if lang == "ru" else "Total" }}:</strong>
+            <span id="cart-total">{{ "%.2f"|format(total) }} €</span>
         </div>
 
-        <div class="cart-subtotal" id="subtotal-{{ item.id }}">
-            {{ "%.2f"|format(item.total) }} €
+        <div class="cart-actions">
+            <a href="/catalog" class="popup-btn">
+                ← {{ "Продолжить покупки" if lang == "ru" else "Continue shopping" }}
+            </a>
+
+            {% if current_user.is_authenticated %}
+                <a href="/order" class="popup-btn primary">
+                    {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
+                </a>
+            {% else %}
+                <a href="/register" class="popup-btn primary">
+                    {{ "Зарегистрироваться для заказа" if lang == "ru" else "Sign up to checkout" }}
+                </a>
+            {% endif %}
         </div>
+
+        {% else %}
+
+        <p class="empty-cart">
+            {{ "Корзина пуста" if lang == "ru" else "Cart is empty" }}
+        </p>
+
+        {% endif %}
+
     </div>
-
 </div>
-    {% endfor %}
-</div>
-
-<div class="cart-total">
-    <strong>{{ "Итого" if lang == "ru" else "Total" }}:</strong>
-    <span id="cart-total">{{ "%.2f"|format(total) }} €</span>
-</div>
-
-<div class="cart-actions">
-    <a href="/catalog" class="popup-btn">
-        ← {{ "Продолжить покупки" if lang == "ru" else "Continue shopping" }}
-    </a>
-
-    {% if current_user.is_authenticated %}
-        <a href="/order" class="popup-btn primary">
-            {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
-        </a>
-    {% else %}
-        <a href="/register" class="popup-btn primary">
-            {{ "Зарегистрироваться для заказа" if lang == "ru" else "Sign up to checkout" }}
-        </a>
-    {% endif %}
-</div>
-
-{% else %}
-
-<p class="empty-cart">
-    {{ "Корзина пуста" if lang == "ru" else "Cart is empty" }}
-</p>
-
-{% endif %}
-
-<script>
-function updateQty(productId, action) {
-    fetch(`/api/update_cart/${productId}/${action}`, {
-        method: "POST",
-        credentials: "include"
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (!data.success) return;
-
-        if (data.qty === 0) {
-            const row = document.getElementById(`row-${productId}`);
-            if (row) row.remove();
-        } else {
-            document.getElementById(`qty-${productId}`).textContent = data.qty;
-            document.getElementById(`subtotal-${productId}`).textContent =
-                data.subtotal.toFixed(2) + " €";
-        }
-
-        document.getElementById("cart-total").textContent =
-            data.total.toFixed(2) + " €";
-
-        const counter = document.getElementById("cart-count");
-        if (counter) {
-            counter.textContent = data.cart_total_items;
-        }
-
-        if (data.cart_total_items === 0) {
-            location.reload();
-        }
-    });
-}
-</script>
 
 {% endblock %}

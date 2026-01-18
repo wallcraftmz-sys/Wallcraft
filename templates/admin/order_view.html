@@ -1,0 +1,43 @@
+{% extends "admin/admin_base.html" %}
+{% block content %}
+
+<h1>Заказ #{{ order.id }}</h1>
+
+<div class="order-card">
+
+    <p><strong>Имя:</strong> {{ order.name }}</p>
+    <p><strong>Контакт:</strong> {{ order.contact }}</p>
+    <p><strong>Дата:</strong> {{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</p>
+
+    <hr>
+
+    <h3>Состав заказа</h3>
+    <pre>{{ order.items }}</pre>
+
+    <h3>Сумма</h3>
+    <p><strong>{{ order.total }} €</strong></p>
+
+    <hr>
+
+    <h3>Статус</h3>
+    <form method="post"
+          action="{{ url_for('update_order_status', order_id=order.id) }}">
+        <select name="status" onchange="this.form.submit()">
+            {% for key, labels in ORDER_STATUSES.items() %}
+            <option value="{{ key }}"
+                    {% if order.status == key %}selected{% endif %}>
+                {{ labels[lang] }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <br>
+
+    <a href="{{ url_for('admin_orders') }}" class="admin-link">
+        ← Назад к заказам
+    </a>
+
+</div>
+
+{% endblock %}

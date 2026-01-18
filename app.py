@@ -122,14 +122,23 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user = db.relationship("User", backref="orders")
 
-    name = db.Column(db.String(100))
-    contact = db.Column(db.String(100))
-    items = db.Column(db.Text)
-    total = db.Column(db.Float)
+    name = db.Column(db.String(100), nullable=False)
+    contact = db.Column(db.String(100), nullable=False)
 
-    status = db.Column(db.String(20), default="new")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    items = db.Column(db.Text, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+
+    status = db.Column(
+        db.String(30),
+        default="new"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
     
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)

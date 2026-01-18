@@ -164,7 +164,11 @@ with app.app_context():
 # ======================
 @app.before_request
 def set_lang():
-    session["lang"] = request.args.get("lang") or session.get("lang") or "ru"
+    if "lang" in request.args:
+        session["lang"] = request.args.get("lang")
+
+    if "lang" not in session:
+        session["lang"] = "ru"
 
 # ======================
 # ROUTES

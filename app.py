@@ -600,19 +600,27 @@ def edit_product(id):
     
 #===== admin-orders =====
 @app.route("/admin/orders")
-@login_required
 @admin_required
 def admin_orders():
     show = request.args.get("show", "active")
 
+    ACTIVE_STATUSES = ["new", "confirmed", "in_progress", "shipped"]
+    ARCHIVE_STATUSES = ["completed", "cancelled"]
+
     if show == "archive":
-        orders = Order.query.filter(
-            Order.status.in_(["completed", "cancelled"])
-        ).order_by(Order.created_at.desc()).all()
+        orders = (
+            Order.query
+            .filter(Order.status.in_(ARCHIVE_STATUSES))
+            .order_by(Order.created_at.desc())
+            .all()
+        )
     else:
-        orders = Order.query.filter(
-            ~Order.status.in_(["completed", "cancelled"])
-        ).order_by(Order.created_at.desc()).all()
+        orders = (
+            Order.query
+            .filter(Order.status.in_(ACTIVE_STATUSES))
+            .order_by(Order.created_at.desc())
+            .all()
+        )
 
     return render_template(
         "admin/orders.html",

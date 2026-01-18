@@ -647,3 +647,17 @@ def restore_product(id):
     product.is_active = True
     db.session.commit()
     return redirect(url_for("admin_products"))
+
+#===== admin-orders-int< =====
+@app.route("/admin/orders/<int:order_id>")
+@login_required
+@admin_required
+def admin_order_view(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    return render_template(
+        "admin/order_view.html",
+        order=order,
+        ORDER_STATUSES=ORDER_STATUSES,
+        lang=session.get("lang", "ru")
+    )

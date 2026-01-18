@@ -16,6 +16,7 @@
 </div>
 
 {% if orders %}
+
 <table class="admin-table">
     <thead>
         <tr>
@@ -24,18 +25,21 @@
             <th>Состав</th>
             <th>Сумма</th>
             <th>Статус</th>
+            <th>История</th>
             <th>Дата</th>
             <th>Действия</th>
         </tr>
     </thead>
     <tbody>
-        {% for order in orders %}
+
+    {% for order in orders %}
         <tr class="status-row status-{{ order.status }}">
+
             <td>
-    <a href="{{ url_for('admin_order_view', order_id=order.id) }}">
-        #{{ order.id }}
-    </a>
-</td>
+                <a href="{{ url_for('admin_order_view', order_id=order.id) }}">
+                    #{{ order.id }}
+                </a>
+            </td>
 
             <td>
                 {{ order.name }}<br>
@@ -61,9 +65,24 @@
                 </form>
             </td>
 
+            <!-- ИСТОРИЯ СТАТУСОВ -->
+            <td>
+                {% for h in order.status_history %}
+                    <div style="font-size:12px; opacity:0.7">
+                        {{ h.created_at.strftime("%d.%m.%Y %H:%M") }} —
+                        {{ ORDER_STATUSES[h.old_status][lang] }}
+                        →
+                        {{ ORDER_STATUSES[h.new_status][lang] }}
+                        ({{ h.changed_by }})
+                    </div>
+                {% else %}
+                    <span style="opacity:0.5">—</span>
+                {% endfor %}
+            </td>
+
             <td>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
 
-            <!-- 🗑 УДАЛИТЬ -->
+            <!-- УДАЛЕНИЕ -->
             <td>
                 <form method="post"
                       action="{{ url_for('delete_order', order_id=order.id) }}"
@@ -73,11 +92,13 @@
             </td>
 
         </tr>
-        {% endfor %}
+    {% endfor %}
+
     </tbody>
 </table>
+
 {% else %}
-<p>Нет заказов</p>
+    <p>Нет заказов</p>
 {% endif %}
 
 {% endblock %}

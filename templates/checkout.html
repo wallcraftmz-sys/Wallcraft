@@ -1,20 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <h1>Оформление заказа</h1>
 
-<h3>Ваш заказ</h3>
-<ul>
-    {% for item in items %}
-        <li>{{ item }}</li>
-    {% endfor %}
-</ul>
+<div class="checkout-box">
 
-<p><strong>{{ total }} €</strong></p>
+    <h3>Ваш заказ</h3>
 
-<form method="post">
-    <input type="text" name="name" placeholder="Имя" required>
-    <input type="text" name="contact" placeholder="Телефон или email" required>
-    <button type="submit">Подтвердить заказ</button>
-</form>
+    <ul class="checkout-list">
+        {% for item in items %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+
+    <p class="checkout-total"><strong>{{ total }} €</strong></p>
+
+    <form method="post" class="checkout-form">
+        <input type="text" name="name" placeholder="Имя" required>
+        <input type="text" name="contact" placeholder="Телефон или email" required>
+
+        <button type="submit" class="btn-primary">
+            Подтвердить заказ
+        </button>
+    </form>
+
+</div>
+
 {% endblock %}

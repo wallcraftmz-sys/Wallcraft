@@ -630,12 +630,13 @@ def admin_orders():
         )
 
     return render_template(
-        "admin/orders.html",
-        orders=orders,
-        ORDER_STATUSES=ORDER_STATUSES,
-        lang=session.get("lang", "ru"),
-        show=show
-    )
+    "admin/orders.html",
+    orders=orders,
+    ORDER_STATUSES=ORDER_STATUSES,
+    ALLOWED_STATUS_TRANSITIONS=ALLOWED_STATUS_TRANSITIONS,
+    lang=session.get("lang", "ru"),
+    show=show
+)
 #===== dashboard =====
 @app.route("/dashboard")
 @login_required

@@ -562,3 +562,13 @@ def update_order_status(order_id):
         db.session.commit()
 
     return redirect(url_for("admin_orders"))
+
+# ===== admin-order-delete =====
+@app.route("/admin/orders/delete/<int:order_id>", methods=["POST"])
+@login_required
+@admin_required
+def delete_order(order_id):
+    order = Order.query.get_or_404(order_id)
+    db.session.delete(order)
+    db.session.commit()
+    return redirect(url_for("admin_orders"))

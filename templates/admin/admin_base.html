@@ -5,7 +5,10 @@
     <title>Admin | Wallcraft</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
 
@@ -14,7 +17,7 @@
     <!-- MENU BUTTON -->
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-    <!-- LOGO CENTER -->
+    <!-- LOGO -->
     <div class="logo-center">
         <a href="{{ url_for('admin_panel') }}" class="logo-link">
             <img
@@ -26,19 +29,27 @@
         </a>
     </div>
 
+    <!-- LANGUAGE SWITCH -->
+    <div class="lang-switch">
+        <a href="?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
+        <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
+        <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
+    </div>
+
 </header>
 
-<!-- SIDE MENU -->
-<div class="side-menu" id="sideMenu">
-    <a href="{{ url_for('admin_panel') }}">Админка</a>
-    <a href="{{ url_for('catalog') }}">Каталог</a>
-    <a href="{{ url_for('admin_products') }}">Товары</a>
-    <a href="{{ url_for('admin_orders') }}">Заказы</a>
-    <hr>
-    <a href="{{ url_for('logout') }}">Выйти</a>
-</div>
+<!-- OVERLAY -->
+<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
-<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+    <a href="{{ url_for('admin_panel') }}" onclick="closeMenu()">📊 Админка</a>
+    <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">📦 Товары</a>
+    <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">🧾 Заказы</a>
+    <a href="{{ url_for('catalog') }}" onclick="closeMenu()">🛍 Каталог</a>
+    <hr>
+    <a href="{{ url_for('logout') }}" onclick="closeMenu()">🚪 Выйти</a>
+</div>
 
 <main class="container admin-container">
     {% block content %}{% endblock %}
@@ -49,8 +60,18 @@ function toggleMenu() {
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
 
+    if (!menu || !overlay) return;
+
     menu.classList.toggle("open");
     overlay.classList.toggle("show");
+}
+
+function closeMenu() {
+    const menu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("menuOverlay");
+
+    if (menu) menu.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
 }
 </script>
 

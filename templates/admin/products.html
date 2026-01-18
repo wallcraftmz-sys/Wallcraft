@@ -44,17 +44,25 @@
             <div class="product-price">{{ product.price }} €</div>
 
             <div class="admin-product-actions">
-                <a href="{{ url_for('edit_product', id=product.id) }}"
-                   class="admin-btn edit">✏️</a>
 
-                <form action="{{ url_for('delete_product', id=product.id) }}"
-                      method="post">
-                    <button type="submit" class="admin-btn delete">❌</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+    <a href="{{ url_for('edit_product', id=product.id) }}"
+       class="admin-btn edit">✏️</a>
+
+    {% if product.is_active %}
+        <!-- SOFT DELETE -->
+        <form action="{{ url_for('delete_product', id=product.id) }}"
+              method="post"
+              onsubmit="return confirm('Скрыть товар из каталога?');">
+            <button type="submit" class="admin-btn delete">❌</button>
+        </form>
+    {% else %}
+        <!-- RESTORE -->
+        <form action="{{ url_for('restore_product', id=product.id) }}"
+              method="post">
+            <button type="submit" class="admin-btn edit">♻️</button>
+        </form>
+    {% endif %}
+
 </div>
 
 <script>

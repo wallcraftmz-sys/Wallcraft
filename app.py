@@ -167,7 +167,7 @@ def set_lang():
     if "lang" in request.args:
         session["lang"] = request.args.get("lang")
 
-    if "lang" not in session:
+    if session.get("lang") not in ["ru", "lv", "en"]:
         session["lang"] = "ru"
 
 

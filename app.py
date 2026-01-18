@@ -417,8 +417,7 @@ def update_cart(product_id, action):
 @login_required
 @admin_required
 def admin_panel():
-    orders = Order.query.order_by(Order.id.desc()).all()
-    return render_template("admin/dashboard.html", orders=orders)
+    return redirect(url_for("admin_orders"))
 
 #===== checkout =====
 @app.route("/checkout", methods=["GET", "POST"])

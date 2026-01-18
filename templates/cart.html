@@ -52,7 +52,7 @@
             </a>
 
             {% if current_user.is_authenticated %}
-    <a href="/order" class="popup-btn primary">
+    <a href="/checkout" class="popup-btn primary">
         {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
     </a>
 {% else %}

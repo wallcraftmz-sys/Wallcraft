@@ -1152,3 +1152,16 @@ body {
 select {
     padding: 4px;
 }
+
+.danger-btn {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.danger-btn:hover {
+    background: #e74c3c;
+}

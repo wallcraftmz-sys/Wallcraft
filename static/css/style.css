@@ -1276,3 +1276,8 @@ select {
 .checkout-btn:active {
     transform: scale(0.98);
 }
+
+.product-card.inactive {
+    opacity: 0.4;
+    filter: grayscale(1);
+}

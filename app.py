@@ -688,10 +688,11 @@ def update_order_status(order_id):
 @admin_required
 def delete_order(order_id):
     order = Order.query.get_or_404(order_id)
-    db.session.delete(order)
+    order.is_deleted = True
     db.session.commit()
+    flash("Заказ перемещён в архив", "success")
     return redirect(url_for("admin_orders"))
-
+    
 #===== admin-products-restore =====
 @app.route("/admin/products/restore/<int:id>", methods=["POST"])
 @login_required

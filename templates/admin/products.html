@@ -31,7 +31,7 @@
         </div>
     </form>
 
-    <!-- PRODUCTS -->
+        <!-- PRODUCTS -->
     {% for product in products %}
     <div class="product-card {% if not product.is_active %}inactive{% endif %}">
 
@@ -45,32 +45,25 @@
 
             <div class="admin-product-actions">
 
-    <a href="{{ url_for('edit_product', id=product.id) }}"
-       class="admin-btn edit">✏️</a>
+                <a href="{{ url_for('edit_product', id=product.id) }}"
+                   class="admin-btn edit">✏️</a>
 
-    {% if product.is_active %}
-        <!-- SOFT DELETE -->
-        <form action="{{ url_for('delete_product', id=product.id) }}"
-              method="post"
-              onsubmit="return confirm('Скрыть товар из каталога?');">
-            <button type="submit" class="admin-btn delete">❌</button>
-        </form>
-    {% else %}
-        <!-- RESTORE -->
-        <form action="{{ url_for('restore_product', id=product.id) }}"
-              method="post">
-            <button type="submit" class="admin-btn edit">♻️</button>
-        </form>
-    {% endif %}
+                {% if product.is_active %}
+                    <!-- SOFT DELETE -->
+                    <form action="{{ url_for('delete_product', id=product.id) }}"
+                          method="post"
+                          onsubmit="return confirm('Скрыть товар из каталога?');">
+                        <button type="submit" class="admin-btn delete">❌</button>
+                    </form>
+                {% else %}
+                    <!-- RESTORE -->
+                    <form action="{{ url_for('restore_product', id=product.id) }}"
+                          method="post">
+                        <button type="submit" class="admin-btn edit">♻️</button>
+                    </form>
+                {% endif %}
 
-</div>
-
-<script>
-function previewImage(event) {
-    const img = document.getElementById("preview");
-    img.src = URL.createObjectURL(event.target.files[0]);
-    img.style.display = "block";
-}
-</script>
-
-{% endblock %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}

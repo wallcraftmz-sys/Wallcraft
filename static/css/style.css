@@ -1165,3 +1165,114 @@ select {
 .danger-btn:hover {
     background: #e74c3c;
 }
+
+/* =========================
+   CHECKOUT
+========================= */
+
+.checkout-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.checkout-wrapper {
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.checkout-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.checkout-subtitle {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.checkout-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f7f7f7;
+    margin-bottom: 10px;
+}
+
+.checkout-item-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.checkout-item-price {
+    font-weight: 700;
+    color: #27ae60;
+}
+
+.checkout-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 14px;
+}
+
+/* FORM */
+
+.checkout-form {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.form-group input {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #27ae60;
+}
+
+.checkout-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 10px 25px rgba(39,174,96,0.35);
+}
+
+.checkout-btn:active {
+    transform: scale(0.98);
+}

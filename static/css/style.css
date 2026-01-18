@@ -1124,3 +1124,31 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    vertical-align: top;
+}
+
+.admin-table th {
+    background: #f4f4f4;
+}
+
+/* Статусы */
+.status-new { background: #fff8e1; }
+.status-confirmed { background: #e3f2fd; }
+.status-in_progress { background: #e8f5e9; }
+.status-shipped { background: #ede7f6; }
+.status-completed { background: #e0f2f1; }
+.status-cancelled { background: #ffebee; }
+
+select {
+    padding: 4px;
+}

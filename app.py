@@ -159,6 +159,17 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
+
+
+ORDER_STATUSES = [
+    "new",
+    "confirmed",
+    "in_progress",
+    "shipped",
+    "completed",
+    "cancelled"
+]
+
 # ======================
 # LANGUAGE
 # ======================
@@ -488,11 +499,15 @@ def edit_product(id):
     return render_template("admin/edit_product.html", product=product)
     
 #===== admin-orders =====
-@app.route("/admin/orders")
+@@app.route("/admin/orders")
 @admin_required
 def admin_orders():
-    orders = Order.query.order_by(Order.id.desc()).all()
-    return render_template("admin/orders.html", orders=orders)
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    return render_template(
+        "admin/orders.html",
+        orders=orders,
+        statuses=ORDER_STATUSES
+    )
 
 #===== checkout =====
 @app.route("/checkout", methods=["GET", "POST"])
@@ -547,3 +562,16 @@ def checkout():
         items=items,
         total=total
     )
+
+
+@app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
+@admin_required
+def update_order_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    new_status = request.form.get("status")
+
+    if new_status in ORDER_STATUSES:
+        order.status = new_status
+        db.session.commit()
+
+    return redirect(url_for("admin_orders"))

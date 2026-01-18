@@ -220,6 +220,12 @@ ORDER_STATUSES = {
     }
 }
 
+ALLOWED_STATUS_TRANSITIONS = {
+    "new": ["confirmed"],
+    "confirmed": ["shipped", "completed"],
+    "shipped": ["completed"],
+    "completed": [],
+}
 # ======================
 # LANGUAGE
 # ======================
@@ -643,20 +649,30 @@ def dashboard_redirect():
 def update_order_status(order_id):
     order = Order.query.get_or_404(order_id)
     new_status = request.form.get("status")
+    old_status = order.status
 
-    if new_status in ORDER_STATUSES:
-        old_status = order.status
-        order.status = new_status
+    # ❌ если статус не существует
+    if new_status not in ORDER_STATUSES:
+        return redirect(url_for("admin_orders"))
 
-        history = OrderStatusHistory(
-            order_id=order.id,
-            old_status=old_status,
-            new_status=new_status,
-            changed_by=current_user.username
-        )
+    # ❌ если переход запрещён
+    allowed = ALLOWED_STATUS_TRANSITIONS.get(old_status, [])
+    if new_status not in allowed:
+        flash("Недопустимый переход статуса", "error")
+        return redirect(url_for("admin_orders"))
 
-        db.session.add(history)
-        db.session.commit()
+    # ✅ обновляем статус
+    order.status = new_status
+
+    history = OrderStatusHistory(
+        order_id=order.id,
+        old_status=old_status,
+        new_status=new_status,
+        changed_by=current_user.username
+    )
+
+    db.session.add(history)
+    db.session.commit()
 
     return redirect(url_for("admin_orders"))
 

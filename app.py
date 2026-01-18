@@ -637,17 +637,17 @@ def update_order_status(order_id):
 
     if new_status in ORDER_STATUSES:
         old_status = order.status
-order.status = new_status
+        order.status = new_status
 
-history = OrderStatusHistory(
-    order_id=order.id,
-    old_status=old_status,
-    new_status=new_status,
-    changed_by=current_user.username
-)
+        history = OrderStatusHistory(
+            order_id=order.id,
+            old_status=old_status,
+            new_status=new_status,
+            changed_by=current_user.username
+        )
 
-db.session.add(history)
-db.session.commit()
+        db.session.add(history)
+        db.session.commit()
 
     return redirect(url_for("admin_orders"))
 

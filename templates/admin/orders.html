@@ -31,7 +31,11 @@
     <tbody>
         {% for order in orders %}
         <tr class="status-row status-{{ order.status }}">
-            <td>#{{ order.id }}</td>
+            <td>
+    <a href="{{ url_for('admin_order_view', order_id=order.id) }}">
+        #{{ order.id }}
+    </a>
+</td>
 
             <td>
                 {{ order.name }}<br>

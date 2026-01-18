@@ -6,11 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}?v=1003">
+          href="{{ url_for('static', filename='css/style.css') }}?v=1004">
 
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
+
+{% set T = {
+    "home": {"ru": "Главная", "lv": "Sākums", "en": "Home"},
+    "catalog": {"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"},
+    "about": {"ru": "О компании", "lv": "Par mums", "en": "About"},
+    "profile": {"ru": "Профиль", "lv": "Profils", "en": "Profile"},
+    "admin": {"ru": "Админка", "lv": "Admin", "en": "Admin"},
+    "login": {"ru": "Вход", "lv": "Ienākt", "en": "Login"},
+    "register": {"ru": "Регистрация", "lv": "Reģistrācija", "en": "Register"},
+    "logout": {"ru": "Выйти", "lv": "Iziet", "en": "Logout"},
+    "added": {"ru": "Товар добавлен в корзину", "lv": "Prece pievienota grozam", "en": "Product added to cart"},
+    "continue": {"ru": "Продолжить покупки", "lv": "Turpināt iepirkties", "en": "Continue shopping"},
+    "cart": {"ru": "Перейти в корзину", "lv": "Doties uz grozu", "en": "Go to cart"}
+} %}
 
 <header class="top-header">
     <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">☰</button>
@@ -24,11 +38,12 @@
         </a>
     </div>
 
+    <!-- LANGUAGE SWITCH -->
     <div class="lang-switch">
-    <a href="?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
-    <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
-    <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
-</div>
+        <a href="{{ request.path }}?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
+        <a href="{{ request.path }}?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
+        <a href="{{ request.path }}?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
+    </div>
 </header>
 
 <!-- OVERLAY -->
@@ -36,26 +51,26 @@
 
 <!-- SIDE MENU -->
 <div id="sideMenu" class="side-menu">
-    <a href="/" onclick="closeMenu()">🏠 Главная</a>
-    <a href="/catalog" onclick="closeMenu()">📦 Каталог</a>
-    <a href="/about" onclick="closeMenu()">ℹ️ О компании</a>
+    <a href="/" onclick="closeMenu()">🏠 {{ T.home[lang] }}</a>
+    <a href="/catalog" onclick="closeMenu()">📦 {{ T.catalog[lang] }}</a>
+    <a href="/about" onclick="closeMenu()">ℹ️ {{ T.about[lang] }}</a>
 
     <hr>
 
     {% if current_user.is_authenticated %}
         {% if current_user.role == "admin" %}
-            <a href="{{ url_for('admin_panel') }}">Админ</a>
+            <a href="{{ url_for('admin_panel') }}">{{ T.admin[lang] }}</a>
         {% else %}
-            <a href="/profile" onclick="closeMenu()">👤 Профиль</a>
+            <a href="/profile">{{ T.profile[lang] }}</a>
         {% endif %}
-        <a href="/logout" onclick="closeMenu()">🚪 Выйти</a>
+        <a href="/logout">{{ T.logout[lang] }}</a>
     {% else %}
-        <a href="/login" onclick="closeMenu()">🔐 Вход</a>
-        <a href="/register" onclick="closeMenu()">📝 Регистрация</a>
+        <a href="/login">{{ T.login[lang] }}</a>
+        <a href="/register">{{ T.register[lang] }}</a>
     {% endif %}
 </div>
 
-<!-- 🔥 КЛЮЧЕВОЙ ФИКС -->
+<!-- MAIN CONTENT -->
 <main class="container">
     {% block content %}{% endblock %}
 </main>
@@ -63,10 +78,10 @@
 <!-- CART POPUP -->
 <div id="cart-popup" class="cart-popup">
     <div class="cart-popup-content">
-        <p>✅ Товар добавлен в корзину</p>
+        <p>✅ {{ T.added[lang] }}</p>
 
-        <a href="/catalog" class="popup-btn">Продолжить покупки</a>
-        <a href="/cart" class="popup-btn primary">Перейти в корзину</a>
+        <a href="/catalog" class="popup-btn">{{ T.continue[lang] }}</a>
+        <a href="/cart" class="popup-btn primary">{{ T.cart[lang] }}</a>
 
         <button class="close-popup" onclick="closeCartPopup()">×</button>
     </div>

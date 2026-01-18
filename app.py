@@ -513,6 +513,8 @@ def checkout():
 @login_required
 @admin_required
 def admin_products():
+    
+    # --- ADD PRODUCT ---
     if request.method == "POST":
         file = request.files.get("image")
 
@@ -538,8 +540,21 @@ def admin_products():
         db.session.commit()
         return redirect(url_for("admin_products"))
 
-    products = Product.query.all()
-    return render_template("admin/products.html", products=products)
+    # --- FILTER ---
+    show = request.args.get("show", "active")
+
+    if show == "inactive":
+        products = Product.query.filter_by(is_active=False).all()
+    elif show == "all":
+        products = Product.query.all()
+    else:
+        products = Product.query.filter_by(is_active=True).all()
+
+    return render_template(
+        "admin/products.html",
+        products=products,
+        show=show
+    )
 
 #===== admin-products-delete =====
 @app.route("/admin/products/delete/<int:id>", methods=["POST"])

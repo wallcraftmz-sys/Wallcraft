@@ -403,7 +403,7 @@ def update_cart(product_id, action):
 @admin_required
 def admin_panel():
     orders = Order.query.order_by(Order.id.desc()).all()
-    return render_template("admin.html", orders=orders)
+    return render_template("admin/dachboard.html", orders=orders)
 
 #===== checkout =====
 @app.route("/checkout", methods=["GET", "POST"])

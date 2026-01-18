@@ -55,7 +55,7 @@
                 <form method="post"
                       action="{{ url_for('update_order_status', order_id=order.id) }}">
                     <select name="status" onchange="this.form.submit()">
-                        {% for key, labels in ORDER_STATUSES.items() %}
+                        {% for key, labels in ORDER_STATUSES.items() if key != 'confirmed' %}
                         <option value="{{ key }}"
                                 {% if order.status == key %}selected{% endif %}>
                             {{ labels[lang] }}

@@ -33,7 +33,7 @@
 
     <!-- PRODUCTS -->
     {% for product in products %}
-    <div class="product-card">
+    <div class="product-card {% if not product.is_active %}inactive{% endif %}">
 
         <div class="product-image">
             <img src="{{ url_for('static', filename=product.image or 'images/no-image.png') }}">

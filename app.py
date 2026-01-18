@@ -499,7 +499,7 @@ def edit_product(id):
     return render_template("admin/edit_product.html", product=product)
     
 #===== admin-orders =====
-@@app.route("/admin/orders")
+@app.route("/admin/orders")
 @admin_required
 def admin_orders():
     orders = Order.query.order_by(Order.created_at.desc()).all()

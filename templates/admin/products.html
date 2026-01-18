@@ -3,6 +3,23 @@
 
 <h1 class="page-title">Товары</h1>
 
+<div style="margin-bottom:20px; display:flex; gap:10px;">
+    <a href="{{ url_for('admin_products', show='active') }}"
+       class="admin-link {% if show == 'active' %}primary{% endif %}">
+        Активные
+    </a>
+
+    <a href="{{ url_for('admin_products', show='inactive') }}"
+       class="admin-link {% if show == 'inactive' %}primary{% endif %}">
+        Скрытые
+    </a>
+
+    <a href="{{ url_for('admin_products', show='all') }}"
+       class="admin-link {% if show == 'all' %}primary{% endif %}">
+        Все
+    </a>
+</div>
+
 <div class="product-grid admin-products">
 
     <!-- ADD PRODUCT -->

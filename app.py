@@ -393,55 +393,7 @@ def update_cart(product_id, action):
         total=total,
         cart_total_items=sum(cart.values())
     )
-# ===== order =====
-@app.route("/order", methods=["GET", "POST"])
-@login_required
-def order():
-    cart = session.get("cart", {})
 
-    if not cart:
-        return redirect(url_for("cart"))
-
-    if request.method == "POST":
-        name = request.form.get("name")
-        contact = request.form.get("contact")
-
-        total = 0
-        items = []
-
-        for pid, qty in cart.items():
-            product = Product.query.get(int(pid))
-            if product:
-                total += product.price * qty
-                items.append(f"{product.name_ru} × {qty}")
-
-        order = Order(
-            user_id=current_user.id,
-            name=name,
-            contact=contact,
-            items="\n".join(items),
-            total=total
-        )
-
-        db.session.add(order)
-        db.session.commit()
-
-        # 🔔 TELEGRAM — СТРОГО ЗДЕСЬ (БЕЗ ЛИШНИХ ОТСТУПОВ)
-        send_telegram(
-            f"🛒 НОВЫЙ ЗАКАЗ\n"
-            f"Пользователь: {current_user.username}\n"
-            f"Имя: {name}\n"
-            f"Контакт: {contact}\n\n"
-            f"{chr(10).join(items)}\n"
-            f"Итого: {total:.2f} €"
-        )
-
-        session["cart"] = {}
-        session.modified = True
-
-        return redirect(url_for("profile"))
-
-    return render_template("order.html", lang=session.get("lang", "ru"))
     
 # ======================
 # ADMIN PANEL
@@ -454,13 +406,67 @@ def admin_panel():
     return render_template("admin.html", orders=orders)
 
 #===== dashboard =====
-@app.route("/dashboard")
+@app.route("/checkout", methods=["GET", "POST"])
 @login_required
-@admin_required
-def dashboard():
-    return render_template("admin/dashboard.html")
+def checkout():
+    cart = session.get("cart", {})
 
-#===== admin-products =====
+    if not cart:
+        return redirect(url_for("cart"))
+
+    items = []
+    total = 0
+
+    for pid, qty in cart.items():
+        product = Product.query.get(int(pid))
+        if product:
+            subtotal = product.price * qty
+            total += subtotal
+            items.append(f"{product.name_ru} × {qty}")
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+
+        if not name or not contact:
+            return render_template(
+                "checkout.html",
+                items=items,
+                total=total,
+                error=True
+            )
+
+        order = Order(
+            user_id=current_user.id,
+            name=name,
+            contact=contact,
+            items="\n".join(items),
+            total=total,
+            status="new"
+        )
+
+        db.session.add(order)
+        db.session.commit()
+
+        session.pop("cart", None)
+
+        send_telegram(
+            f"🛒 НОВЫЙ ЗАКАЗ\n"
+            f"Пользователь: {current_user.username}\n"
+            f"Имя: {name}\n"
+            f"Контакт: {contact}\n\n"
+            f"{chr(10).join(items)}\n"
+            f"Итого: {total:.2f} €"
+        )
+
+        return redirect(url_for("profile"))
+
+    return render_template(
+        "checkout.html",
+        items=items,
+        total=total
+    )
+
 #===== admin-products =====
 @app.route("/admin/products", methods=["GET", "POST"])
 @login_required
@@ -530,7 +536,8 @@ def admin_orders():
     return render_template(
         "admin/orders.html",
         orders=orders,
-        statuses=ORDER_STATUSES
+        ORDER_STATUSES=ORDER_STATUSES,
+        lang=session.get("lang", "ru")
     )
 
 #===== checkout =====

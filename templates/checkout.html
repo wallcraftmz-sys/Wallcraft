@@ -40,9 +40,11 @@
             <input type="text" name="contact" placeholder="+371 / example@email.com" required>
         </div>
 
-        <button type="submit" class="checkout-btn">
-            Подтвердить заказ
-        </button>
+        <button type="submit"
+        class="checkout-btn"
+        onclick="this.disabled=true; this.innerText='Отправка…'; this.form.submit();">
+    Подтвердить заказ
+</button>
     </form>
 
 </div>

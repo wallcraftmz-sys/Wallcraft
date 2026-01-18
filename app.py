@@ -192,16 +192,27 @@ ORDER_STATUSES = {
         "lv": "Jauns",
         "en": "New"
     },
-    "confirmed": {   # ← ВЕРНУЛИ, НО…
+
+    # алиас для старых заказов
+    "confirmed": {
         "ru": "В работе",
         "lv": "Darbā",
         "en": "In progress"
     },
+
+    # ОСНОВНОЙ рабочий статус
+    "in_progress": {
+        "ru": "В работе",
+        "lv": "Darbā",
+        "en": "In progress"
+    },
+
     "shipped": {
         "ru": "Отправлен",
         "lv": "Nosūtīts",
         "en": "Shipped"
     },
+
     "completed": {
         "ru": "Завершён",
         "lv": "Pabeigts",

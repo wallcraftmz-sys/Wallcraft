@@ -3,6 +3,18 @@
 
 <h1>🧾 Заказы</h1>
 
+<div style="margin-bottom:20px; display:flex; gap:10px;">
+    <a href="{{ url_for('admin_orders', show='active') }}"
+       class="admin-link {% if show == 'active' %}primary{% endif %}">
+        Активные
+    </a>
+
+    <a href="{{ url_for('admin_orders', show='archive') }}"
+       class="admin-link {% if show == 'archive' %}primary{% endif %}">
+        Архив
+    </a>
+</div>
+
 {% if orders %}
 <table class="admin-table">
     <thead>

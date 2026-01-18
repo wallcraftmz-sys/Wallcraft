@@ -209,6 +209,17 @@ def set_lang():
 @app.context_processor
 def inject_lang():
     return dict(lang=session.get("lang", "ru"))
+
+# ======================
+# SECURITY: BLOCK EMPTY CHECKOUT
+# ======================
+@app.before_request
+def block_empty_checkout():
+    if request.endpoint == "checkout":
+        cart = session.get("cart", {})
+        if not cart or sum(cart.values()) == 0:
+            return redirect(url_for("cart"))
+            
 # ======================
 # ROUTES
 # ======================

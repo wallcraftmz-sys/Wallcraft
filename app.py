@@ -197,11 +197,6 @@ ORDER_STATUSES = {
         "lv": "Darbā",
         "en": "In progress"
     },
-    "in_progress": {
-        "ru": "В работе",
-        "lv": "Darbā",
-        "en": "In progress"
-    },
     "shipped": {
         "ru": "Отправлен",
         "lv": "Nosūtīts",

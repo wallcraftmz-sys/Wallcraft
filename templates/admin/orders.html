@@ -13,18 +13,24 @@
             <th>Сумма</th>
             <th>Статус</th>
             <th>Дата</th>
+            <th>Действия</th>
         </tr>
     </thead>
     <tbody>
         {% for order in orders %}
         <tr class="status-row status-{{ order.status }}">
             <td>#{{ order.id }}</td>
+
             <td>
                 {{ order.name }}<br>
                 <small>{{ order.contact }}</small>
             </td>
+
             <td style="white-space: pre-line">{{ order.items }}</td>
+
             <td><strong>{{ order.total }} €</strong></td>
+
+            <!-- СТАТУС -->
             <td>
                 <form method="post"
                       action="{{ url_for('update_order_status', order_id=order.id) }}">
@@ -38,7 +44,18 @@
                     </select>
                 </form>
             </td>
+
             <td>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+
+            <!-- 🗑 УДАЛИТЬ -->
+            <td>
+                <form method="post"
+                      action="{{ url_for('delete_order', order_id=order.id) }}"
+                      onsubmit="return confirm('Удалить заказ навсегда?');">
+                    <button type="submit" class="danger-btn">🗑</button>
+                </form>
+            </td>
+
         </tr>
         {% endfor %}
     </tbody>

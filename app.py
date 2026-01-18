@@ -192,11 +192,6 @@ ORDER_STATUSES = {
         "lv": "Jauns",
         "en": "New"
     },
-    "confirmed": {
-        "ru": "Подтверждён",
-        "lv": "Apstiprināts",
-        "en": "Confirmed"
-    },
     "in_progress": {
         "ru": "В работе",
         "lv": "Procesā",
@@ -211,11 +206,6 @@ ORDER_STATUSES = {
         "ru": "Завершён",
         "lv": "Pabeigts",
         "en": "Completed"
-    },
-    "cancelled": {
-        "ru": "Отменён",
-        "lv": "Atcelts",
-        "en": "Cancelled"
     }
 }
 

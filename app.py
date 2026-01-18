@@ -192,6 +192,11 @@ ORDER_STATUSES = {
         "lv": "Jauns",
         "en": "New"
     },
+    "confirmed": {   # ← ВЕРНУЛИ, НО…
+        "ru": "В работе",
+        "lv": "Darbā",
+        "en": "In progress"
+    },
     "in_progress": {
         "ru": "В работе",
         "lv": "Darbā",
@@ -207,7 +212,6 @@ ORDER_STATUSES = {
         "lv": "Pabeigts",
         "en": "Completed"
     }
-    # ❌ cancelled — убрали
 }
 
 # ======================

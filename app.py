@@ -405,8 +405,8 @@ def admin_panel():
     orders = Order.query.order_by(Order.id.desc()).all()
     return render_template("admin.html", orders=orders)
 
-#===== dashboard =====
-@app.route("/dashboard", methods=["GET", "POST"])
+#===== checkout =====
+@app.route("/checkout", methods=["GET", "POST"])
 @login_required
 def checkout():
     cart = session.get("cart", {})
@@ -539,3 +539,9 @@ def admin_orders():
         ORDER_STATUSES=ORDER_STATUSES,
         lang=session.get("lang", "ru")
     )
+#===== dashboard =====
+@app.route("/dashboard")
+@login_required
+@admin_required
+def dashboard_redirect():
+    return redirect(url_for("admin_panel"))

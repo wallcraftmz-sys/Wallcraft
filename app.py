@@ -521,6 +521,7 @@ def admin_products():
             name_lv=request.form["name_lv"],
             price=float(request.form["price"]),
             image=image_path
+            is_active=True
         )
 
         db.session.add(product)
@@ -599,3 +600,13 @@ def delete_order(order_id):
     db.session.delete(order)
     db.session.commit()
     return redirect(url_for("admin_orders"))
+
+#===== admin-products-restore =====
+@app.route("/admin/products/restore/<int:id>", methods=["POST"])
+@login_required
+@admin_required
+def restore_product(id):
+    product = Product.query.get_or_404(id)
+    product.is_active = True
+    db.session.commit()
+    return redirect(url_for("admin_products"))

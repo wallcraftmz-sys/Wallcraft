@@ -170,6 +170,10 @@ def set_lang():
     if "lang" not in session:
         session["lang"] = "ru"
 
+
+@app.context_processor
+def inject_lang():
+    return dict(lang=session.get("lang", "ru"))
 # ======================
 # ROUTES
 # ======================

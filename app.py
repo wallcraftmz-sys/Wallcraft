@@ -681,14 +681,21 @@ def restore_product(id):
 
 #===== admin-orders-int< =====
 @app.route("/admin/orders/<int:order_id>")
-@login_required
 @admin_required
 def admin_order_view(order_id):
     order = Order.query.get_or_404(order_id)
 
+    history = (
+        OrderStatusHistory.query
+        .filter_by(order_id=order.id)
+        .order_by(OrderStatusHistory.created_at.desc())
+        .all()
+    )
+
     return render_template(
         "admin/order_view.html",
         order=order,
+        history=history,
         ORDER_STATUSES=ORDER_STATUSES,
         lang=session.get("lang", "ru")
     )

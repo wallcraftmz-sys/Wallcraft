@@ -520,7 +520,7 @@ def admin_products():
             name_ru=request.form["name_ru"],
             name_lv=request.form["name_lv"],
             price=float(request.form["price"]),
-            image=image_path
+            image=image_path,
             is_active=True
         )
 

@@ -146,6 +146,8 @@ class Product(db.Model):
     name_lv = db.Column(db.String(200), nullable=False)
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200))
+
+    is_active = db.Column(db.Boolean, default=True)
 # ======================
 # USER LOADER (СТРОГО ЗДЕСЬ)
 # ======================
@@ -230,7 +232,7 @@ def index():
 #==== catalog =====
 @app.route("/catalog")
 def catalog():
-    products = Product.query.all()
+    products = Product.query.filter_by(is_active=True).all()
     return render_template(
         "catalog.html",
         products=products,
@@ -347,7 +349,7 @@ def cart():
 
     for pid, qty in cart.items():
         product = Product.query.get(int(pid))
-        if not product:
+        if not product or not product.is_active:
             continue
 
         item_total = product.price * qty
@@ -534,7 +536,7 @@ def admin_products():
 @admin_required
 def delete_product(id):
     product = Product.query.get_or_404(id)
-    db.session.delete(product)
+    product.is_active = False
     db.session.commit()
     return redirect(url_for("admin_products"))
 

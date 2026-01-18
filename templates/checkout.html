@@ -1,33 +1,46 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h1>Оформление заказа</h1>
+<h1 class="checkout-title">Оформление заказа</h1>
 
-<div class="checkout-box">
+<div class="checkout-wrapper">
 
-    <h3>Ваш заказ</h3>
+    <!-- ЗАКАЗ -->
+    <div class="checkout-card">
+        <h3 class="checkout-subtitle">Ваш заказ</h3>
 
-    <ul class="cart-list">
         {% for item in items %}
-        <li class="cart-row">
-            <div class="cart-info">
-                <div class="cart-name">{{ item }}</div>
+        <div class="checkout-item">
+            <div class="checkout-item-name">
+                {{ item }}
             </div>
-            <div class="cart-subtotal">{{ total }} €</div>
-        </li>
+            <div class="checkout-item-price">
+                {{ total }} €
+            </div>
+        </div>
         {% endfor %}
-    </ul>
 
-    <div class="cart-total">
-        Итого: <strong>{{ total }} €</strong>
+        <div class="checkout-total">
+            <span>Итого:</span>
+            <strong>{{ total }} €</strong>
+        </div>
     </div>
 
+    <!-- ФОРМА -->
     <form method="post" class="checkout-form">
-        <input type="text" name="name" placeholder="Имя" required>
-        <input type="text" name="contact" placeholder="Телефон или email" required>
+        <h3 class="checkout-subtitle">Контактные данные</h3>
 
-        <button type="submit" class="btn-primary">
+        <div class="form-group">
+            <label>Имя</label>
+            <input type="text" name="name" placeholder="Введите имя" required>
+        </div>
+
+        <div class="form-group">
+            <label>Телефон или Email</label>
+            <input type="text" name="contact" placeholder="+371 / example@email.com" required>
+        </div>
+
+        <button type="submit" class="checkout-btn">
             Подтвердить заказ
         </button>
     </form>

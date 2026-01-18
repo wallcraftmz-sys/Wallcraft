@@ -406,7 +406,7 @@ def admin_panel():
     return render_template("admin.html", orders=orders)
 
 #===== dashboard =====
-@app.route("/checkout", methods=["GET", "POST"])
+@app.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def checkout():
     cart = session.get("cart", {})

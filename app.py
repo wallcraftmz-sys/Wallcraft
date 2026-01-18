@@ -493,3 +493,57 @@ def edit_product(id):
 def admin_orders():
     orders = Order.query.order_by(Order.id.desc()).all()
     return render_template("admin/orders.html", orders=orders)
+
+#===== checkout =====
+@app.route("/checkout", methods=["GET", "POST"])
+@login_required
+def checkout():
+    cart = session.get("cart", {})
+
+    if not cart:
+        return redirect(url_for("cart"))
+
+    products = Product.query.all()
+    items = []
+    total = 0
+
+    for p in products:
+        qty = cart.get(str(p.id))
+        if qty:
+            subtotal = p.price * qty
+            total += subtotal
+            items.append(f"{p.name_ru} x {qty}")
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact = request.form.get("contact")
+
+        if not name or not contact:
+            return render_template(
+                "checkout.html",
+                items=items,
+                total=total,
+                error=True
+            )
+
+        order = Order(
+            user_id=current_user.id,
+            name=name,
+            contact=contact,
+            items="\n".join(items),
+            total=total,
+            status="new"
+        )
+
+        db.session.add(order)
+        db.session.commit()
+
+        session.pop("cart", None)
+
+        return redirect(url_for("profile"))
+
+    return render_template(
+        "checkout.html",
+        items=items,
+        total=total
+    )

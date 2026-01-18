@@ -161,6 +161,16 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
+    # 🔧 AUTO-MIGRATION: add is_active if missing
+    from sqlalchemy import text
+
+    try:
+        db.session.execute(text("ALTER TABLE product ADD COLUMN is_active BOOLEAN DEFAULT TRUE"))
+        db.session.commit()
+        print("✅ is_active column added")
+    except Exception as e:
+        db.session.rollback()
+        print("ℹ️ is_active column already exists")
 
 
 ORDER_STATUSES = {

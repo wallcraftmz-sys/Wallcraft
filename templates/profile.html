@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 
+{% set STATUS_LABELS = {
+    "new": {"ru": "Новый", "lv": "Jauns", "en": "New"},
+    "confirmed": {"ru": "Подтверждён", "lv": "Apstiprināts", "en": "Confirmed"},
+    "in_progress": {"ru": "В работе", "lv": "Procesā", "en": "In progress"},
+    "shipped": {"ru": "Отправлен", "lv": "Nosūtīts", "en": "Shipped"},
+    "completed": {"ru": "Завершён", "lv": "Pabeigts", "en": "Completed"},
+    "cancelled": {"ru": "Отменён", "lv": "Atcelts", "en": "Cancelled"}
+} %}
+
 <h1 class="page-title">
     {{ "Личный кабинет" if lang == "ru" else "Profile" }}
 </h1>
@@ -22,7 +31,7 @@
         <div class="order-header">
             <strong>#{{ order.id }}</strong>
             <span class="order-status status-{{ order.status }}">
-                {{ order.status }}
+                {{ STATUS_LABELS[order.status][lang] }}
             </span>
         </div>
 

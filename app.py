@@ -139,15 +139,11 @@ class Order(db.Model):
     items = db.Column(db.Text, nullable=False)
     total = db.Column(db.Float, nullable=False)
 
-    status = db.Column(
-        db.String(30),
-        default="new"
-    )
+    status = db.Column(db.String(30), default="new")
 
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
+    is_deleted = db.Column(db.Boolean, default=False)  # ← ВАЖНО
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)

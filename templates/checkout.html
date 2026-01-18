@@ -8,13 +8,20 @@
 
     <h3>Ваш заказ</h3>
 
-    <ul class="checkout-list">
+    <ul class="cart-list">
         {% for item in items %}
-            <li>{{ item }}</li>
+        <li class="cart-row">
+            <div class="cart-info">
+                <div class="cart-name">{{ item }}</div>
+            </div>
+            <div class="cart-subtotal">{{ total }} €</div>
+        </li>
         {% endfor %}
     </ul>
 
-    <p class="checkout-total"><strong>{{ total }} €</strong></p>
+    <div class="cart-total">
+        Итого: <strong>{{ total }} €</strong>
+    </div>
 
     <form method="post" class="checkout-form">
         <input type="text" name="name" placeholder="Имя" required>

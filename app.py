@@ -251,11 +251,13 @@ def register():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template(
-        "profile.html",
-        user=current_user,
-        lang=session["lang"]
+    orders = (
+        Order.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Order.created_at.desc())
+        .all()
     )
+    return render_template("profile.html", orders=orders)
 
 # ======================
 # ADD TO CART

@@ -2,54 +2,44 @@
 {% block content %}
 
 <h1 class="page-title">
-    {% if lang == "ru" %}
-        Личный кабинет
-    {% else %}
-        User profile
-    {% endif %}
+    {{ "Личный кабинет" if lang == "ru" else "Profile" }}
 </h1>
 
-<div class="profile-box">
-    <p>
-        <b>
-            {% if lang == "ru" %}Пользователь:{% else %}User:{% endif %}
-        </b>
-        {{ user.username }}
-    </p>
-</div>
+<p>
+    {{ "Пользователь" if lang == "ru" else "User" }}:
+    <strong>{{ current_user.username }}</strong>
+</p>
 
-<h2 class="section-title">
-    {% if lang == "ru" %}
-        Мои заказы
-    {% else %}
-        My orders
-    {% endif %}
+<h2 style="margin-top:20px">
+    {{ "Мои заказы" if lang == "ru" else "My orders" }}
 </h2>
 
 {% if orders %}
-    <div class="orders-list">
-        {% for order in orders %}
-            <div class="order-card">
-                <p><b>ID:</b> {{ loop.index }}</p>
-                <p><b>{% if lang=="ru" %}Сумма{% else %}Total{% endif %}:</b>
-                   {{ order.total }} €</p>
 
-                <ul>
-                    {% for item in order.items %}
-                        <li>{{ item }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
+<div class="orders-list">
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <strong>#{{ order.id }}</strong>
+            <span class="order-status status-{{ order.status }}">
+                {{ order.status }}
+            </span>
+        </div>
+
+        <div class="order-body">
+            <div>{{ order.items }}</div>
+            <div class="order-total">{{ order.total }} €</div>
+        </div>
+
+        <div class="order-footer">
+            {{ order.created_at.strftime("%d.%m.%Y %H:%M") }}
+        </div>
     </div>
+    {% endfor %}
+</div>
+
 {% else %}
-    <p>
-        {% if lang == "ru" %}
-            У вас пока нет заказов
-        {% else %}
-            You have no orders yet
-        {% endif %}
-    </p>
+<p>{{ "У вас пока нет заказов" if lang == "ru" else "No orders yet" }}</p>
 {% endif %}
 
 {% endblock %}

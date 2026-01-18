@@ -545,3 +545,16 @@ def admin_orders():
 @admin_required
 def dashboard_redirect():
     return redirect(url_for("admin_panel"))
+
+#===== admin-orders-status =====
+@app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
+@admin_required
+def update_order_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    new_status = request.form.get("status")
+
+    if new_status in ORDER_STATUSES:
+        order.status = new_status
+        db.session.commit()
+
+    return redirect(url_for("admin_orders"))

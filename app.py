@@ -118,15 +118,18 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="admin")
 
-
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     name = db.Column(db.String(100))
     contact = db.Column(db.String(100))
     items = db.Column(db.Text)
     total = db.Column(db.Float)
+
+    status = db.Column(db.String(20), default="new")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)

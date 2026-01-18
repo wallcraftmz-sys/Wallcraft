@@ -300,7 +300,11 @@ def profile():
         .order_by(Order.created_at.desc())
         .all()
     )
-    return render_template("profile.html", orders=orders)
+    return render_template(
+        "profile.html",
+        orders=orders,
+        ORDER_STATUSES=ORDER_STATUSES
+    )
 
 # ======================
 # ADD TO CART

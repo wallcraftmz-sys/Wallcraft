@@ -1,30 +1,50 @@
 {% extends "admin/admin_base.html" %}
 {% block content %}
 
-<h1>Заказы</h1>
+<h1>🧾 Заказы</h1>
 
 {% if orders %}
-<table border="1" cellpadding="8">
-    <tr>
-        <th>ID</th>
-        <th>Имя</th>
-        <th>Контакт</th>
-        <th>Товары</th>
-        <th>Сумма</th>
-    </tr>
-
-    {% for order in orders %}
-    <tr>
-        <td>{{ order.id }}</td>
-        <td>{{ order.name }}</td>
-        <td>{{ order.contact }}</td>
-        <td style="white-space: pre-line">{{ order.items }}</td>
-        <td>{{ order.total }} €</td>
-    </tr>
-    {% endfor %}
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Покупатель</th>
+            <th>Состав</th>
+            <th>Сумма</th>
+            <th>Статус</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr class="status-row status-{{ order.status }}">
+            <td>#{{ order.id }}</td>
+            <td>
+                {{ order.name }}<br>
+                <small>{{ order.contact }}</small>
+            </td>
+            <td style="white-space: pre-line">{{ order.items }}</td>
+            <td><strong>{{ order.total }} €</strong></td>
+            <td>
+                <form method="post"
+                      action="{{ url_for('update_order_status', order_id=order.id) }}">
+                    <select name="status" onchange="this.form.submit()">
+                        {% for key, labels in ORDER_STATUSES.items() %}
+                        <option value="{{ key }}"
+                                {% if order.status == key %}selected{% endif %}>
+                            {{ labels[lang] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </td>
+            <td>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 {% else %}
-<p>Заказов нет</p>
+<p>Нет заказов</p>
 {% endif %}
 
 {% endblock %}

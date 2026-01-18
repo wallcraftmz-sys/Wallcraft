@@ -408,6 +408,7 @@ def admin_panel():
 #===== dashboard =====
 @app.route("/checkout", methods=["GET", "POST"])
 @login_required
+@admin_required
 def checkout():
     cart = session.get("cart", {})
 

@@ -1281,3 +1281,11 @@ select {
     opacity: 0.4;
     filter: grayscale(1);
 }
+
+.admin-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    margin-top: 16px;
+}

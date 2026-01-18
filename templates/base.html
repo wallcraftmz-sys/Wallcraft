@@ -44,7 +44,7 @@
 
     {% if current_user.is_authenticated %}
         {% if current_user.role == "admin" %}
-            <a href="/dashboard" onclick="closeMenu()">🛠 Админка</a>
+            <a href="{{ url_for('admin_panel') }}">Админ</a>
         {% else %}
             <a href="/profile" onclick="closeMenu()">👤 Профиль</a>
         {% endif %}

@@ -415,7 +415,8 @@ def admin_panel():
 def checkout():
     cart = session.get("cart", {})
 
-    if not cart:
+    # 🔒 1. Блок пустой корзины (и GET, и POST)
+    if not cart or sum(cart.values()) == 0:
         return redirect(url_for("cart"))
 
     items = []
@@ -423,22 +424,34 @@ def checkout():
 
     for pid, qty in cart.items():
         product = Product.query.get(int(pid))
-        if product:
-            subtotal = product.price * qty
-            total += subtotal
-            items.append(f"{product.name_ru} × {qty}")
+        if not product or qty <= 0:
+            continue
+
+        subtotal = product.price * qty
+        total += subtotal
+        items.append(f"{product.name_ru} × {qty}")
+
+    # 🔒 2. Блок если товары исчезли или сумма 0
+    if not items or total <= 0:
+        session.pop("cart", None)
+        return redirect(url_for("cart"))
 
     if request.method == "POST":
-        name = request.form.get("name")
-        contact = request.form.get("contact")
+        name = request.form.get("name", "").strip()
+        contact = request.form.get("contact", "").strip()
 
+        # 🔒 3. Блок пустых полей
         if not name or not contact:
             return render_template(
                 "checkout.html",
                 items=items,
                 total=total,
-                error=True
+                error="Заполните все поля"
             )
+
+        # 🔒 4. Повторная проверка ПЕРЕД созданием заказа
+        if not session.get("cart"):
+            return redirect(url_for("cart"))
 
         order = Order(
             user_id=current_user.id,
@@ -452,7 +465,9 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
+        # 🔒 5. Очистка корзины ТОЛЬКО после commit
         session.pop("cart", None)
+        session.modified = True
 
         send_telegram(
             f"🛒 НОВЫЙ ЗАКАЗ\n"

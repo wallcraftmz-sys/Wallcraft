@@ -161,14 +161,38 @@ with app.app_context():
 
 
 
-ORDER_STATUSES = [
-    "new",
-    "confirmed",
-    "in_progress",
-    "shipped",
-    "completed",
-    "cancelled"
-]
+ORDER_STATUSES = {
+    "new": {
+        "ru": "Новый",
+        "lv": "Jauns",
+        "en": "New"
+    },
+    "confirmed": {
+        "ru": "Подтверждён",
+        "lv": "Apstiprināts",
+        "en": "Confirmed"
+    },
+    "in_progress": {
+        "ru": "В работе",
+        "lv": "Procesā",
+        "en": "In progress"
+    },
+    "shipped": {
+        "ru": "Отправлен",
+        "lv": "Nosūtīts",
+        "en": "Shipped"
+    },
+    "completed": {
+        "ru": "Завершён",
+        "lv": "Pabeigts",
+        "en": "Completed"
+    },
+    "cancelled": {
+        "ru": "Отменён",
+        "lv": "Atcelts",
+        "en": "Cancelled"
+    }
+}
 
 # ======================
 # LANGUAGE

@@ -1,1 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
 
+<h1 class="page-title">
+    {{ "Оформление заказа" if lang == "ru"
+       else "Pasūtījuma noformēšana" if lang == "lv"
+       else "Checkout" }}
+</h1>
+
+{% if error %}
+<p style="color:red">
+    {{ "Заполните все поля" if lang == "ru"
+       else "Aizpildiet visus laukus" if lang == "lv"
+       else "Please fill all fields" }}
+</p>
+{% endif %}
+
+<div class="checkout-box">
+    <h3>
+        {{ "Ваш заказ" if lang == "ru"
+           else "Jūsu pasūtījums" if lang == "lv"
+           else "Your order" }}
+    </h3>
+
+    <ul>
+        {% for item in items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><strong>{{ total }} €</strong></p>
+
+    <form method="post">
+        <input
+            name="name"
+            placeholder="{{ 'Имя' if lang == 'ru' else 'Vārds' if lang == 'lv' else 'Name' }}"
+            required
+        >
+
+        <input
+            name="contact"
+            placeholder="{{ 'Телефон или email' if lang == 'ru'
+                            else 'Tālrunis vai e-pasts' if lang == 'lv'
+                            else 'Phone or email' }}"
+            required
+        >
+
+        <button class="popup-btn primary">
+            {{ "Подтвердить заказ" if lang == "ru"
+               else "Apstiprināt pasūtījumu" if lang == "lv"
+               else "Confirm order" }}
+        </button>
+    </form>
+</div>
+
+{% endblock %}

@@ -194,7 +194,7 @@ ORDER_STATUSES = {
     },
     "in_progress": {
         "ru": "В работе",
-        "lv": "Procesā",
+        "lv": "Darbā",
         "en": "In progress"
     },
     "shipped": {
@@ -207,6 +207,7 @@ ORDER_STATUSES = {
         "lv": "Pabeigts",
         "en": "Completed"
     }
+    # ❌ cancelled — убрали
 }
 
 # ======================

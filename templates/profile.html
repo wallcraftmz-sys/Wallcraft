@@ -1,13 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% set STATUS_LABELS = {
-    "new": {"ru": "Новый", "lv": "Jauns", "en": "New"},
-    "confirmed": {"ru": "Подтверждён", "lv": "Apstiprināts", "en": "Confirmed"},
-    "in_progress": {"ru": "В работе", "lv": "Procesā", "en": "In progress"},
-    "shipped": {"ru": "Отправлен", "lv": "Nosūtīts", "en": "Shipped"},
-    "completed": {"ru": "Завершён", "lv": "Pabeigts", "en": "Completed"},
-    "cancelled": {"ru": "Отменён", "lv": "Atcelts", "en": "Cancelled"}
+{% set T = {
+    "profile": {
+        "ru": "Личный кабинет",
+        "lv": "Profils",
+        "en": "Profile"
+    },
+    "user": {
+        "ru": "Пользователь",
+        "lv": "Lietotājs",
+        "en": "User"
+    },
+    "my_orders": {
+        "ru": "Мои заказы",
+        "lv": "Mani pasūtījumi",
+        "en": "My orders"
+    },
+    "no_orders": {
+        "ru": "У вас пока нет заказов",
+        "lv": "Jums vēl nav pasūtījumu",
+        "en": "No orders yet"
+    }
 } %}
 
 <h1 class="page-title">

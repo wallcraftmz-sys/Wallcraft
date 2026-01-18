@@ -148,6 +148,19 @@ class Product(db.Model):
     image = db.Column(db.String(200))
 
     is_active = db.Column(db.Boolean, default=True)
+
+class OrderStatusHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False)
+    order = db.relationship("Order", backref="status_history")
+
+    old_status = db.Column(db.String(30))
+    new_status = db.Column(db.String(30))
+
+    changed_by = db.Column(db.String(80))  # username или "system"
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 # ======================
 # USER LOADER (СТРОГО ЗДЕСЬ)
 # ======================
@@ -623,8 +636,18 @@ def update_order_status(order_id):
     new_status = request.form.get("status")
 
     if new_status in ORDER_STATUSES:
-        order.status = new_status
-        db.session.commit()
+        old_status = order.status
+order.status = new_status
+
+history = OrderStatusHistory(
+    order_id=order.id,
+    old_status=old_status,
+    new_status=new_status,
+    changed_by=current_user.username
+)
+
+db.session.add(history)
+db.session.commit()
 
     return redirect(url_for("admin_orders"))
 

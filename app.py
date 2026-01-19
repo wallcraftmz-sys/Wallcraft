@@ -486,7 +486,8 @@ def checkout():
         subtotal = product.price * qty
         total += subtotal
         items.append(f"{product.name_ru} × {qty}")
-
+    items_text = "\n".join(items)
+    
     # 🔒 2. Блок если товары исчезли или сумма 0
     if not items or total <= 0:
         session.pop("cart", None)

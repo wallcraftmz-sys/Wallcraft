@@ -27,6 +27,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
 from werkzeug.utils import secure_filename
+import uuid
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -471,7 +472,7 @@ def admin_panel():
 def checkout():
     cart = session.get("cart", {})
 
-    # 🔒 1. Блок пустой корзины (и GET, и POST)
+    # 🔒 1. Блок пустой корзины
     if not cart or sum(cart.values()) == 0:
         return redirect(url_for("cart"))
 
@@ -486,44 +487,63 @@ def checkout():
         subtotal = product.price * qty
         total += subtotal
         items.append(f"{product.name_ru} × {qty}")
+
     items_text = "\n".join(items)
-    
-    # 🔒 2. Блок если товары исчезли или сумма 0
+
+    # 🔒 2. Блок если товары исчезли
     if not items or total <= 0:
         session.pop("cart", None)
         return redirect(url_for("cart"))
 
+    # 🔐 ГЕНЕРАЦИЯ ТОКЕНА ПРИ GET
+    if request.method == "GET":
+        session["checkout_token"] = str(uuid.uuid4())
+
+    # ======================
+    # POST
+    # ======================
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         contact = request.form.get("contact", "").strip()
 
-        # 🔒 3. Блок пустых полей
+        # 🔐 ПРОВЕРКА ТОКЕНА
+        form_token = request.form.get("checkout_token")
+        session_token = session.get("checkout_token")
+
+        if not form_token or form_token != session_token:
+            return redirect(url_for("cart"))
+
+        # 🔥 токен одноразовый
+        session.pop("checkout_token", None)
+
+        # 🔒 3. Проверка полей
         if not name or not contact:
             return render_template(
                 "checkout.html",
                 items=items,
                 total=total,
-                error="Заполните все поля"
+                error="Заполните все поля",
+                checkout_token=session.get("checkout_token")
             )
 
-        # 🔒 4. Повторная проверка ПЕРЕД созданием заказа
+        # 🔒 4. Повторная проверка корзины
         if not session.get("cart"):
             return redirect(url_for("cart"))
 
         order = Order(
-    user_id=current_user.id,
-    name=name,
-    contact=contact,
-    items=items_text,
-    total=total,
-    status="new",
-    is_deleted=False
-)
+            user_id=current_user.id,
+            name=name,
+            contact=contact,
+            items=items_text,
+            total=total,
+            status="new",
+            is_deleted=False
+        )
 
         db.session.add(order)
         db.session.commit()
 
-        # 🔒 5. Очистка корзины ТОЛЬКО после commit
+        # 🔒 5. Очистка корзины
         session.pop("cart", None)
         session.modified = True
 
@@ -532,7 +552,7 @@ def checkout():
             f"Пользователь: {current_user.username}\n"
             f"Имя: {name}\n"
             f"Контакт: {contact}\n\n"
-            f"{chr(10).join(items)}\n"
+            f"{items_text}\n"
             f"Итого: {total:.2f} €"
         )
 
@@ -541,7 +561,8 @@ def checkout():
     return render_template(
         "checkout.html",
         items=items,
-        total=total
+        total=total,
+        checkout_token=session.get("checkout_token")
     )
 
 #===== admin-products =====

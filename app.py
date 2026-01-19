@@ -616,32 +616,23 @@ def edit_product(id):
 def admin_orders():
     show = request.args.get("show", "active")
 
-    ACTIVE_STATUSES = ["new", "confirmed", "in_progress", "shipped"]
-    ARCHIVE_STATUSES = ["completed", "cancelled"]
+    query = Order.query
 
     if show == "archive":
-        orders = (
-            Order.query
-            .filter(Order.status.in_(ARCHIVE_STATUSES))
-            .order_by(Order.created_at.desc())
-            .all()
-        )
+        query = query.filter_by(is_deleted=True)
     else:
-        orders = (
-            Order.query
-            .filter(Order.status.in_(ACTIVE_STATUSES))
-            .order_by(Order.created_at.desc())
-            .all()
-        )
+        query = query.filter_by(is_deleted=False)
+
+    orders = query.order_by(Order.created_at.desc()).all()
 
     return render_template(
-    "admin/orders.html",
-    orders=orders,
-    ORDER_STATUSES=ORDER_STATUSES,
-    ALLOWED_STATUS_TRANSITIONS=ALLOWED_STATUS_TRANSITIONS,
-    lang=session.get("lang", "ru"),
-    show=show
-)
+        "admin/orders.html",
+        orders=orders,
+        ORDER_STATUSES=ORDER_STATUSES,
+        ALLOWED_STATUS_TRANSITIONS=ALLOWED_STATUS_TRANSITIONS,
+        lang=session.get("lang", "ru"),
+        show=show
+    )
 #===== dashboard =====
 @app.route("/dashboard")
 @login_required

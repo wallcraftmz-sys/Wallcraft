@@ -27,7 +27,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
 from werkzeug.utils import secure_filename
-from flask import flash
+
 # ======================
 # ADMIN ACCESS CONTROL
 # ======================
@@ -179,6 +179,16 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
+    try:
+    db.session.execute(text(
+        'ALTER TABLE "order" ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE'
+    ))
+    db.session.commit()
+    print("✅ is_deleted column added")
+except Exception:
+    db.session.rollback()
+    print("ℹ️ is_deleted column already exists")
+    
     # 🔧 AUTO-MIGRATION: add is_active if missing
     from sqlalchemy import text
 
@@ -252,7 +262,7 @@ def inject_lang():
 # ======================
 @app.before_request
 def block_empty_checkout():
-    if request.endpoint == "checkout":
+    if request.endpoint == "checkout" and request.method == "POST":
         cart = session.get("cart", {})
         if not cart or sum(cart.values()) == 0:
             return redirect(url_for("cart"))
@@ -504,7 +514,7 @@ def checkout():
     user_id=current_user.id,
     name=name,
     contact=contact,
-    items=items,
+    items=items_text,
     total=total,
     status="new",
     is_deleted=False
@@ -671,14 +681,13 @@ def update_order_status(order_id):
     order.status = new_status
 
     history = OrderStatusHistory(
-        order_id=order.id,
-        old_status=old_status,
-        new_status=new_status,
-        changed_by=current_user.username
-    )
-
-    db.session.add(history)
-    db.session.commit()
+    order_id=order.id,
+    old_status=None,
+    new_status="new",
+    changed_by="system"
+)
+db.session.add(history)
+db.session.commit()
 
     return redirect(url_for("admin_orders"))
 

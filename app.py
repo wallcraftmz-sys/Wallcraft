@@ -198,14 +198,13 @@ ORDER_STATUSES = {
         "en": "New"
     },
 
-    # алиас для старых заказов
+    # алиас для старых заказов (НЕ ИСПОЛЬЗУЕТСЯ В НОВЫХ)
     "confirmed": {
         "ru": "В работе",
         "lv": "Darbā",
         "en": "In progress"
     },
 
-    # ОСНОВНОЙ рабочий статус
     "in_progress": {
         "ru": "В работе",
         "lv": "Darbā",
@@ -226,10 +225,11 @@ ORDER_STATUSES = {
 }
 
 ALLOWED_STATUS_TRANSITIONS = {
-    "new": ["confirmed"],
-    "confirmed": ["shipped", "completed"],
+    "new": ["in_progress"],
+    "confirmed": ["in_progress"],  # для старых заказов
+    "in_progress": ["shipped", "completed"],
     "shipped": ["completed"],
-    "completed": [],
+    "completed": []
 }
 # ======================
 # LANGUAGE
@@ -501,13 +501,14 @@ def checkout():
             return redirect(url_for("cart"))
 
         order = Order(
-            user_id=current_user.id,
-            name=name,
-            contact=contact,
-            items="\n".join(items),
-            total=total,
-            status="new"
-        )
+    user_id=current_user.id,
+    name=name,
+    contact=contact,
+    items=items,
+    total=total,
+    status="new",
+    is_deleted=False
+)
 
         db.session.add(order)
         db.session.commit()
@@ -616,14 +617,20 @@ def edit_product(id):
 def admin_orders():
     show = request.args.get("show", "active")
 
-    query = Order.query
-
     if show == "archive":
-        query = query.filter_by(is_deleted=True)
+        orders = (
+            Order.query
+            .filter(Order.is_deleted == True)
+            .order_by(Order.created_at.desc())
+            .all()
+        )
     else:
-        query = query.filter_by(is_deleted=False)
-
-    orders = query.order_by(Order.created_at.desc()).all()
+        orders = (
+            Order.query
+            .filter(Order.is_deleted == False)
+            .order_by(Order.created_at.desc())
+            .all()
+        )
 
     return render_template(
         "admin/orders.html",
@@ -648,17 +655,19 @@ def update_order_status(order_id):
     new_status = request.form.get("status")
     old_status = order.status
 
-    # ❌ если статус не существует
+    # защита
+    if new_status == old_status:
+        return redirect(url_for("admin_orders"))
+
     if new_status not in ORDER_STATUSES:
         return redirect(url_for("admin_orders"))
 
-    # ❌ если переход запрещён
     allowed = ALLOWED_STATUS_TRANSITIONS.get(old_status, [])
     if new_status not in allowed:
         flash("Недопустимый переход статуса", "error")
         return redirect(url_for("admin_orders"))
 
-    # ✅ обновляем статус
+    # обновление
     order.status = new_status
 
     history = OrderStatusHistory(

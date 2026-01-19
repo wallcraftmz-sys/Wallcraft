@@ -467,6 +467,8 @@ def admin_panel():
     return redirect(url_for("admin_orders"))
 
 #===== checkout =====
+import re
+
 @app.route("/checkout", methods=["GET", "POST"])
 @login_required
 def checkout():
@@ -495,7 +497,7 @@ def checkout():
         session.pop("cart", None)
         return redirect(url_for("cart"))
 
-    # 🔐 ГЕНЕРАЦИЯ ТОКЕНА ПРИ GET
+    # 🔐 Токен при GET
     if request.method == "GET":
         session["checkout_token"] = str(uuid.uuid4())
 
@@ -506,30 +508,50 @@ def checkout():
         name = request.form.get("name", "").strip()
         contact = request.form.get("contact", "").strip()
 
-        # 🔐 ПРОВЕРКА ТОКЕНА
+        # 🔐 Проверка токена
         form_token = request.form.get("checkout_token")
         session_token = session.get("checkout_token")
 
         if not form_token or form_token != session_token:
             return redirect(url_for("cart"))
 
-        # 🔥 токен одноразовый
         session.pop("checkout_token", None)
 
-        # 🔒 3. Проверка полей
-        if not name or not contact:
+        # 🔒 Проверка имени
+        if len(name) < 2:
             return render_template(
                 "checkout.html",
                 items=items,
                 total=total,
-                error="Заполните все поля",
+                error="Имя слишком короткое",
                 checkout_token=session.get("checkout_token")
             )
 
-        # 🔒 4. Повторная проверка корзины
+        # ======================
+        # 🔐 ВАЛИДАЦИЯ CONTACT (ШАГ 15)
+        # ======================
+        email_regex = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+        phone_regex = r"^\+?[0-9\s\-]{7,15}$"
+
+        if not (
+            re.match(email_regex, contact)
+            or re.match(phone_regex, contact)
+        ):
+            return render_template(
+                "checkout.html",
+                items=items,
+                total=total,
+                error="Введите корректный телефон или email",
+                checkout_token=session.get("checkout_token")
+            )
+
+        # 🔒 Повторная проверка корзины
         if not session.get("cart"):
             return redirect(url_for("cart"))
 
+        # ======================
+        # СОЗДАНИЕ ЗАКАЗА
+        # ======================
         order = Order(
             user_id=current_user.id,
             name=name,
@@ -543,7 +565,7 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
-        # 🔒 5. Очистка корзины
+        # 🔒 Очистка корзины
         session.pop("cart", None)
         session.modified = True
 

@@ -88,7 +88,7 @@
             <td>
                 <form method="post"
                       action="{{ url_for('delete_order', order_id=order.id) }}"
-                      onsubmit="return confirm('Удалить заказ навсегда?');">
+                      onsubmit="return confirm('Переместить заказ в архив?');"
                     <button type="submit" class="danger-btn">🗑</button>
                 </form>
             </td>

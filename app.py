@@ -177,7 +177,7 @@ def load_user(user_id):
 # ======================
 # INIT DB (1 РАЗ)
 # ======================
- with app.app_context():
+with app.app_context():
     db.create_all()
 
     # ===== migration: order.is_deleted =====

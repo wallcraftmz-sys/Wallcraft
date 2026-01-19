@@ -548,7 +548,21 @@ def checkout():
         # 🔒 Повторная проверка корзины
         if not session.get("cart"):
             return redirect(url_for("cart"))
+            
+              # ======================
+        # 🔒 ШАГ 16: АНТИ-СПАМ (1 заказ / 60 сек)
+# ======================
+last_order_ts = session.get("last_order_ts")
+now = datetime.utcnow().timestamp()
 
+if last_order_ts and now - last_order_ts < 60:
+    return render_template(
+        "checkout.html",
+        items=items,
+        total=total,
+        error="Подождите минуту перед следующим заказом",
+        checkout_token=session.get("checkout_token")
+    )
         # ======================
         # СОЗДАНИЕ ЗАКАЗА
         # ======================
@@ -564,6 +578,8 @@ def checkout():
 
         db.session.add(order)
         db.session.commit()
+# 🔒 фиксируем время последнего заказа
+session["last_order_ts"] = datetime.utcnow().timestamp()
 
         # 🔒 Очистка корзины
         session.pop("cart", None)

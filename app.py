@@ -675,6 +675,9 @@ def edit_product(id):
     return render_template("admin/edit_product.html", product=product)
     
 #===== admin-orders =====
+import csv
+from io import StringIO
+from flask import Response
 @app.route("/admin/orders")
 @admin_required
 def admin_orders():
@@ -792,4 +795,52 @@ def admin_order_view(order_id):
         history=history,
         ORDER_STATUSES=ORDER_STATUSES,
         lang=session.get("lang", "ru")
+    )
+
+#=====admin-orders-export
+@app.route("/admin/orders/export")
+@admin_required
+def export_orders_csv():
+    orders = (
+        Order.query
+        .filter(Order.is_deleted == False)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+
+    output = StringIO()
+    writer = csv.writer(output)
+
+    # заголовки
+    writer.writerow([
+        "ID",
+        "Дата",
+        "Пользователь",
+        "Имя",
+        "Контакт",
+        "Состав",
+        "Сумма",
+        "Статус"
+    ])
+
+    for o in orders:
+        writer.writerow([
+            o.id,
+            o.created_at.strftime("%d.%m.%Y %H:%M"),
+            o.user.username if o.user else "-",
+            o.name,
+            o.contact,
+            o.items.replace("\n", " | "),
+            f"{o.total:.2f}",
+            ORDER_STATUSES.get(o.status, {}).get("ru", o.status)
+        ])
+
+    output.seek(0)
+
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=orders.csv"
+        }
     )

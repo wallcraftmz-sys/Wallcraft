@@ -14,7 +14,11 @@
         Архив
     </a>
 </div>
-
+<a href="{{ url_for('export_orders_csv') }}"
+   class="admin-link"
+   style="margin-bottom:15px; display:inline-block;">
+    ⬇ Экспорт заказов (CSV)
+</a>
 {% if orders %}
 
 <table class="admin-table">

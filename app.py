@@ -167,6 +167,17 @@ class OrderStatusHistory(db.Model):
     changed_by = db.Column(db.String(80))  # username или "system"
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class OrderComment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False)
+    order = db.relationship("Order", backref="comments")
+
+    author = db.Column(db.String(80))  # username админа
+    text = db.Column(db.Text, nullable=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 # ======================
 # USER LOADER (СТРОГО ЗДЕСЬ)
 # ======================
@@ -848,3 +859,23 @@ def export_orders_csv():
             "Content-Disposition": f"attachment; filename=orders_{show}.csv"
         }
     )
+    #===== admin-orders-comment
+@app.route("/admin/orders/<int:order_id>/comment", methods=["POST"])
+@admin_required
+def add_order_comment(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    text = request.form.get("comment", "").strip()
+    if not text:
+        return redirect(url_for("admin_order_view", order_id=order.id))
+
+    comment = OrderComment(
+        order_id=order.id,
+        author=current_user.username,
+        text=text
+    )
+
+    db.session.add(comment)
+    db.session.commit()
+
+    return redirect(url_for("admin_order_view", order_id=order.id))

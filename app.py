@@ -674,7 +674,7 @@ def update_order_status(order_id):
     allowed = ALLOWED_STATUS_TRANSITIONS.get(old_status, [])
     if new_status not in allowed:
         flash("Недопустимый переход статуса", "error")
-         return redirect(url_for("admin_orders"))
+        return redirect(url_for("admin_orders"))
 
     # обновление
     order.status = new_status

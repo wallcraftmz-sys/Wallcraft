@@ -10,15 +10,12 @@
         <h3 class="checkout-subtitle">Ваш заказ</h3>
 
         {% for item in items %}
-        <div class="checkout-item">
-            <div class="checkout-item-name">
-                {{ item }}
-            </div>
-            <div class="checkout-item-price">
-                {{ total }} €
-            </div>
-        </div>
-        {% endfor %}
+<div class="checkout-item">
+    <div class="checkout-item-name">
+        {{ item }}
+    </div>
+</div>
+{% endfor %}
 
         <div class="checkout-total">
             <span>Итого:</span>
@@ -28,6 +25,9 @@
 
     <!-- ФОРМА -->
     <form method="post" class="checkout-form">
+        {% if checkout_token %}
+<input type="hidden" name="checkout_token" value="{{ checkout_token }}">
+{% endif %}
         <h3 class="checkout-subtitle">Контактные данные</h3>
 
         <div class="form-group">

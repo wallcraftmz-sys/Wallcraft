@@ -27,7 +27,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
 from werkzeug.utils import secure_filename
-from sqlalchemy import text
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -175,32 +174,30 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # ======================
-# INIT DB (1 РАЗ)
+# INIT DB (SAFE)
 # ======================
+from sqlalchemy import text
+
 with app.app_context():
     db.create_all()
 
-    # ===== migration: order.is_deleted =====
+    # migration: order.is_deleted
     try:
         db.session.execute(
             text('ALTER TABLE "order" ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE')
         )
         db.session.commit()
-        print("✅ is_deleted column added")
     except Exception:
         db.session.rollback()
-        print("ℹ️ is_deleted column already exists")
 
-    # ===== migration: product.is_active =====
+    # migration: product.is_active
     try:
         db.session.execute(
             text("ALTER TABLE product ADD COLUMN is_active BOOLEAN DEFAULT TRUE")
         )
         db.session.commit()
-        print("✅ is_active column added")
     except Exception:
         db.session.rollback()
-        print("ℹ️ is_active column already exists")
 
 
 ORDER_STATUSES = {

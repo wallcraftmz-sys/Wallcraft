@@ -801,46 +801,49 @@ def admin_order_view(order_id):
 @app.route("/admin/orders/export")
 @admin_required
 def export_orders_csv():
-    orders = (
-        Order.query
-        .filter(Order.is_deleted == False)
-        .order_by(Order.created_at.desc())
-        .all()
-    )
+    show = request.args.get("show", "active")
 
-    output = StringIO()
-    writer = csv.writer(output)
+    ACTIVE_STATUSES = ["new", "in_progress", "shipped"]
+    ARCHIVE_STATUSES = ["completed"]
 
-    # заголовки
+    if show == "archive":
+        orders = Order.query.filter(Order.status.in_(ARCHIVE_STATUSES)).all()
+    else:
+        orders = Order.query.filter(Order.status.in_(ACTIVE_STATUSES)).all()
+
+    si = StringIO()
+    writer = csv.writer(si)
+
+    # Заголовки CSV
     writer.writerow([
         "ID",
-        "Дата",
-        "Пользователь",
         "Имя",
         "Контакт",
         "Состав",
         "Сумма",
-        "Статус"
+        "Статус",
+        "Дата"
     ])
 
+    # Данные
     for o in orders:
         writer.writerow([
             o.id,
-            o.created_at.strftime("%d.%m.%Y %H:%M"),
-            o.user.username if o.user else "-",
             o.name,
             o.contact,
-            o.items.replace("\n", " | "),
+            o.items,
             f"{o.total:.2f}",
-            ORDER_STATUSES.get(o.status, {}).get("ru", o.status)
+            ORDER_STATUSES.get(o.status, {}).get("ru", o.status),
+            o.created_at.strftime("%d.%m.%Y %H:%M")
         ])
 
-    output.seek(0)
+    output = si.getvalue()
+    si.close()
 
     return Response(
         output,
         mimetype="text/csv",
         headers={
-            "Content-Disposition": "attachment; filename=orders.csv"
+            "Content-Disposition": f"attachment; filename=orders_{show}.csv"
         }
     )

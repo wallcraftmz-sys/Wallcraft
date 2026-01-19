@@ -682,28 +682,29 @@ from flask import Response
 @admin_required
 def admin_orders():
     show = request.args.get("show", "active")
+    page = request.args.get("page", 1, type=int)
+    PER_PAGE = 20
 
     ACTIVE_STATUSES = ["new", "in_progress", "shipped"]
     ARCHIVE_STATUSES = ["completed"]
 
+    query = Order.query
+
     if show == "archive":
-        orders = (
-            Order.query
-            .filter(Order.status.in_(ARCHIVE_STATUSES))
-            .order_by(Order.created_at.desc())
-            .all()
-        )
+        query = query.filter(Order.status.in_(ARCHIVE_STATUSES))
     else:
-        orders = (
-            Order.query
-            .filter(Order.status.in_(ACTIVE_STATUSES))
-            .order_by(Order.created_at.desc())
-            .all()
-        )
+        query = query.filter(Order.status.in_(ACTIVE_STATUSES))
+
+    pagination = (
+        query
+        .order_by(Order.created_at.desc())
+        .paginate(page=page, per_page=PER_PAGE, error_out=False)
+    )
 
     return render_template(
         "admin/orders.html",
-        orders=orders,
+        orders=pagination.items,
+        pagination=pagination,
         ORDER_STATUSES=ORDER_STATUSES,
         ALLOWED_STATUS_TRANSITIONS=ALLOWED_STATUS_TRANSITIONS,
         lang=session.get("lang", "ru"),

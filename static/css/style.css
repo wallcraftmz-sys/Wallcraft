@@ -1289,3 +1289,25 @@ select {
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     margin-top: 16px;
 }
+
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.pagination a,
+.pagination span {
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.pagination .current {
+    background: #222;
+    color: #fff;
+    border-color: #222;
+}

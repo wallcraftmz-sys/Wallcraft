@@ -661,31 +661,38 @@ def dashboard_redirect():
 @admin_required
 def update_order_status(order_id):
     order = Order.query.get_or_404(order_id)
+
     new_status = request.form.get("status")
     old_status = order.status
 
-    # защита
-    if new_status == old_status:
+    # защита: тот же статус
+    if not new_status or new_status == old_status:
         return redirect(url_for("admin_orders"))
 
+    # защита: статус не существует
     if new_status not in ORDER_STATUSES:
         return redirect(url_for("admin_orders"))
 
+    # защита: запрещённый переход
     allowed = ALLOWED_STATUS_TRANSITIONS.get(old_status, [])
     if new_status not in allowed:
         flash("Недопустимый переход статуса", "error")
+        return redirect(url_for("admin_orders"))
 
-    # обновление
+    # ✅ обновление статуса
     order.status = new_status
 
+    # ✅ запись в историю
     history = OrderStatusHistory(
-    order_id=order.id,
-    old_status=None,
-    new_status="new",
-    changed_by="system"
-)
-db.session.add(history)
-db.session.commit()
+        order_id=order.id,
+        old_status=old_status,
+        new_status=new_status,
+        changed_by=current_user.username
+    )
+
+    db.session.add(history)
+    db.session.commit()
+
     return redirect(url_for("admin_orders"))
 
 # ===== admin-order-delete =====

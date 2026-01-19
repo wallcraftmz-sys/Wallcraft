@@ -14,6 +14,28 @@
         Архив
     </a>
 </div>
+<form method="get" style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
+    <input type="hidden" name="show" value="{{ show }}">
+
+    <input
+        type="text"
+        name="q"
+        placeholder="Поиск: ID, имя, контакт"
+        value="{{ request.args.get('q', '') }}"
+        style="padding:6px 10px; min-width:260px;"
+    >
+
+    <button type="submit" class="admin-link">
+        🔍 Найти
+    </button>
+
+    {% if request.args.get('q') %}
+        <a href="{{ url_for('admin_orders', show=show) }}"
+           class="admin-link danger">
+            ✖ Сброс
+        </a>
+    {% endif %}
+</form>
 <a href="{{ url_for('export_orders_csv') }}"
    class="admin-link"
    style="margin-bottom:15px; display:inline-block;">

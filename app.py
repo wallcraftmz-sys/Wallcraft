@@ -680,17 +680,20 @@ def edit_product(id):
 def admin_orders():
     show = request.args.get("show", "active")
 
+    ACTIVE_STATUSES = ["new", "in_progress", "shipped"]
+    ARCHIVE_STATUSES = ["completed"]
+
     if show == "archive":
         orders = (
             Order.query
-            .filter(Order.is_deleted == True)
+            .filter(Order.status.in_(ARCHIVE_STATUSES))
             .order_by(Order.created_at.desc())
             .all()
         )
     else:
         orders = (
             Order.query
-            .filter(Order.is_deleted == False)
+            .filter(Order.status.in_(ACTIVE_STATUSES))
             .order_by(Order.created_at.desc())
             .all()
         )

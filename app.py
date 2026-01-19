@@ -687,7 +687,7 @@ def update_order_status(order_id):
 )
 db.session.add(history)
 db.session.commit()
-     return redirect(url_for("admin_orders"))
+return redirect(url_for("admin_orders"))
 
 # ===== admin-order-delete =====
 @app.route("/admin/orders/delete/<int:order_id>", methods=["POST"])

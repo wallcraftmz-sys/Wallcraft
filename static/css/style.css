@@ -1311,3 +1311,208 @@ select {
     color: #fff;
     border-color: #222;
 }
+
+/* =========================
+   MOBILE MENU (ADMIN)
+   ========================= */
+
+.menu-btn{
+  border: 0;
+  background: rgba(255,255,255,0.12);
+  color: inherit;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 20px;
+  line-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease, visibility 180ms ease;
+  z-index: 999;
+}
+
+.menu-overlay.show{
+  opacity: 1;
+  visibility: visible;
+}
+
+.side-menu{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: min(86vw, 360px);
+  background: #ffffff;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.20);
+  transform: translateX(-105%);
+  transition: transform 220ms ease;
+  z-index: 1000;
+  padding: 14px 14px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-menu.open{
+  transform: translateX(0);
+}
+
+.side-menu-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px 14px;
+}
+
+.side-menu-title{
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+}
+
+.side-menu-close{
+  border: 0;
+  background: rgba(0,0,0,0.06);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 40px;
+}
+
+/* Карточка быстрых действий */
+.side-menu-card{
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 10px;
+  margin: 4px 6px 10px;
+}
+
+.side-menu-card-title{
+  font-weight: 800;
+  font-size: 13px;
+  opacity: 0.75;
+  margin: 2px 4px 10px;
+}
+
+.side-menu-action{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #111;
+  font-weight: 700;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: transform 150ms ease, background 150ms ease;
+  margin-bottom: 8px;
+}
+
+.side-menu-action:last-child{
+  margin-bottom: 0;
+}
+
+.side-menu-action:active{
+  transform: scale(0.99);
+}
+
+.side-menu-action:hover{
+  background: rgba(120, 63, 255, 0.08);
+}
+
+.side-menu-action .ico{
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(120, 63, 255, 0.12);
+  font-size: 16px;
+}
+
+.side-menu-action .txt{
+  display: inline-block;
+}
+
+.side-menu-section{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+}
+
+.side-menu-link{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #111;
+  font-weight: 650;
+  background: transparent;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.side-menu-link:active{
+  transform: scale(0.99);
+}
+
+.side-menu-link:hover{
+  background: rgba(0,0,0,0.05);
+}
+
+.side-menu-link .ico{
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.06);
+  font-size: 16px;
+}
+
+.side-menu-link.active{
+  background: rgba(120, 63, 255, 0.12);
+  color: #2a155f;
+}
+
+.side-menu-link.active .ico{
+  background: rgba(120, 63, 255, 0.18);
+}
+
+.side-menu-divider{
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 10px 8px;
+}
+
+.side-menu-link.danger{
+  color: #b42318;
+}
+
+.side-menu-link.danger .ico{
+  background: rgba(180,35,24,0.10);
+}
+
+@media (min-width: 900px){
+  .side-menu{
+    width: 360px;
+  }
+}

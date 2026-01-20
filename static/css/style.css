@@ -1516,3 +1516,15 @@ select {
     width: 360px;
   }
 }
+
+/* ===== ADMIN MENU: hide duplicates when quick actions exist ===== */
+.side-menu .quick-actions { margin: 14px 0 18px; }
+.side-menu .quick-actions-title { font-weight: 700; margin: 0 0 10px; opacity: .8; }
+.side-menu .quick-actions a { display: flex; align-items: center; gap: 10px; padding: 12px 12px; border-radius: 14px; background: #fff; box-shadow: 0 10px 24px rgba(0,0,0,.06); margin-bottom: 10px; }
+.side-menu .quick-actions a .qa-ico { width: 34px; height: 34px; border-radius: 12px; display:flex; align-items:center; justify-content:center; background: rgba(120, 80, 255, .10); font-size: 18px; }
+
+/* hide the duplicated classic links (Admin/Products/Orders/Catalog) */
+.side-menu .classic-admin-links { display: none; }
+
+/* keep logout visible */
+.side-menu .logout-link { margin-top: 10px; }

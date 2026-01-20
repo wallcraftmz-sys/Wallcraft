@@ -43,71 +43,40 @@
 
 
 <!-- SIDE MENU -->
-<div id="sideMenu" class="side-menu" role="dialog" aria-modal="true" aria-label="Меню">
-    <div class="side-menu-head">
-        <div class="side-menu-title">Меню</div>
-        <button class="side-menu-close" type="button" onclick="closeMenu()" aria-label="Закрыть">✕</button>
-    </div>
+<div id="sideMenu" class="side-menu">
 
-    <!-- Быстрые действия -->
-    <div class="side-menu-card">
-        <div class="side-menu-card-title">Быстрые действия</div>
+    <!-- QUICK ACTIONS (fast, no duplicates) -->
+    <div class="quick-actions">
+        <div class="quick-actions-title">Быстрые действия</div>
 
-        <!-- Вариант 1 (без новых роутов): ведём на /admin/products и там добавляешь товар -->
-        <a class="side-menu-action"
-           href="{{ url_for('admin_products') }}"
-           onclick="closeMenu()">
-            <span class="ico">➕</span>
-            <span class="txt">Добавить товар</span>
+        <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">
+            <span class="qa-ico">➕</span>
+            <span>Добавить товар</span>
         </a>
 
-        <!-- Быстрый переход в каталог -->
-        <a class="side-menu-action"
-           href="{{ url_for('catalog') }}"
-           onclick="closeMenu()">
-            <span class="ico">🛍</span>
-            <span class="txt">Открыть каталог</span>
+        <a href="{{ url_for('catalog') }}" onclick="closeMenu()">
+            <span class="qa-ico">🛍️</span>
+            <span>Открыть каталог</span>
         </a>
 
-        <!-- Заказы -->
-        <a class="side-menu-action"
-           href="{{ url_for('admin_orders') }}"
-           onclick="closeMenu()">
-            <span class="ico">🧾</span>
-            <span class="txt">Перейти к заказам</span>
+        <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">
+            <span class="qa-ico">🧾</span>
+            <span>Перейти к заказам</span>
         </a>
     </div>
 
-    <div class="side-menu-section">
-        <a class="side-menu-link {% if request.endpoint == 'admin_panel' %}active{% endif %}"
-           href="{{ url_for('admin_panel') }}" onclick="closeMenu()">
-            <span class="ico">🏠</span> Админка
-        </a>
+    <hr>
 
-        <a class="side-menu-link {% if request.endpoint == 'admin_products' %}active{% endif %}"
-           href="{{ url_for('admin_products') }}" onclick="closeMenu()">
-            <span class="ico">🧱</span> Товары
-        </a>
-
-        <a class="side-menu-link {% if request.endpoint in ['admin_orders','admin_order_view'] %}active{% endif %}"
-           href="{{ url_for('admin_orders') }}" onclick="closeMenu()">
-            <span class="ico">🧾</span> Заказы
-        </a>
-
-        <a class="side-menu-link {% if request.endpoint == 'catalog' %}active{% endif %}"
-           href="{{ url_for('catalog') }}" onclick="closeMenu()">
-            <span class="ico">🛍</span> Каталог
-        </a>
+    <!-- classic links hidden by CSS to avoid repeating -->
+    <div class="classic-admin-links">
+        <a href="{{ url_for('admin_panel') }}" onclick="closeMenu()">Админка</a>
+        <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">Товары</a>
+        <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">Заказы</a>
+        <a href="{{ url_for('catalog') }}" onclick="closeMenu()">Каталог</a>
     </div>
 
-    <div class="side-menu-divider"></div>
-
-    <div class="side-menu-section">
-        <a class="side-menu-link danger"
-           href="{{ url_for('logout') }}" onclick="closeMenu()">
-            <span class="ico">🚪</span> Выйти
-        </a>
-    </div>
+    <a class="logout-link" href="{{ url_for('logout') }}" onclick="closeMenu()">Выйти</a>
+</div>
 </div>
 
 <main class="container admin-container">

@@ -25,10 +25,9 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import os
 from werkzeug.utils import secure_filename
 import uuid
-import secrets
+import secrets  # ✅ ADD
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -44,7 +43,8 @@ def admin_required(f):
 
         return f(*args, **kwargs)
     return decorated
-    
+
+
 # ======================
 # TELEGRAM
 # ======================
@@ -68,6 +68,7 @@ def send_telegram(message: str):
     except Exception as e:
         print("❌ TG ERROR:", e)
 
+
 # ======================
 # APP CONFIG
 # ======================
@@ -77,8 +78,10 @@ UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Railway / ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -107,6 +110,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.permanent_session_lifetime = timedelta(days=7)
 app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)
 
+
 # ======================
 # DB + LOGIN MANAGER
 # ======================
@@ -120,6 +124,7 @@ login_manager.init_app(app)
 def unauthorized():
     return redirect(url_for("login", lang=session.get("lang", "ru")))
 
+
 # ======================
 # MODELS
 # ======================
@@ -128,6 +133,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="admin")
+
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -143,10 +149,11 @@ class Order(db.Model):
 
     status = db.Column(db.String(30), default="new")
 
-    is_deleted = db.Column(db.Boolean, default=False)  # ← ВАЖНО
+    is_deleted = db.Column(db.Boolean, default=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_ru = db.Column(db.String(200), nullable=False)
@@ -155,6 +162,7 @@ class Product(db.Model):
     image = db.Column(db.String(200))
 
     is_active = db.Column(db.Boolean, default=True)
+
 
 class OrderStatusHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -165,9 +173,9 @@ class OrderStatusHistory(db.Model):
     old_status = db.Column(db.String(30))
     new_status = db.Column(db.String(30))
 
-    changed_by = db.Column(db.String(80))  # username или "system"
-
+    changed_by = db.Column(db.String(80))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class OrderComment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -175,21 +183,27 @@ class OrderComment(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False)
     order = db.relationship("Order", backref="comments")
 
-    author = db.Column(db.String(80))  # username админа
+    author = db.Column(db.String(80))
     text = db.Column(db.Text, nullable=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # ======================
-# USER LOADER (СТРОГО ЗДЕСЬ)
+# USER LOADER
 # ======================
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 # ======================
 # INIT DB (SAFE)
 # ======================
-from sqlalchemy import text
+from sqlalchemy import text, or_  # ✅ ADD or_
+from io import StringIO          # ✅ (для экспорта CSV)
+import csv                       # ✅ (для экспорта CSV)
+from flask import Response       # ✅ (для экспорта CSV)
 
 with app.app_context():
     db.create_all()
@@ -214,45 +228,22 @@ with app.app_context():
 
 
 ORDER_STATUSES = {
-    "new": {
-        "ru": "Новый",
-        "lv": "Jauns",
-        "en": "New"
-    },
-
-    # алиас для старых заказов (НЕ ИСПОЛЬЗУЕТСЯ В НОВЫХ)
-    "confirmed": {
-        "ru": "В работе",
-        "lv": "Darbā",
-        "en": "In progress"
-    },
-
-    "in_progress": {
-        "ru": "В работе",
-        "lv": "Darbā",
-        "en": "In progress"
-    },
-
-    "shipped": {
-        "ru": "Отправлен",
-        "lv": "Nosūtīts",
-        "en": "Shipped"
-    },
-
-    "completed": {
-        "ru": "Завершён",
-        "lv": "Pabeigts",
-        "en": "Completed"
-    }
+    "new": {"ru": "Новый", "lv": "Jauns", "en": "New"},
+    "confirmed": {"ru": "В работе", "lv": "Darbā", "en": "In progress"},
+    "in_progress": {"ru": "В работе", "lv": "Darbā", "en": "In progress"},
+    "shipped": {"ru": "Отправлен", "lv": "Nosūtīts", "en": "Shipped"},
+    "completed": {"ru": "Завершён", "lv": "Pabeigts", "en": "Completed"},
 }
 
 ALLOWED_STATUS_TRANSITIONS = {
     "new": ["in_progress"],
-    "confirmed": ["in_progress"],  # для старых заказов
+    "confirmed": ["in_progress"],
     "in_progress": ["shipped", "completed"],
     "shipped": ["completed"],
-    "completed": []
+    "completed": [],
 }
+
+
 # ======================
 # LANGUAGE
 # ======================
@@ -269,11 +260,14 @@ def set_lang():
 def inject_lang():
     return dict(lang=session.get("lang", "ru"))
 
+
+# ✅ ADD: CSRF token into templates
 @app.context_processor
 def inject_csrf_token():
     if "csrf_token" not in session:
         session["csrf_token"] = secrets.token_hex(16)
     return dict(csrf_token=session["csrf_token"])
+
 
 # ======================
 # SECURITY: BLOCK EMPTY CHECKOUT
@@ -285,6 +279,8 @@ def block_empty_checkout():
         if not cart or sum(cart.values()) == 0:
             return redirect(url_for("cart"))
 
+
+# ✅ ADD: CSRF protect all /admin POST
 @app.before_request
 def csrf_protect_admin():
     if request.method == "POST" and request.path.startswith("/admin"):
@@ -294,7 +290,8 @@ def csrf_protect_admin():
         if not form_token or not session_token or form_token != session_token:
             flash("CSRF ошибка. Обновите страницу.", "error")
             return redirect(url_for("admin_orders"))
-            
+
+
 # ======================
 # ROUTES
 # ======================
@@ -302,18 +299,13 @@ def csrf_protect_admin():
 def index():
     return render_template("index.html", lang=session["lang"])
 
-#==== catalog =====
+
 @app.route("/catalog")
 def catalog():
     products = Product.query.filter_by(is_active=True).all()
-    return render_template(
-        "catalog.html",
-        products=products,
-        lang=session["lang"]
-    )
+    return render_template("catalog.html", products=products, lang=session["lang"])
 
 
-# ===== LOGIN =====
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -339,7 +331,6 @@ def login():
     return render_template("login.html", lang=session.get("lang", "ru"))
 
 
-# ===== LOGOUT =====
 @app.route("/logout")
 @login_required
 def logout():
@@ -347,7 +338,6 @@ def logout():
     return redirect(url_for("index"))
 
 
-# ===== REGISTER =====
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -376,7 +366,6 @@ def register():
     return render_template("register.html", lang=session["lang"])
 
 
-# ===== PROFILE =====
 @app.route("/profile")
 @login_required
 def profile():
@@ -386,15 +375,9 @@ def profile():
         .order_by(Order.created_at.desc())
         .all()
     )
-    return render_template(
-        "profile.html",
-        orders=orders,
-        ORDER_STATUSES=ORDER_STATUSES
-    )
+    return render_template("profile.html", orders=orders, ORDER_STATUSES=ORDER_STATUSES)
 
-# ======================
-# ADD TO CART
-# ======================
+
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     cart = session.get("cart", {})
@@ -402,17 +385,11 @@ def add_to_cart(product_id):
 
     cart[pid] = cart.get(pid, 0) + 1
     session["cart"] = cart
-    session.modified = True  # 🔥 ОБЯЗАТЕЛЬНО
+    session.modified = True
 
-    return jsonify(
-        success=True,
-        cart_total_items=sum(cart.values())
-    )
+    return jsonify(success=True, cart_total_items=sum(cart.values()))
 
 
-# ======================
-# CART PAGE
-# ======================
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
@@ -437,16 +414,9 @@ def cart():
             "image": product.image
         })
 
-    return render_template(
-    "cart.html",
-    items=items,
-    total=total,
-    lang=session.get("lang", "ru")
-)
+    return render_template("cart.html", items=items, total=total, lang=session.get("lang", "ru"))
 
-# ======================
-# UPDATE CART
-# ======================
+
 @app.route("/api/update_cart/<int:product_id>/<action>", methods=["POST"])
 def update_cart(product_id, action):
     cart = session.get("cart", {})
@@ -466,7 +436,6 @@ def update_cart(product_id, action):
     session.modified = True
 
     qty = cart.get(pid, 0)
-
     product = Product.query.get(product_id)
     subtotal = product.price * qty if product else 0
 
@@ -484,24 +453,22 @@ def update_cart(product_id, action):
         cart_total_items=sum(cart.values())
     )
 
-    
-# ======================
-# ADMIN PANEL
-# ======================
+
 @app.route("/admin")
 @login_required
 @admin_required
 def admin_panel():
     return redirect(url_for("admin_orders"))
 
-#===== checkout =====
+
+# ===== CHECKOUT =====
 import re
+
 @app.route("/checkout", methods=["GET", "POST"])
 @login_required
 def checkout():
     cart = session.get("cart", {})
 
-    # 🔒 1. Блок пустой корзины
     if not cart or sum(cart.values()) == 0:
         return redirect(url_for("cart"))
 
@@ -519,32 +486,24 @@ def checkout():
 
     items_text = "\n".join(items)
 
-    # 🔒 2. Блок если товары исчезли
     if not items or total <= 0:
         session.pop("cart", None)
         return redirect(url_for("cart"))
 
-    # 🔐 Токен при GET
     if request.method == "GET":
         session["checkout_token"] = str(uuid.uuid4())
 
-    # ======================
-    # POST
-    # ======================
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         contact = request.form.get("contact", "").strip()
 
-        # 🔐 Проверка токена
         form_token = request.form.get("checkout_token")
         session_token = session.get("checkout_token")
-
         if not form_token or form_token != session_token:
             return redirect(url_for("cart"))
 
         session.pop("checkout_token", None)
 
-        # 🔒 Проверка имени
         if len(name) < 2:
             return render_template(
                 "checkout.html",
@@ -554,10 +513,8 @@ def checkout():
                 checkout_token=session.get("checkout_token")
             )
 
-        # 🔐 ВАЛИДАЦИЯ CONTACT (ШАГ 15)
         email_regex = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
         phone_regex = r"^\+?[0-9\s\-]{7,15}$"
-
         if not (re.match(email_regex, contact) or re.match(phone_regex, contact)):
             return render_template(
                 "checkout.html",
@@ -567,14 +524,11 @@ def checkout():
                 checkout_token=session.get("checkout_token")
             )
 
-        # 🔒 Повторная проверка корзины
         if not session.get("cart"):
             return redirect(url_for("cart"))
 
-        # 🔒 ШАГ 16: АНТИ-СПАМ (1 заказ / 60 сек)
         last_order_ts = session.get("last_order_ts")
         now = datetime.utcnow().timestamp()
-
         if last_order_ts and now - last_order_ts < 60:
             return render_template(
                 "checkout.html",
@@ -584,9 +538,6 @@ def checkout():
                 checkout_token=session.get("checkout_token")
             )
 
-        # ======================
-        # СОЗДАНИЕ ЗАКАЗА
-        # ======================
         order = Order(
             user_id=current_user.id,
             name=name,
@@ -600,10 +551,8 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
-        # 🔒 фиксируем время последнего заказа
         session["last_order_ts"] = datetime.utcnow().timestamp()
 
-        # 🔒 Очистка корзины
         session.pop("cart", None)
         session.modified = True
 
@@ -625,13 +574,12 @@ def checkout():
         checkout_token=session.get("checkout_token")
     )
 
-#===== admin-products =====
+
+# ===== ADMIN PRODUCTS =====
 @app.route("/admin/products", methods=["GET", "POST"])
 @login_required
 @admin_required
 def admin_products():
-    
-    # --- ADD PRODUCT ---
     if request.method == "POST":
         file = request.files.get("image")
 
@@ -657,7 +605,6 @@ def admin_products():
         db.session.commit()
         return redirect(url_for("admin_products"))
 
-    # --- FILTER ---
     show = request.args.get("show", "active")
 
     if show == "inactive":
@@ -667,13 +614,9 @@ def admin_products():
     else:
         products = Product.query.filter_by(is_active=True).all()
 
-    return render_template(
-        "admin/products.html",
-        products=products,
-        show=show
-    )
+    return render_template("admin/products.html", products=products, show=show)
 
-#===== admin-products-delete =====
+
 @app.route("/admin/products/delete/<int:id>", methods=["POST"])
 @login_required
 @admin_required
@@ -684,7 +627,6 @@ def delete_product(id):
     return redirect(url_for("admin_products"))
 
 
-# показать форму редактирования
 @app.route("/admin/products/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -701,15 +643,14 @@ def edit_product(id):
         return redirect(url_for("admin_products"))
 
     return render_template("admin/edit_product.html", product=product)
-    
-#===== admin-orders =====
-import csv
-from io import StringIO
-from flask import Response
+
+
+# ===== ADMIN ORDERS =====
 @app.route("/admin/orders")
 @admin_required
 def admin_orders():
     show = request.args.get("show", "active")
+    q = request.args.get("q", "").strip()  # ✅ ADD (поиск)
     page = request.args.get("page", 1, type=int)
     PER_PAGE = 20
 
@@ -718,10 +659,32 @@ def admin_orders():
 
     query = Order.query
 
+    # ✅ ADD: архив учитывает и completed, и is_deleted
     if show == "archive":
-        query = query.filter(Order.status.in_(ARCHIVE_STATUSES))
+        query = query.filter(
+            or_(
+                Order.is_deleted.is_(True),
+                Order.status.in_(ARCHIVE_STATUSES)
+            )
+        )
     else:
-        query = query.filter(Order.status.in_(ACTIVE_STATUSES))
+        query = query.filter(
+            Order.is_deleted.is_(False),
+            Order.status.in_(ACTIVE_STATUSES)
+        )
+
+    # ✅ ADD: поиск
+    if q:
+        if q.isdigit():
+            query = query.filter(Order.id == int(q))
+        else:
+            like = f"%{q}%"
+            query = query.filter(
+                or_(
+                    Order.name.ilike(like),
+                    Order.contact.ilike(like)
+                )
+            )
 
     pagination = (
         query
@@ -738,14 +701,15 @@ def admin_orders():
         lang=session.get("lang", "ru"),
         show=show
     )
-#===== dashboard =====
+
+
 @app.route("/dashboard")
 @login_required
 @admin_required
 def dashboard_redirect():
     return redirect(url_for("admin_panel"))
 
-#===== admin-orders-status =====
+
 @app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
 @admin_required
 def update_order_status(order_id):
@@ -754,24 +718,23 @@ def update_order_status(order_id):
     new_status = request.form.get("status")
     old_status = order.status
 
-    # защита: тот же статус
     if not new_status or new_status == old_status:
         return redirect(url_for("admin_orders"))
 
-    # защита: статус не существует
     if new_status not in ORDER_STATUSES:
         return redirect(url_for("admin_orders"))
 
-    # защита: запрещённый переход
     allowed = ALLOWED_STATUS_TRANSITIONS.get(old_status, [])
     if new_status not in allowed:
         flash("Недопустимый переход статуса", "error")
         return redirect(url_for("admin_orders"))
 
-    # ✅ обновление статуса
     order.status = new_status
 
-    # ✅ запись в историю
+    # ✅ ADD: если completed — автоматически уходит в архив
+    if new_status == "completed":
+        order.is_deleted = True
+
     history = OrderStatusHistory(
         order_id=order.id,
         old_status=old_status,
@@ -784,7 +747,7 @@ def update_order_status(order_id):
 
     return redirect(url_for("admin_orders"))
 
-# ===== admin-order-delete =====
+
 @app.route("/admin/orders/delete/<int:order_id>", methods=["POST"])
 @login_required
 @admin_required
@@ -794,8 +757,8 @@ def delete_order(order_id):
     db.session.commit()
     flash("Заказ перемещён в архив", "success")
     return redirect(url_for("admin_orders"))
-    
-#===== admin-products-restore =====
+
+
 @app.route("/admin/products/restore/<int:id>", methods=["POST"])
 @login_required
 @admin_required
@@ -805,7 +768,7 @@ def restore_product(id):
     db.session.commit()
     return redirect(url_for("admin_products"))
 
-#===== admin-orders-int< =====
+
 @app.route("/admin/orders/<int:order_id>")
 @admin_required
 def admin_order_view(order_id):
@@ -826,35 +789,50 @@ def admin_order_view(order_id):
         lang=session.get("lang", "ru")
     )
 
-#=====admin-orders-export
+
 @app.route("/admin/orders/export")
 @admin_required
 def export_orders_csv():
     show = request.args.get("show", "active")
+    q = request.args.get("q", "").strip()  # ✅ ADD (экспорт с учетом поиска)
 
     ACTIVE_STATUSES = ["new", "in_progress", "shipped"]
     ARCHIVE_STATUSES = ["completed"]
 
+    query = Order.query
+
     if show == "archive":
-        orders = Order.query.filter(Order.status.in_(ARCHIVE_STATUSES)).all()
+        query = query.filter(
+            or_(
+                Order.is_deleted.is_(True),
+                Order.status.in_(ARCHIVE_STATUSES)
+            )
+        )
     else:
-        orders = Order.query.filter(Order.status.in_(ACTIVE_STATUSES)).all()
+        query = query.filter(
+            Order.is_deleted.is_(False),
+            Order.status.in_(ACTIVE_STATUSES)
+        )
+
+    if q:
+        if q.isdigit():
+            query = query.filter(Order.id == int(q))
+        else:
+            like = f"%{q}%"
+            query = query.filter(
+                or_(
+                    Order.name.ilike(like),
+                    Order.contact.ilike(like)
+                )
+            )
+
+    orders = query.order_by(Order.created_at.desc()).all()
 
     si = StringIO()
     writer = csv.writer(si)
 
-    # Заголовки CSV
-    writer.writerow([
-        "ID",
-        "Имя",
-        "Контакт",
-        "Состав",
-        "Сумма",
-        "Статус",
-        "Дата"
-    ])
+    writer.writerow(["ID", "Имя", "Контакт", "Состав", "Сумма", "Статус", "Дата"])
 
-    # Данные
     for o in orders:
         writer.writerow([
             o.id,
@@ -872,24 +850,23 @@ def export_orders_csv():
     return Response(
         output,
         mimetype="text/csv",
-        headers={
-            "Content-Disposition": f"attachment; filename=orders_{show}.csv"
-        }
+        headers={"Content-Disposition": f"attachment; filename=orders_{show}.csv"}
     )
-    #===== admin-orders-comment
+
+
 @app.route("/admin/orders/<int:order_id>/comment", methods=["POST"])
 @admin_required
 def add_order_comment(order_id):
     order = Order.query.get_or_404(order_id)
 
-    text = request.form.get("comment", "").strip()
-    if not text:
+    text_comment = request.form.get("comment", "").strip()
+    if not text_comment:
         return redirect(url_for("admin_order_view", order_id=order.id))
 
     comment = OrderComment(
         order_id=order.id,
         author=current_user.username,
-        text=text
+        text=text_comment
     )
 
     db.session.add(comment)

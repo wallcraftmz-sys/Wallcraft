@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>Заказ #{{ order.id }} | Печать</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1,h2,h3 { margin: 0 0 10px; }
+        .row { margin: 6px 0; }
+        .muted { opacity: .7; }
+        .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin: 12px 0; }
+        pre { white-space: pre-line; }
+        @media print {
+            button { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<button onclick="window.print()">Печать</button>
+
+<h1>Заказ #{{ order.id }}</h1>
+<div class="row"><strong>Имя:</strong> {{ order.name }}</div>
+<div class="row"><strong>Контакт:</strong> {{ order.contact }}</div>
+<div class="row"><strong>Сумма:</strong> {{ order.total }} €</div>
+<div class="row"><strong>Статус:</strong> {{ ORDER_STATUSES.get(order.status, {}).get(lang, order.status) }}</div>
+<div class="row muted"><strong>Дата:</strong> {{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+
+<div class="box">
+    <h3>Состав</h3>
+    <pre>{{ order.items }}</pre>
+</div>
+
+<div class="box">
+    <h3>История статусов</h3>
+    {% for h in history %}
+        <div class="row muted">
+            {{ h.created_at.strftime("%d.%m.%Y %H:%M") }} —
+            {{ ORDER_STATUSES[h.old_status][lang] if h.old_status else "—" }}
+            →
+            {{ ORDER_STATUSES[h.new_status][lang] }}
+            ({{ h.changed_by }})
+        </div>
+    {% else %}
+        <div class="row muted">—</div>
+    {% endfor %}
+</div>
+
+<div class="box">
+    <h3>Комментарии</h3>
+    {% for c in comments %}
+        <div class="row">
+            <strong>{{ c.author }}</strong>
+            <span class="muted">{{ c.created_at.strftime("%d.%m.%Y %H:%M") }}</span><br>
+            {{ c.text }}
+        </div>
+        <hr>
+    {% else %}
+        <div class="row muted">—</div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

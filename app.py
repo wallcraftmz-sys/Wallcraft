@@ -28,6 +28,7 @@ from functools import wraps
 import os
 from werkzeug.utils import secure_filename
 import uuid
+import secrets
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -268,6 +269,12 @@ def set_lang():
 def inject_lang():
     return dict(lang=session.get("lang", "ru"))
 
+@app.context_processor
+def inject_csrf_token():
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_hex(16)
+    return dict(csrf_token=session["csrf_token"])
+
 # ======================
 # SECURITY: BLOCK EMPTY CHECKOUT
 # ======================
@@ -277,6 +284,16 @@ def block_empty_checkout():
         cart = session.get("cart", {})
         if not cart or sum(cart.values()) == 0:
             return redirect(url_for("cart"))
+
+@app.before_request
+def csrf_protect_admin():
+    if request.method == "POST" and request.path.startswith("/admin"):
+        form_token = request.form.get("csrf_token")
+        session_token = session.get("csrf_token")
+
+        if not form_token or not session_token or form_token != session_token:
+            flash("CSRF ошибка. Обновите страницу.", "error")
+            return redirect(url_for("admin_orders"))
             
 # ======================
 # ROUTES

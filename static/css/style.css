@@ -1528,3 +1528,8 @@ select {
 
 /* keep logout visible */
 .side-menu .logout-link { margin-top: 10px; }
+
+/* ===== USER MENU (works with base_user.html) ===== */
+#userSideMenu.side-menu { padding-top: 18px; }
+#userSideMenu.side-menu a { display:block; padding:14px 16px; border-radius:14px; margin: 6px 10px; background:#fff; box-shadow: 0 8px 20px rgba(0,0,0,.05); }
+#userSideMenu.side-menu hr { margin: 14px 16px; opacity:.2; }

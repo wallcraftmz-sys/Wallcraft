@@ -1533,3 +1533,15 @@ select {
 #userSideMenu.side-menu { padding-top: 18px; }
 #userSideMenu.side-menu a { display:block; padding:14px 16px; border-radius:14px; margin: 6px 10px; background:#fff; box-shadow: 0 8px 20px rgba(0,0,0,.05); }
 #userSideMenu.side-menu hr { margin: 14px 16px; opacity:.2; }
+
+/* ===== FIX: content/menu under header ===== */
+:root { --header-h: 64px; } /* если шапка выше/ниже — поменяй число */
+
+/* чтобы страницы не залезали под шапку */
+.container { padding-top: calc(var(--header-h) + 10px); }
+
+/* чтобы и меню начиналось ниже шапки */
+.side-menu { padding-top: calc(var(--header-h) + 12px); }
+
+/* на всякий случай, если overlay перекрывается */
+.menu-overlay { top: var(--header-h); }

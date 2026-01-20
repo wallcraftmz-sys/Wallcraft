@@ -27,7 +27,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from werkzeug.utils import secure_filename
 import uuid
-import secrets  # ✅ ADD
+import secrets
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -200,10 +200,10 @@ def load_user(user_id):
 # ======================
 # INIT DB (SAFE)
 # ======================
-from sqlalchemy import text, or_  # ✅ ADD or_
-from io import StringIO          # ✅ (для экспорта CSV)
-import csv                       # ✅ (для экспорта CSV)
-from flask import Response       # ✅ (для экспорта CSV)
+from sqlalchemy import text, or_
+from io import StringIO
+import csv
+from flask import Response
 
 with app.app_context():
     db.create_all()
@@ -261,7 +261,7 @@ def inject_lang():
     return dict(lang=session.get("lang", "ru"))
 
 
-# ✅ ADD: CSRF token into templates
+# CSRF token into templates
 @app.context_processor
 def inject_csrf_token():
     if "csrf_token" not in session:
@@ -280,7 +280,7 @@ def block_empty_checkout():
             return redirect(url_for("cart"))
 
 
-# ✅ ADD: CSRF protect all /admin POST
+# CSRF protect all /admin POST
 @app.before_request
 def csrf_protect_admin():
     if request.method == "POST" and request.path.startswith("/admin"):
@@ -650,7 +650,7 @@ def edit_product(id):
 @admin_required
 def admin_orders():
     show = request.args.get("show", "active")
-    q = request.args.get("q", "").strip()  # ✅ ADD (поиск)
+    q = request.args.get("q", "").strip()
     page = request.args.get("page", 1, type=int)
     PER_PAGE = 20
 
@@ -659,7 +659,6 @@ def admin_orders():
 
     query = Order.query
 
-    # ✅ ADD: архив учитывает и completed, и is_deleted
     if show == "archive":
         query = query.filter(
             or_(
@@ -673,7 +672,6 @@ def admin_orders():
             Order.status.in_(ACTIVE_STATUSES)
         )
 
-    # ✅ ADD: поиск
     if q:
         if q.isdigit():
             query = query.filter(Order.id == int(q))
@@ -731,7 +729,7 @@ def update_order_status(order_id):
 
     order.status = new_status
 
-    # ✅ ADD: если completed — автоматически уходит в архив
+    # ✅ Авто-архив при completed (чтобы сразу ушел в Архив)
     if new_status == "completed":
         order.is_deleted = True
 
@@ -757,6 +755,46 @@ def delete_order(order_id):
     db.session.commit()
     flash("Заказ перемещён в архив", "success")
     return redirect(url_for("admin_orders"))
+
+
+# ======================
+# ✅ ПУНКТ 24: RESTORE ORDER
+# ======================
+@app.route("/admin/orders/restore/<int:order_id>", methods=["POST"])
+@login_required
+@admin_required
+def restore_order(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # завершенный заказ логикой статусов не возвращаем назад
+    if order.status == "completed":
+        flash("Завершённый заказ нельзя вернуть из архива.", "error")
+        return redirect(url_for("admin_orders", show="archive"))
+
+    order.is_deleted = False
+    db.session.commit()
+    flash("Заказ восстановлен из архива", "success")
+    return redirect(url_for("admin_orders", show="archive"))
+
+
+# ======================
+# ✅ ПУНКТ 25: HARD DELETE ORDER (навсегда)
+# ======================
+@app.route("/admin/orders/hard_delete/<int:order_id>", methods=["POST"])
+@login_required
+@admin_required
+def hard_delete_order(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # сначала удаляем зависимые записи
+    OrderStatusHistory.query.filter_by(order_id=order.id).delete()
+    OrderComment.query.filter_by(order_id=order.id).delete()
+
+    db.session.delete(order)
+    db.session.commit()
+
+    flash("Заказ удалён навсегда", "success")
+    return redirect(url_for("admin_orders", show="archive"))
 
 
 @app.route("/admin/products/restore/<int:id>", methods=["POST"])
@@ -790,11 +828,43 @@ def admin_order_view(order_id):
     )
 
 
+# ======================
+# ✅ ПУНКТ 27: PRINT ORDER
+# ======================
+@app.route("/admin/orders/<int:order_id>/print")
+@admin_required
+def admin_order_print(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    history = (
+        OrderStatusHistory.query
+        .filter_by(order_id=order.id)
+        .order_by(OrderStatusHistory.created_at.desc())
+        .all()
+    )
+
+    comments = (
+        OrderComment.query
+        .filter_by(order_id=order.id)
+        .order_by(OrderComment.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin/order_print.html",
+        order=order,
+        history=history,
+        comments=comments,
+        ORDER_STATUSES=ORDER_STATUSES,
+        lang=session.get("lang", "ru")
+    )
+
+
 @app.route("/admin/orders/export")
 @admin_required
 def export_orders_csv():
     show = request.args.get("show", "active")
-    q = request.args.get("q", "").strip()  # ✅ ADD (экспорт с учетом поиска)
+    q = request.args.get("q", "").strip()
 
     ACTIVE_STATUSES = ["new", "in_progress", "shipped"]
     ARCHIVE_STATUSES = ["completed"]

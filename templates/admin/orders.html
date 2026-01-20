@@ -85,6 +85,7 @@
             <td>
                 <form method="post"
                       action="{{ url_for('update_order_status', order_id=order.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <select name="status" onchange="this.form.submit()">
                         {% for key, labels in ORDER_STATUSES.items() %}
                             {% if key == order.status
@@ -121,6 +122,7 @@
                 <form method="post"
                       action="{{ url_for('delete_order', order_id=order.id) }}"
                       onsubmit="return confirm('Переместить заказ в архив?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <button type="submit" class="danger-btn">🗑</button>
                 </form>
             </td>

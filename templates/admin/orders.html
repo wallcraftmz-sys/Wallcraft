@@ -117,14 +117,49 @@
 
             <td>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
 
-            <!-- АРХИВ -->
-            <td>
-                <form method="post"
-                      action="{{ url_for('delete_order', order_id=order.id) }}"
-                      onsubmit="return confirm('Переместить заказ в архив?');">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <button type="submit" class="danger-btn">🗑</button>
-                </form>
+            <!-- ДЕЙСТВИЯ -->
+            <td style="display:flex; gap:8px; align-items:center;">
+
+                <!-- 27: ПЕЧАТЬ -->
+                <a class="admin-link"
+                   href="{{ url_for('admin_order_print', order_id=order.id) }}"
+                   target="_blank"
+                   title="Печать">
+                    🖨
+                </a>
+
+                {% if show == 'archive' %}
+
+                    <!-- 24: RESTORE (только если не completed) -->
+                    {% if order.status != 'completed' %}
+                    <form method="post"
+                          action="{{ url_for('restore_order', order_id=order.id) }}"
+                          onsubmit="return confirm('Восстановить заказ из архива?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="admin-btn edit" title="Восстановить">♻️</button>
+                    </form>
+                    {% endif %}
+
+                    <!-- 25: HARD DELETE -->
+                    <form method="post"
+                          action="{{ url_for('hard_delete_order', order_id=order.id) }}"
+                          onsubmit="return confirm('Удалить заказ НАВСЕГДА? Это действие нельзя отменить.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="danger-btn" title="Удалить навсегда">🗑</button>
+                    </form>
+
+                {% else %}
+
+                    <!-- Архив (soft) -->
+                    <form method="post"
+                          action="{{ url_for('delete_order', order_id=order.id) }}"
+                          onsubmit="return confirm('Переместить заказ в архив?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="danger-btn" title="В архив">🗑</button>
+                    </form>
+
+                {% endif %}
+
             </td>
 
         </tr>

@@ -40,7 +40,7 @@
 </form>
 
 <!-- ЭКСПОРТ -->
-<a href="{{ url_for('export_orders_csv') }}"
+<a href="{{ url_for('export_orders_csv', show=show, q=request.args.get('q','')) }}"
    class="admin-link"
    style="margin-bottom:15px; display:inline-block;">
     ⬇ Экспорт заказов (CSV)
@@ -137,19 +137,19 @@
 {% if pagination and pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
-        <a href="{{ url_for('admin_orders', show=show, page=pagination.prev_num) }}">←</a>
+        <a href="{{ url_for('admin_orders', show=show, page=pagination.prev_num, q=request.args.get('q','')) }}">←</a>
     {% endif %}
 
     {% for p in range(1, pagination.pages + 1) %}
         {% if p == pagination.page %}
             <span class="current">{{ p }}</span>
         {% else %}
-            <a href="{{ url_for('admin_orders', show=show, page=p) }}">{{ p }}</a>
+            <a href="{{ url_for('admin_orders', show=show, page=p, q=request.args.get('q','')) }}">{{ p }}</a>
         {% endif %}
     {% endfor %}
 
     {% if pagination.has_next %}
-        <a href="{{ url_for('admin_orders', show=show, page=pagination.next_num) }}">→</a>
+        <a href="{{ url_for('admin_orders', show=show, page=pagination.next_num, q=request.args.get('q','')) }}">→</a>
     {% endif %}
 </div>
 {% endif %}

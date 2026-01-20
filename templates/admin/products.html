@@ -26,6 +26,7 @@
     <form method="post"
           enctype="multipart/form-data"
           class="product-card add-product-card">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
         <div class="product-image add-image">
             ➕
@@ -48,7 +49,7 @@
         </div>
     </form>
 
-        <!-- PRODUCTS -->
+    <!-- PRODUCTS -->
     {% for product in products %}
     <div class="product-card {% if not product.is_active %}inactive{% endif %}">
 
@@ -68,8 +69,7 @@
                 {% if product.is_active %}
                     <!-- SOFT DELETE -->
                     <form action="{{ url_for('delete_product', id=product.id) }}"
-                          method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                          method="post"
                           onsubmit="return confirm('Скрыть товар из каталога?');">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <button type="submit" class="admin-btn delete">❌</button>
@@ -78,6 +78,7 @@
                     <!-- RESTORE -->
                     <form action="{{ url_for('restore_product', id=product.id) }}"
                           method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <button type="submit" class="admin-btn edit">♻️</button>
                     </form>
                 {% endif %}
@@ -85,8 +86,11 @@
             </div>
         </div>
     </div>
-     {% endfor %}
-    <script>
+    {% endfor %}
+
+</div>
+
+<script>
 function previewImage(event) {
     const img = document.getElementById("preview");
     img.src = URL.createObjectURL(event.target.files[0]);
@@ -94,4 +98,4 @@ function previewImage(event) {
 }
 </script>
 
-{% endblock %}   
+{% endblock %}

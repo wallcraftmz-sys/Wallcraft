@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>Wallcraft</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+</head>
+<body>
+
+<header class="top-header">
+    <button class="menu-btn" onclick="toggleUserMenu()">☰</button>
+
+    <div class="logo-center">
+        <a href="{{ url_for('index') }}" class="logo-link">
+            <span class="logo-text">Wallcraft</span>
+        </a>
+    </div>
+
+    <div class="lang-switch">
+        <a href="?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
+        <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
+        <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
+    </div>
+</header>
+
+<div id="userMenuOverlay" class="menu-overlay" onclick="closeUserMenu()"></div>
+
+<div id="userSideMenu" class="side-menu">
+    <a href="{{ url_for('catalog') }}" onclick="closeUserMenu()">🛍️ Каталог</a>
+    <a href="{{ url_for('cart') }}" onclick="closeUserMenu()">🛒 Корзина</a>
+
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" onclick="closeUserMenu()">👤 Профиль</a>
+        {% if current_user.role == "admin" %}
+            <a href="{{ url_for('admin_panel') }}" onclick="closeUserMenu()">🧰 Админка</a>
+        {% endif %}
+        <hr>
+        <a href="{{ url_for('logout') }}" onclick="closeUserMenu()">🚪 Выйти</a>
+    {% else %}
+        <hr>
+        <a href="{{ url_for('login') }}" onclick="closeUserMenu()">🔑 Войти</a>
+        <a href="{{ url_for('register') }}" onclick="closeUserMenu()">📝 Регистрация</a>
+    {% endif %}
+</div>
+
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+
+<script>
+function toggleUserMenu() {
+    const menu = document.getElementById("userSideMenu");
+    const overlay = document.getElementById("userMenuOverlay");
+    if (!menu || !overlay) return;
+    menu.classList.toggle("open");
+    overlay.classList.toggle("show");
+}
+function closeUserMenu() {
+    const menu = document.getElementById("userSideMenu");
+    const overlay = document.getElementById("userMenuOverlay");
+    if (menu) menu.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
+}
+</script>
+
+</body>
+</html>

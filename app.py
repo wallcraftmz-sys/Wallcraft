@@ -675,6 +675,10 @@ def add_to_cart(product_id):
 
     return jsonify(success=True, cart_total_items=sum(cart.values()))
 
+@app.route("/api/cart_count")
+def cart_count():
+    cart = session.get("cart", {})
+    return jsonify(cart_total_items=sum(cart.values()))
 
 @app.route("/cart")
 def cart():

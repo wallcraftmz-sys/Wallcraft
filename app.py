@@ -509,7 +509,24 @@ def set_lang():
 def inject_lang():
     return dict(lang=session.get("lang", "ru"))
 
+# ======================
+# CORE-5: FORMAT HELPERS
+# ======================
+def fmt_money(x):
+    try:
+        return f"{float(x):.2f} €"
+    except Exception:
+        return f"{x} €"
 
+def fmt_dt(dt):
+    try:
+        return dt.strftime("%d.%m.%Y %H:%M")
+    except Exception:
+        return ""
+
+@app.context_processor
+def inject_formatters():
+    return dict(fmt_money=fmt_money, fmt_dt=fmt_dt)
 # CSRF token into templates
 @app.context_processor
 def inject_csrf_token():
@@ -1272,3 +1289,53 @@ def admin_steps():
     {% endblock %}
     """
     return render_template_string(tmpl, grouped=grouped)
+
+# ======================
+# CORE-7: ROBOTS + SITEMAP
+# ======================
+@app.route("/robots.txt")
+def robots_txt():
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin",
+        "Sitemap: " + request.url_root.rstrip("/") + "/sitemap.xml"
+    ]
+    return Response("\n".join(lines), mimetype="text/plain")
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    pages = [
+        url_for("index", _external=True),
+        url_for("catalog", _external=True),
+        url_for("cart", _external=True),
+        url_for("about", _external=True),
+        url_for("policy", _external=True),
+        url_for("shipping", _external=True),
+        url_for("faq", _external=True),
+    ]
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for p in pages:
+        xml.append("<url><loc>%s</loc></url>" % p)
+    xml.append("</urlset>")
+    return Response("\n".join(xml), mimetype="application/xml")
+
+# ======================
+# CORE-12/13/14/15: STATIC PAGES
+# ======================
+@app.route("/about")
+def about():
+    return render_template("pages/about.html", lang=session.get("lang", "ru"))
+
+@app.route("/policy")
+def policy():
+    return render_template("pages/policy.html", lang=session.get("lang", "ru"))
+
+@app.route("/shipping")
+def shipping():
+    return render_template("pages/shipping.html", lang=session.get("lang", "ru"))
+
+@app.route("/faq")
+def faq():
+    return render_template("pages/faq.html", lang=session.get("lang", "ru"))

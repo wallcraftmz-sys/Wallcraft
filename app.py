@@ -534,7 +534,10 @@ def inject_csrf_token():
         session["csrf_token"] = secrets.token_hex(16)
     return dict(csrf_token=session["csrf_token"])
 
-
+@app.context_processor
+def inject_cart_total():
+    cart = session.get("cart", {})
+    return dict(cart_total_items=sum(cart.values()))
 # ======================
 # SECURITY: BLOCK EMPTY CHECKOUT
 # ======================

@@ -1608,3 +1608,8 @@ select {
   background: #ff3b30;
   color: #fff;
 }
+
+.flash-wrap{ display:flex; flex-direction:column; gap:10px; margin:12px 0; }
+.flash{ padding:10px 12px; border-radius:10px; }
+.flash-success{ background:#e7f8ee; color:#116b35; }
+.flash-error{ background:#fdeaea; color:#8a1f1f; }

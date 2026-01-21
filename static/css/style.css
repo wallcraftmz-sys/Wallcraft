@@ -1613,3 +1613,6 @@ select {
 .flash{ padding:10px 12px; border-radius:10px; }
 .flash-success{ background:#e7f8ee; color:#116b35; }
 .flash-error{ background:#fdeaea; color:#8a1f1f; }
+
+.breadcrumbs{ margin:10px 0 14px; font-size:14px; opacity:0.8; }
+.breadcrumbs a{ text-decoration:none; }

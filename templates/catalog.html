@@ -8,7 +8,7 @@
 
         <div class="product-image">
             <img
-                src="{{ url_for('static', filename=product.image) }}"
+                src="{{ url_for('static', filename=product.image or 'images/no-image.png') }}"
                 alt="{{ product.name_ru if lang == 'ru' else product.name_lv }}"
                 loading="lazy"
             >

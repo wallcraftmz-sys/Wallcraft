@@ -66,5 +66,30 @@ function closeUserMenu() {
 }
 </script>
 
+<!-- FLOATING CART (User) -->
+<a href="{{ url_for('cart') }}" class="cart-fab" aria-label="Корзина">
+  <span class="cart-fab-ico">🛒</span>
+  <span id="cart-count" class="cart-badge">0</span>
+</a>
+
+<script>
+async function refreshCartCount() {
+  try {
+    const res = await fetch("/api/cart_count", { credentials: "same-origin" });
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) return;
+    const data = await res.json();
+    const badge = document.getElementById("cart-count");
+    if (badge && data && typeof data.cart_total_items === "number") {
+      badge.textContent = data.cart_total_items;
+      badge.style.display = data.cart_total_items > 0 ? "inline-flex" : "none";
+    }
+  } catch (e) {
+    console.error("refreshCartCount error:", e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", refreshCartCount);
+</script>    
 </body>
 </html>

@@ -7,6 +7,12 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+<meta property="og:title" content="Wallcraft">
+<meta property="og:description" content="Каталог и оформление заказов.">
+<meta property="og:image" content="{{ url_for('static', filename='images/IMG_0857.jpeg', _external=True) }}">
+<meta property="og:url" content="{{ request.url }}">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 

@@ -871,6 +871,11 @@ def admin_products():
             filename = secure_filename(file.filename)
             upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
+            # CORE-19: basic upload guard
+        if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
+            flash("Файл слишком большой", "error")
+            return redirect(url_for("admin_products"))
+
             os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
             file.save(upload_path)
 
@@ -1339,3 +1344,22 @@ def shipping():
 @app.route("/faq")
 def faq():
     return render_template("pages/faq.html", lang=session.get("lang", "ru"))
+
+# ======================
+# CORE-20: MENU/LINK CHECK (admin)
+# ======================
+@app.route("/admin/links_check")
+@admin_required
+def links_check():
+    links = {
+        "admin_orders": url_for("admin_orders"),
+        "admin_products": url_for("admin_products"),
+        "catalog": url_for("catalog"),
+        "cart": url_for("cart"),
+        "about": url_for("about"),
+        "policy": url_for("policy"),
+        "shipping": url_for("shipping"),
+        "faq": url_for("faq"),
+        "health": url_for("health"),
+    }
+    return jsonify(ok=True, links=links)

@@ -35,19 +35,34 @@
 </div>
 
 <script>
-function addToCart(productId) {
-    fetch(`/api/add_to_cart/${productId}`, {
-        method: "POST"
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            const badge = document.getElementById("cart-count");
-            if (badge) {
-                badge.textContent = data.cart_total_items;
+async function addToCart(productId) {
+    try {
+        const res = await fetch(`/api/add_to_cart/${productId}`, {
+            method: "POST",
+            credentials: "same-origin", // ВАЖНО: чтобы сессия работала (cookies)
+            headers: {
+                "Content-Type": "application/json"
             }
+        });
+
+        // если сервер вернул не JSON (ошибка/редирект) — не ломаем страницу
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            console.error("Expected JSON, got:", contentType);
+            return;
         }
-    });
+
+        const data = await res.json();
+
+        if (data && data.success) {
+            const badge = document.getElementById("cart-count");
+            if (badge) badge.textContent = data.cart_total_items;
+        } else {
+            console.error("Add to cart failed:", data);
+        }
+    } catch (e) {
+        console.error("Add to cart error:", e);
+    }
 }
 </script>
 

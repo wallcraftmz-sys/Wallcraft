@@ -739,6 +739,10 @@ def update_cart(product_id, action):
         cart_total_items=sum(cart.values())
     )
 
+@app.route("/api/cart_count")
+def cart_count():
+    cart = session.get("cart", {})
+    return jsonify(cart_total_items=sum(cart.values()))
 
 @app.route("/admin")
 @login_required

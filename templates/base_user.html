@@ -62,6 +62,17 @@
     </div>
   {% endif %}
 {% endwith %}
+    {% if breadcrumbs %}
+<nav class="breadcrumbs">
+  {% for b in breadcrumbs %}
+    {% if not loop.last %}
+      <a href="{{ b.url }}">{{ b.title }}</a> /
+    {% else %}
+      <span>{{ b.title }}</span>
+    {% endif %}
+  {% endfor %}
+</nav>
+{% endif %}
     {% block content %}{% endblock %}
 </main>
 

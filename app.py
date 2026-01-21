@@ -73,6 +73,37 @@ def send_telegram(message: str):
 # APP CONFIG
 # ======================
 app = Flask(__name__)
+# ======================
+# CORE-9: LOGGING
+# ======================
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger("wallcraft")
+# ======================
+# CORE-10: CONFIG dev/prod
+# ======================
+class BaseConfig:
+    SECRET_KEY = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "Lax"
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # CORE-19/SEC: 8MB upload limit
+
+class ProdConfig(BaseConfig):
+    DEBUG = False
+    TESTING = False
+
+class DevConfig(BaseConfig):
+    DEBUG = True
+    TESTING = False
+
+APP_ENV = os.getenv("APP_ENV", "prod").lower()
+app.config.from_object(DevConfig if APP_ENV == "dev" else ProdConfig)
 app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
@@ -517,6 +548,23 @@ def csrf_protect_admin():
 def index():
     return render_template("index.html", lang=session["lang"])
 
+# ======================
+# CORE-11: HEALTH CHECK
+# ======================
+@app.route("/health")
+def health():
+    return jsonify(status="ok", time=datetime.utcnow().isoformat() + "Z")
+
+# ======================
+# CORE-4: ERROR PAGES
+# ======================
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("errors/404.html", lang=session.get("lang", "ru")), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template("errors/500.html", lang=session.get("lang", "ru")), 500
 
 @app.route("/catalog")
 def catalog():

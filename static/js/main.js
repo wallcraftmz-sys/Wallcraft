@@ -100,3 +100,72 @@ function updateQty(productId, action) {
     })
     .catch(err => console.error("UPDATE CART ERROR:", err));
 }
+
+// STEP-17: UI TOAST NOTIFICATIONS
+(function () {
+  function ensureToastContainer() {
+    let c = document.querySelector(".toast-container");
+    if (!c) {
+      c = document.createElement("div");
+      c.className = "toast-container";
+      document.body.appendChild(c);
+    }
+    return c;
+  }
+
+  window.showToast = function (message, category, ms) {
+    const container = ensureToastContainer();
+    const toast = document.createElement("div");
+    const type = (category || "info").toLowerCase();
+
+    toast.className = "toast toast-" + (["success","error","info","warning"].includes(type) ? type : "info");
+
+    const text = document.createElement("div");
+    text.className = "toast-text";
+    text.textContent = message || "";
+
+    const btn = document.createElement("button");
+    btn.className = "toast-close";
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Закрыть");
+    btn.textContent = "×";
+
+    btn.addEventListener("click", () => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 200);
+    });
+
+    toast.appendChild(text);
+    toast.appendChild(btn);
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add("show"));
+
+    const ttl = typeof ms === "number" ? ms : 3500;
+    setTimeout(() => {
+      if (!toast.isConnected) return;
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 220);
+    }, ttl);
+  };
+
+  function flashToToasts() {
+    const flashes = document.querySelectorAll(".flash-wrap .flash");
+    if (!flashes || flashes.length === 0) return;
+
+    flashes.forEach((el) => {
+      const cls = el.className || "";
+      // ожидаем форматы: flash flash-success / flash flash-error
+      let category = "info";
+      if (cls.includes("flash-success")) category = "success";
+      else if (cls.includes("flash-error")) category = "error";
+      else if (cls.includes("flash-warning")) category = "warning";
+      else if (cls.includes("flash-info")) category = "info";
+
+      const msg = (el.textContent || "").trim();
+      if (msg) window.showToast(msg, category, 4000);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", flashToToasts);
+})();

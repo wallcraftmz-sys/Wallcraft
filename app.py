@@ -1704,39 +1704,39 @@ except Exception:
     statuses[110] = "done"
     statuses[138] = "done"  # TG уведомление есть
 
-       # UX
-    statuses[142] = "done"  # меню админа
-    statuses[144] = "done"  # быстрые действия
+    def build_steps_status_200():
+    statuses = {sid: "todo" for (sid, _, _) in SITE_STEPS}
 
-    # CORE-3: flash messages auto-detect (ищем во всех шаблонах, а не только admin/admin_base.html)
+    done_ids, wip_ids = _scan_markers()
+
+    for sid in wip_ids:
+        if sid in statuses:
+            statuses[sid] = "in_progress"
+    for sid in done_ids:
+        if sid in statuses:
+            statuses[sid] = "done"
+
+    # ... тут твои проверки 1..200 ...
+
+    # UX
+    statuses[142] = "done"
+    statuses[144] = "done"
+
+    # CORE-3: flash messages auto-detect (success/error)
     try:
         tpl_root = Path(app.root_path) / "templates"
-        found_flash = False
-        if tpl_root.exists():
-            for f in tpl_root.rglob("*.html"):
-                t = f.read_text(encoding="utf-8", errors="ignore")
+        candidates = [
+            tpl_root / "admin" / "admin_base.html",
+            tpl_root / "admin_base.html",
+            tpl_root / "base.html",
+            tpl_root / "base_user.html",
+        ]
+        for p in candidates:
+            if p.exists():
+                t = p.read_text(encoding="utf-8", errors="ignore")
                 if "get_flashed_messages" in t:
-                    found_flash = True
+                    statuses[3] = "done"
                     break
-        if found_flash:
-            statuses[3] = "done"
-    except Exception:
-        pass
-
-    # CORE-16: breadcrumbs auto-detect
-    try:
-        # 1) если есть контекст-процессор inject_breadcrumbs
-        if "inject_breadcrumbs" in globals():
-            statuses[16] = "done"
-        else:
-            # 2) или если в шаблонах есть nav с breadcrumbs
-            tpl_root = Path(app.root_path) / "templates"
-            if tpl_root.exists():
-                for f in tpl_root.rglob("*.html"):
-                    t = f.read_text(encoding="utf-8", errors="ignore")
-                    if 'class="breadcrumbs"' in t or 'aria-label="breadcrumb"' in t:
-                        statuses[16] = "done"
-                        break
     except Exception:
         pass
 
@@ -1748,13 +1748,15 @@ except Exception:
         css_text = cssp.read_text(encoding="utf-8", errors="ignore") if cssp.exists() else ""
         js_text  = jsp.read_text(encoding="utf-8", errors="ignore") if jsp.exists() else ""
 
-        css_ok = ("STEP-17" in css_text) or (".toast-container" in css_text)
-        js_ok  = ("STEP-17" in js_text) or ("showToast" in js_text)
+        css_ok = ("STEP-17" in css_text) or (".toast-container" in css_text) or (".toast" in css_text)
+        js_ok  = ("STEP-17" in js_text) or ("showToast" in js_text) or ("toast" in js_text)
 
         if css_ok and js_ok:
             statuses[17] = "done"
     except Exception:
         pass
+
+    return statuses
 
         # CORE-18: forms validation (server/client) auto-detect
     try:

@@ -1,0 +1,43 @@
+{% extends "admin/admin_base.html" %}
+{% block content %}
+
+<h1>200 шагов</h1>
+
+<div class="steps-stats">
+  <span class="step-chip done">Готово: {{ stats.done }}</span>
+  <span class="step-chip in_progress">В работе: {{ stats.in_progress }}</span>
+  <span class="step-chip todo">Не сделано: {{ stats.todo }}</span>
+  <span class="step-chip">Всего: {{ stats.total }}</span>
+</div>
+
+{% for cat, rows in grouped.items() %}
+  <h3 class="steps-cat">{{ cat }}</h3>
+
+  <div class="steps-list">
+    {% for sid, title, st in rows %}
+      <div class="step-row step-{{ st }}">
+        <div class="step-left">
+          <span class="step-id">#{{ sid }}</span>
+          <span class="step-title">{{ title }}</span>
+        </div>
+
+        <div class="step-right">
+          {% if st == "done" %}
+            <span class="step-badge done">DONE</span>
+          {% elif st == "in_progress" %}
+            <span class="step-badge in_progress">WIP</span>
+          {% else %}
+            <span class="step-badge todo">TODO</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}
+
+<p style="margin-top:18px; opacity:0.7;">
+  Автоматизация: если в коде/шаблонах есть <b>STEP-123</b> — шаг 123 станет зелёным.
+  Если есть <b>WIP-123</b> — станет жёлтым.
+</p>
+
+{% endblock %}

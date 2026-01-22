@@ -875,13 +875,27 @@ def checkout():
 @admin_required
 def admin_products():
     if request.method == "POST":
-        file = request.files.get("image")
+    file = request.files.get("image")
 
-        image_path = None
-        
-        if file and allowed_file(file.filename):
+    image_path = None
+
+    # если файл есть — проверяем
+    if file and file.filename:
+        # CORE-19/SEC: upload size guard (MAX_CONTENT_LENGTH)
+        if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
+            flash("Файл слишком большой", "error")
+
+        # проверяем расширение
+        if allowed_file(file.filename):
             filename = secure_filename(file.filename)
             upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+            file.save(upload_path)
+
+            image_path = f"uploads/{filename}"
+        else:
+            flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
 
             # CORE-19: basic upload guard
         if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):

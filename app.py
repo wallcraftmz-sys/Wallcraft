@@ -53,20 +53,25 @@ def send_telegram(message: str):
     chat_id = os.getenv("TG_CHAT_ID")
 
     if not token or not chat_id:
-        print("❌ Telegram ENV vars not set")
-        return
+        print("❌ Telegram ENV vars not set:", {
+            "TG_BOT_TOKEN": bool(token),
+            "TG_CHAT_ID": bool(chat_id)
+        })
+        return False
 
     try:
-        requests.post(
+        r = requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
-            json={
-                "chat_id": chat_id,
-                "text": message
-            },
+            json={"chat_id": chat_id, "text": message},
             timeout=10
         )
+
+        print("✅ TG response:", r.status_code, r.text)
+
+        return r.ok
     except Exception as e:
-        print("❌ TG ERROR:", e)
+        print("❌ TG ERROR:", repr(e))
+        return False
 
 
 # ======================

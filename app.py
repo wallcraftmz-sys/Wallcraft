@@ -1693,24 +1693,58 @@ def build_steps_status_200():
     statuses[110] = "done"
     statuses[138] = "done"  # TG уведомление есть
 
-    # UX
+       # UX
     statuses[142] = "done"  # меню админа
     statuses[144] = "done"  # быстрые действия
 
-        # CORE-17: UI notifications (toast) auto-detect
+    # CORE-3: flash messages auto-detect (ищем во всех шаблонах, а не только admin/admin_base.html)
     try:
-        from pathlib import Path
+        tpl_root = Path(app.root_path) / "templates"
+        found_flash = False
+        if tpl_root.exists():
+            for f in tpl_root.rglob("*.html"):
+                t = f.read_text(encoding="utf-8", errors="ignore")
+                if "get_flashed_messages" in t:
+                    found_flash = True
+                    break
+        if found_flash:
+            statuses[3] = "done"
+    except Exception:
+        pass
+
+    # CORE-16: breadcrumbs auto-detect
+    try:
+        # 1) если есть контекст-процессор inject_breadcrumbs
+        if "inject_breadcrumbs" in globals():
+            statuses[16] = "done"
+        else:
+            # 2) или если в шаблонах есть nav с breadcrumbs
+            tpl_root = Path(app.root_path) / "templates"
+            if tpl_root.exists():
+                for f in tpl_root.rglob("*.html"):
+                    t = f.read_text(encoding="utf-8", errors="ignore")
+                    if 'class="breadcrumbs"' in t or 'aria-label="breadcrumb"' in t:
+                        statuses[16] = "done"
+                        break
+    except Exception:
+        pass
+
+    # CORE-17: UI notifications (toast) auto-detect
+    try:
         cssp = Path(app.root_path) / "static" / "css" / "style.css"
         jsp  = Path(app.root_path) / "static" / "js" / "main.js"
 
-        css_ok = cssp.exists() and ("STEP-17" in cssp.read_text(encoding="utf-8", errors="ignore") or ".toast-container" in cssp.read_text(encoding="utf-8", errors="ignore"))
-        js_ok  = jsp.exists() and ("STEP-17" in jsp.read_text(encoding="utf-8", errors="ignore") or "showToast" in jsp.read_text(encoding="utf-8", errors="ignore"))
+        css_text = cssp.read_text(encoding="utf-8", errors="ignore") if cssp.exists() else ""
+        js_text  = jsp.read_text(encoding="utf-8", errors="ignore") if jsp.exists() else ""
+
+        css_ok = ("STEP-17" in css_text) or (".toast-container" in css_text)
+        js_ok  = ("STEP-17" in js_text) or ("showToast" in js_text)
 
         if css_ok and js_ok:
             statuses[17] = "done"
     except Exception:
         pass
-        
+
     return statuses
 
 

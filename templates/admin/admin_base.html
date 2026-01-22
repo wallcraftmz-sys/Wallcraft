@@ -99,6 +99,18 @@
     </div>
   {% endif %}
 {% endwith %}
+  {% if breadcrumbs and breadcrumbs|length > 1 %}
+<nav class="breadcrumbs" aria-label="breadcrumb">
+  {% for c in breadcrumbs %}
+    {% if loop.last %}
+      <span class="bc-current">{{ c.title }}</span>
+    {% else %}
+      <a class="bc-link" href="{{ c.url }}">{{ c.title }}</a>
+      <span class="bc-sep">/</span>
+    {% endif %}
+  {% endfor %}
+</nav>
+{% endif %}  
     {% block content %}{% endblock %}
 </main>
 

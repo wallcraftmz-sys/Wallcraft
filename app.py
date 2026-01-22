@@ -1697,6 +1697,20 @@ def build_steps_status_200():
     statuses[142] = "done"  # меню админа
     statuses[144] = "done"  # быстрые действия
 
+        # CORE-17: UI notifications (toast) auto-detect
+    try:
+        from pathlib import Path
+        cssp = Path(app.root_path) / "static" / "css" / "style.css"
+        jsp  = Path(app.root_path) / "static" / "js" / "main.js"
+
+        css_ok = cssp.exists() and ("STEP-17" in cssp.read_text(encoding="utf-8", errors="ignore") or ".toast-container" in cssp.read_text(encoding="utf-8", errors="ignore"))
+        js_ok  = jsp.exists() and ("STEP-17" in jsp.read_text(encoding="utf-8", errors="ignore") or "showToast" in jsp.read_text(encoding="utf-8", errors="ignore"))
+
+        if css_ok and js_ok:
+            statuses[17] = "done"
+    except Exception:
+        pass
+        
     return statuses
 
 

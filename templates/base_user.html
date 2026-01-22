@@ -61,18 +61,7 @@
       {% endfor %}
     </div>
   {% endif %}
-{% endwith %}
-    {% if breadcrumbs %}
-<nav class="breadcrumbs">
-  {% for b in breadcrumbs %}
-    {% if not loop.last %}
-      <a href="{{ b.url }}">{{ b.title }}</a> /
-    {% else %}
-      <span>{{ b.title }}</span>
-    {% endif %}
-  {% endfor %}
-</nav>
-{% endif %}
+{% endwith %}   
     {% if breadcrumbs and breadcrumbs|length > 1 %}
 <nav class="breadcrumbs" aria-label="breadcrumb">
   {% for c in breadcrumbs %}

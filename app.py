@@ -1610,6 +1610,25 @@ def build_steps_status_200():
         statuses[14] = "done"
     if _has_route("/faq") and _template_exists("pages/faq.html"):
         statuses[15] = "done"
+        # CORE-16: BREADCRUMBS component (auto-detect)
+    try:
+        # 1) функция breadcrumbs должна существовать
+        has_inject = "inject_breadcrumbs" in globals()
+
+        # 2) и разметка breadcrumbs должна быть хотя бы в одном базовом шаблоне
+        tpl_user = Path(app.root_path) / "templates" / "base_user.html"
+        tpl_admin = Path(app.root_path) / "templates" / "admin" / "admin_base.html"
+
+        def _has_breadcrumbs_markup(p: Path) -> bool:
+            if not p.exists():
+                return False
+            t = p.read_text(encoding="utf-8", errors="ignore")
+            return ('aria-label="breadcrumb"' in t) or ('class="breadcrumbs"' in t)
+
+        if has_inject and (_has_breadcrumbs_markup(tpl_user) or _has_breadcrumbs_markup(tpl_admin)):
+            statuses[16] = "done"
+    except Exception:
+        pass
 
     # SECURITY
     # CSRF: есть inject_csrf_token + csrf_protect_admin (частично, но считаем базу сделанной)

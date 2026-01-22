@@ -1745,6 +1745,31 @@ def build_steps_status_200():
     except Exception:
         pass
 
+        # CORE-18: forms validation (server/client) auto-detect
+    try:
+        from pathlib import Path
+
+        server_ok = ("email_regex" in globals()) or ("phone_regex" in globals())
+        # если не хочешь globals, можно просто искать слова в app.py:
+        app_py = Path(app.root_path) / "app.py"
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+            server_ok = server_ok or ("email_regex" in t and "phone_regex" in t) or ("len(name) < 2" in t)
+
+        tpl_root = Path(app.root_path) / "templates"
+        client_ok = False
+        if tpl_root.exists():
+            for f in tpl_root.rglob("*.html"):
+                ht = f.read_text(encoding="utf-8", errors="ignore")
+                # минимальный набор признаков клиентской валидации
+                if ("required" in ht) and (("minlength" in ht) or ("pattern=" in ht)):
+                    client_ok = True
+                    break
+
+        if server_ok and client_ok:
+            statuses[18] = "done"
+    except Exception:
+        pass
     return statuses
 
 

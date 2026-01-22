@@ -1755,8 +1755,7 @@ except Exception:
             statuses[17] = "done"
     except Exception:
         pass
-
-    return statuses
+        return statuses
 
         # CORE-18: forms validation (server/client) auto-detect
     try:

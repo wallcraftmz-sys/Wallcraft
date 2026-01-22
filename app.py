@@ -1548,14 +1548,25 @@ def build_steps_status_200():
         statuses[2] = "done"
 
     # flash messages: если в admin_base есть get_flashed_messages
-    try:
-        base_path = Path(app.root_path) / "templates" / "admin" / "admin_base.html"
-        if base_path.exists():
-            t = base_path.read_text(encoding="utf-8", errors="ignore")
+    # CORE-3: flash messages auto-detect (success/error)
+try:
+    tpl_root = Path(app.root_path) / "templates"
+
+    candidates = [
+        tpl_root / "admin" / "admin_base.html",
+        tpl_root / "admin_base.html",
+        tpl_root / "base.html",
+        tpl_root / "base_user.html",
+    ]
+
+    for p in candidates:
+        if p.exists():
+            t = p.read_text(encoding="utf-8", errors="ignore")
             if "get_flashed_messages" in t:
                 statuses[3] = "done"
-    except Exception:
-        pass
+                break
+except Exception:
+    pass
 
     if _template_exists("errors/404.html") and _template_exists("errors/500.html"):
         statuses[4] = "done"

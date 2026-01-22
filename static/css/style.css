@@ -1648,3 +1648,30 @@ select {
 .step-badge.done, .step-chip.done{ background:#d9fbe5; color:#0a7a2f; }
 .step-badge.in_progress, .step-chip.in_progress{ background:#fff3cd; color:#8a6d00; }
 .step-badge.todo, .step-chip.todo{ background:#ffd6d6; color:#b10000; }
+
+.breadcrumbs{
+  margin: 10px 0 14px;
+  font-size: 14px;
+  opacity: .85;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.bc-link{
+  text-decoration: none;
+}
+
+.bc-link:hover{
+  text-decoration: underline;
+}
+
+.bc-sep{
+  opacity: .6;
+}
+
+.bc-current{
+  font-weight: 600;
+  opacity: .95;
+}

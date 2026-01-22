@@ -870,7 +870,7 @@ def checkout():
 
 
 # ===== ADMIN PRODUCTS =====
-.route("/admin/products", methods=["GET", "POST"])
+@app.route("/admin/products", methods=["GET", "POST"])
 @login_required
 @admin_required
 def admin_products():

@@ -543,6 +543,61 @@ def inject_csrf_token():
 def inject_cart_total():
     cart = session.get("cart", {})
     return dict(cart_total_items=sum(cart.values()))
+
+@app.context_processor
+def inject_breadcrumbs():
+    # словарь: endpoint -> (текст, "родитель endpoint" или None)
+    # ВАЖНО: тексты — по языкам
+    MAP = {
+        "index": ({"ru": "Главная", "lv": "Sākums", "en": "Home"}, None),
+        "catalog": ({"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"}, "index"),
+        "cart": ({"ru": "Корзина", "lv": "Grozs", "en": "Cart"}, "catalog"),
+        "checkout": ({"ru": "Оформление", "lv": "Noformēšana", "en": "Checkout"}, "cart"),
+        "profile": ({"ru": "Профиль", "lv": "Profils", "en": "Profile"}, "index"),
+
+        # статические страницы
+        "about": ({"ru": "О нас", "lv": "Par mums", "en": "About"}, "index"),
+        "policy": ({"ru": "Политика", "lv": "Politika", "en": "Policy"}, "index"),
+        "shipping": ({"ru": "Доставка/Оплата", "lv": "Piegāde/Apmaksa", "en": "Shipping/Payment"}, "index"),
+        "faq": ({"ru": "FAQ", "lv": "BUJ", "en": "FAQ"}, "index"),
+
+        # админка (по желанию)
+        "admin_panel": ({"ru": "Админка", "lv": "Admin", "en": "Admin"}, "index"),
+        "admin_orders": ({"ru": "Заказы", "lv": "Pasūtījumi", "en": "Orders"}, "admin_panel"),
+        "admin_products": ({"ru": "Товары", "lv": "Preces", "en": "Products"}, "admin_panel"),
+        "admin_steps": ({"ru": "200 шагов", "lv": "200 soļi", "en": "200 steps"}, "admin_panel"),
+    }
+
+    def build_breadcrumbs():
+        lang = session.get("lang", "ru")
+        endpoint = request.endpoint
+
+        if not endpoint or endpoint not in MAP:
+            # если страница не описана — не показываем крошки
+            return []
+
+        crumbs = []
+        seen = set()
+
+        cur = endpoint
+        while cur and cur in MAP and cur not in seen:
+            seen.add(cur)
+
+            title_dict, parent = MAP[cur]
+            title = title_dict.get(lang, title_dict.get("ru", cur))
+
+            try:
+                url = url_for(cur, lang=lang)
+            except Exception:
+                url = "#"
+
+            crumbs.append({"title": title, "url": url})
+            cur = parent
+
+        crumbs.reverse()
+        return crumbs
+
+    return dict(breadcrumbs=build_breadcrumbs())
 # ======================
 # SECURITY: BLOCK EMPTY CHECKOUT
 # ======================

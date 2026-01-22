@@ -878,6 +878,7 @@ def admin_products():
         file = request.files.get("image")
 
         image_path = None
+        
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)

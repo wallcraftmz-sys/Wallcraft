@@ -1243,9 +1243,9 @@ def add_order_comment(order_id):
 
     return redirect(url_for("admin_order_view", order_id=order.id))
 
-@app.route("/admin/steps", methods=["GET", "POST"])
+@app.route("/admin/steps_manual", methods=["GET", "POST"])
 @admin_required
-def admin_steps():
+def admin_steps_manual():
     if request.method == "POST":
         step_id = request.form.get("step_id", type=int)
         done = request.form.get("done") == "1"

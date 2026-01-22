@@ -1705,7 +1705,7 @@ except Exception:
     statuses[138] = "done"  # TG уведомление есть
 
     def build_steps_status_200():
-    statuses = {sid: "todo" for (sid, _, _) in SITE_STEPS}
+        statuses = {sid: "todo" for (sid, _, _) in SITE_STEPS}
 
     done_ids, wip_ids = _scan_markers()
 

@@ -1621,3 +1621,30 @@ select {
 .admin-link.primary{ font-weight:700; }
 .danger-btn{ border:none; padding:8px 10px; border-radius:10px; cursor:pointer; }
 .admin-btn{ border:none; padding:8px 10px; border-radius:10px; cursor:pointer; }
+
+/* ===== Steps (200) ===== */
+.steps-stats { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 18px; }
+
+.steps-cat { margin-top:18px; }
+
+.steps-list { display:flex; flex-direction:column; gap:10px; }
+
+.step-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 14px; border-radius:14px;
+  background: rgba(0,0,0,0.03);
+  border:1px solid rgba(0,0,0,0.05);
+}
+
+.step-left{ display:flex; gap:10px; align-items:center; }
+.step-id{ font-weight:800; opacity:0.7; }
+.step-title{ font-weight:600; }
+
+.step-badge, .step-chip{
+  padding:6px 10px; border-radius:999px;
+  font-weight:800; font-size:13px;
+}
+
+.step-badge.done, .step-chip.done{ background:#d9fbe5; color:#0a7a2f; }
+.step-badge.in_progress, .step-chip.in_progress{ background:#fff3cd; color:#8a6d00; }
+.step-badge.todo, .step-chip.todo{ background:#ffd6d6; color:#b10000; }

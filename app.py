@@ -1801,11 +1801,12 @@ def build_steps_status_200():
         if server_ok and client_ok:
             statuses[18] = "done"
 
-        if "_rl_allow" in globals():
-            statuses[22] = "done"
     except Exception:
         pass
 
+        # SECURITY-22: rate limit present
+        if "_rl_allow" in globals():
+            statuses[22] = "done"
     # CORE-19: сжатие/оптимизация изображений (авто-детект)
     try:
         app_py = Path(app.root_path) / "app.py"

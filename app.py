@@ -1054,8 +1054,8 @@ def checkout():
         items=items,
         total=total,
         checkout_token=session.get("checkout_token")
-
-
+    )
+    
 # ===== ADMIN PRODUCTS =====
 @app.route("/admin/products", methods=["GET", "POST"])
 @login_required

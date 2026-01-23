@@ -83,9 +83,8 @@ def send_telegram(message: str):
 # ======================
 app = Flask(__name__)
 # =========================
-# #26B: Anti brute-force by IP
+# #26B: Anti brute-force by IP (login)
 # =========================
-
 MAX_FAILS = 8          # сколько неверных попыток допускаем
 WINDOW_SEC = 10 * 60   # окно 10 минут
 BAN_SEC = 30 * 60      # бан 30 минут
@@ -96,8 +95,8 @@ _banned_until = {}  # ip -> unix time
 
 def _client_ip():
     """
-    Railway/Render обычно прокидывают реальный IP через X-Forwarded-For.
-    Берем первый IP из списка.
+    Railway обычно прокидывает реальный IP через X-Forwarded-For.
+    Берём первый IP.
     """
     xff = request.headers.get("X-Forwarded-For", "")
     if xff:
@@ -712,9 +711,13 @@ def catalog():
 def login():
     ip = _client_ip()
 
-    # 1) Если IP забанен — режем сразу
+    # Если IP забанен — показываем сообщение
     if is_ip_banned(ip):
-        abort(429)  # Too Many Requests
+        return render_template(
+            "login.html",
+            error="Слишком много попыток входа. Подождите 30 минут и попробуйте снова.",
+            lang=session.get("lang", "ru")
+        ), 429
 
     if request.method == "POST":
         username = request.form.get("username")
@@ -723,7 +726,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            # 2) Успешный вход — сбрасываем счетчик
+            # Успешный вход — сбрасываем счетчик
             reset_attempts(ip)
 
             login_user(user, remember=True)
@@ -733,7 +736,7 @@ def login():
             else:
                 return redirect(url_for("profile"))
 
-        # 3) Любая неверная попытка (и когда user=None тоже) — считаем
+        # Неверно — записываем попытку
         register_failed_attempt(ip)
 
         return render_template(

@@ -8,3 +8,4 @@ Flask-Login
 Flask-Session
 werkzeug
 psycopg2-binary
+Pillow==10.4.0

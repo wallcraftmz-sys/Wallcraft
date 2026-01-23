@@ -29,6 +29,7 @@ from werkzeug.utils import secure_filename
 import uuid
 import secrets
 from flask import render_template_string
+from PIL import Image
 # ======================
 # ADMIN ACCESS CONTROL
 # ======================

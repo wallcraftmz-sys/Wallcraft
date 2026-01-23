@@ -1454,7 +1454,8 @@ from pathlib import Path
 import re
 
 _STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
-_STEP_WIP_RE = re.compile(r"\bWIP-(\d{1,3})\b")
+_STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")
+
 
 def _project_files_for_scan():
     root = Path(app.root_path)
@@ -1475,11 +1476,12 @@ def _project_files_for_scan():
 
     return files
 
+
 def _scan_markers():
     """
     Ищет маркеры:
-      STEP-123  -> done
-      WIP-123   -> in_progress
+      STEP-123 -> done
+      WIP-123  -> in_progress
     в app.py / templates / static.
     """
     done_ids = set()
@@ -1492,14 +1494,19 @@ def _scan_markers():
             continue
 
         for m in _STEP_DONE_RE.findall(text):
-            try: done_ids.add(int(m))
-            except Exception: pass
+            try:
+                done_ids.add(int(m))
+            except Exception:
+                pass
 
         for m in _STEP_WIP_RE.findall(text):
-            try: wip_ids.add(int(m))
-            except Exception: pass
+            try:
+                wip_ids.add(int(m))
+            except Exception:
+                pass
 
     return done_ids, wip_ids
+
 
 def _has_route(path: str) -> bool:
     try:
@@ -1507,13 +1514,16 @@ def _has_route(path: str) -> bool:
     except Exception:
         return False
 
+
 def _template_exists(rel_path: str) -> bool:
     p = Path(app.root_path) / "templates" / rel_path
     return p.exists()
 
+
 def _static_exists(rel_path: str) -> bool:
     p = Path(app.root_path) / "static" / rel_path
     return p.exists()
+
 
 def _has_model_field(model, field_name: str) -> bool:
     try:
@@ -1521,16 +1531,16 @@ def _has_model_field(model, field_name: str) -> bool:
     except Exception:
         return False
 
+
 def build_steps_status_200():
     """
     Возвращает dict[step_id] -> "done" | "in_progress" | "todo"
-    done / in_progress определяется автоматически.
     """
     statuses = {sid: "todo" for (sid, _, _) in SITE_STEPS}
 
+    # 1) Маркеры STEP-/WIP-
     done_ids, wip_ids = _scan_markers()
 
-    # 1) Маркеры в коде/шаблонах
     for sid in wip_ids:
         if sid in statuses:
             statuses[sid] = "in_progress"
@@ -1538,191 +1548,21 @@ def build_steps_status_200():
         if sid in statuses:
             statuses[sid] = "done"
 
-    # 2) Реальные авто-проверки (там, где это можно понять однозначно)
+    # 2) Авто-проверки
 
-    # CORE
-    if _template_exists("admin/admin_base.html") or _template_exists("base.html") or _template_exists("base_user.html"):
-        statuses[1] = "done"  # структура шаблонов
+    # CORE-1: структура шаблонов
+    if (
+        _template_exists("admin/admin_base.html")
+        or _template_exists("base.html")
+        or _template_exists("base_user.html")
+    ):
+        statuses[1] = "done"
 
+    # CORE-2: общий CSS
     if _static_exists("css/style.css"):
         statuses[2] = "done"
 
-    # flash messages: если в admin_base есть get_flashed_messages
-    # CORE-3: flash messages auto-detect (success/error)
-try:
-    tpl_root = Path(app.root_path) / "templates"
-
-    candidates = [
-        tpl_root / "admin" / "admin_base.html",
-        tpl_root / "admin_base.html",
-        tpl_root / "base.html",
-        tpl_root / "base_user.html",
-    ]
-
-    for p in candidates:
-        if p.exists():
-            t = p.read_text(encoding="utf-8", errors="ignore")
-            if "get_flashed_messages" in t:
-                statuses[3] = "done"
-                break
-except Exception:
-    pass
-
-    if _template_exists("errors/404.html") and _template_exists("errors/500.html"):
-        statuses[4] = "done"
-
-    # форматтеры
-    if "fmt_money" in globals() and "fmt_dt" in globals():
-        statuses[5] = "done"
-
-    # языки
-    statuses[6] = "done"  # set_lang у тебя есть
-
-    if _has_route("/robots.txt") and _has_route("/sitemap.xml"):
-        statuses[7] = "done"
-
-    # favicon + OG: favicon файл + наличие og:title хотя бы в одном шаблоне
-    if _static_exists("images/favicon.ico"):
-        statuses[8] = "done"
-        try:
-            tpl_root = Path(app.root_path) / "templates"
-            if tpl_root.exists():
-                any_og = False
-                for f in tpl_root.rglob("*.html"):
-                    tt = f.read_text(encoding="utf-8", errors="ignore")
-                    if "og:title" in tt:
-                        any_og = True
-                        break
-                if any_og:
-                    statuses[8] = "done"
-        except Exception:
-            pass
-
-    # логирование
-    try:
-        import logging
-        if logging.getLogger().handlers:
-            statuses[9] = "done"
-    except Exception:
-        pass
-
-    # dev/prod
-    if "APP_ENV" in globals():
-        statuses[10] = "done"
-
-    if _has_route("/health"):
-        statuses[11] = "done"
-
-    if _has_route("/about") and _template_exists("pages/about.html"):
-        statuses[12] = "done"
-    if _has_route("/policy") and _template_exists("pages/policy.html"):
-        statuses[13] = "done"
-    if _has_route("/shipping") and _template_exists("pages/shipping.html"):
-        statuses[14] = "done"
-    if _has_route("/faq") and _template_exists("pages/faq.html"):
-        statuses[15] = "done"
-        # CORE-16: BREADCRUMBS component (auto-detect)
-    try:
-        # 1) функция breadcrumbs должна существовать
-        has_inject = "inject_breadcrumbs" in globals()
-
-        # 2) и разметка breadcrumbs должна быть хотя бы в одном базовом шаблоне
-        tpl_user = Path(app.root_path) / "templates" / "base_user.html"
-        tpl_admin = Path(app.root_path) / "templates" / "admin" / "admin_base.html"
-
-        def _has_breadcrumbs_markup(p: Path) -> bool:
-            if not p.exists():
-                return False
-            t = p.read_text(encoding="utf-8", errors="ignore")
-            return ('aria-label="breadcrumb"' in t) or ('class="breadcrumbs"' in t)
-
-        if has_inject and (_has_breadcrumbs_markup(tpl_user) or _has_breadcrumbs_markup(tpl_admin)):
-            statuses[16] = "done"
-    except Exception:
-        pass
-
-    # SECURITY
-    # CSRF: есть inject_csrf_token + csrf_protect_admin (частично, но считаем базу сделанной)
-    if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
-        statuses[21] = "done"
-
-    # checkout token anti-double
-    if "checkout" in globals():
-        statuses[23] = "done"
-
-    # password hashing
-    statuses[24] = "done"
-
-    # cookies secure policy (база)
-    statuses[27] = "done"
-
-    # upload limit
-    if app.config.get("MAX_CONTENT_LENGTH"):
-        statuses[29] = "done"
-
-    # allowed extensions
-    if "ALLOWED_EXTENSIONS" in globals():
-        statuses[30] = "done"
-
-    # roles/admin
-    statuses[33] = "done"
-    statuses[34] = "done"
-
-    # CATALOG/PRODUCTS
-    if _has_model_field(Product, "is_active"):
-        statuses[56] = "done"
-
-    # Lazy-load: если в catalog.html есть loading="lazy"
-    try:
-        cpath = Path(app.root_path) / "templates" / "catalog.html"
-        if cpath.exists():
-            t = cpath.read_text(encoding="utf-8", errors="ignore")
-            if 'loading="lazy"' in t:
-                statuses[64] = "done"
-    except Exception:
-        pass
-
-    # скрытые товары проверяются в catalog()/cart()
-    statuses[68] = "done"
-
-    # CART/CHECKOUT
-    statuses[72] = "done"  # пересчёт суммы есть
-    statuses[85] = "done"  # checkout token есть
-    statuses[86] = "done"  # антиспам (минутный лимит)
-    statuses[87] = "done"  # валидация email/phone
-
-    # ORDERS/ADMIN (то, что у тебя уже реально есть)
-    statuses[101] = "done"
-    statuses[102] = "done"
-    statuses[103] = "done"
-    statuses[104] = "done"
-    statuses[105] = "done"
-    statuses[106] = "done"
-    statuses[107] = "done"
-    statuses[108] = "done"
-    statuses[109] = "done"
-    statuses[110] = "done"
-    statuses[138] = "done"  # TG уведомление есть
-
-    def build_steps_status_200():
-        statuses = {sid: "todo" for (sid, _, _) in SITE_STEPS}
-
-    done_ids, wip_ids = _scan_markers()
-
-    for sid in wip_ids:
-        if sid in statuses:
-            statuses[sid] = "in_progress"
-    for sid in done_ids:
-        if sid in statuses:
-            statuses[sid] = "done"
-
-    # ... тут твои проверки 1..200 ...
-
-    # UX
-    statuses[142] = "done"
-    statuses[144] = "done"
-
-    # CORE-3: flash messages auto-detect (success/error)
+    # CORE-3: flash messages (ищем get_flashed_messages в базовых шаблонах)
     try:
         tpl_root = Path(app.root_path) / "templates"
         candidates = [
@@ -1740,40 +1580,119 @@ except Exception:
     except Exception:
         pass
 
-    # CORE-17: UI notifications (toast) auto-detect
+    # CORE-4: error pages
+    if _template_exists("errors/404.html") and _template_exists("errors/500.html"):
+        statuses[4] = "done"
+
+    # CORE-5: форматтеры
+    if "fmt_money" in globals() and "fmt_dt" in globals():
+        statuses[5] = "done"
+
+    # CORE-6: языки (у тебя есть set_lang)
+    statuses[6] = "done"
+
+    # CORE-7: robots + sitemap
+    if _has_route("/robots.txt") and _has_route("/sitemap.xml"):
+        statuses[7] = "done"
+
+    # CORE-8: favicon + OG
+    if _static_exists("images/favicon.ico"):
+        # базово считаем выполненным, если favicon есть
+        statuses[8] = "done"
+        # доп. проверка og:title хотя бы в одном шаблоне
+        try:
+            tpl_root = Path(app.root_path) / "templates"
+            any_og = False
+            if tpl_root.exists():
+                for f in tpl_root.rglob("*.html"):
+                    tt = f.read_text(encoding="utf-8", errors="ignore")
+                    if "og:title" in tt:
+                        any_og = True
+                        break
+            if any_og:
+                statuses[8] = "done"
+        except Exception:
+            pass
+
+    # CORE-9: логирование
+    try:
+        import logging
+        if logging.getLogger().handlers:
+            statuses[9] = "done"
+    except Exception:
+        pass
+
+    # CORE-10: dev/prod
+    if "APP_ENV" in globals():
+        statuses[10] = "done"
+
+    # CORE-11: health
+    if _has_route("/health"):
+        statuses[11] = "done"
+
+    # CORE-12..15: статические страницы
+    if _has_route("/about") and _template_exists("pages/about.html"):
+        statuses[12] = "done"
+    if _has_route("/policy") and _template_exists("pages/policy.html"):
+        statuses[13] = "done"
+    if _has_route("/shipping") and _template_exists("pages/shipping.html"):
+        statuses[14] = "done"
+    if _has_route("/faq") and _template_exists("pages/faq.html"):
+        statuses[15] = "done"
+
+    # CORE-16: breadcrumbs (важно: не внутрь if faq!)
+    try:
+        has_inject = "inject_breadcrumbs" in globals()
+
+        tpl_user = Path(app.root_path) / "templates" / "base_user.html"
+        tpl_admin = Path(app.root_path) / "templates" / "admin" / "admin_base.html"
+
+        def _has_breadcrumbs_markup(p: Path) -> bool:
+            if not p.exists():
+                return False
+            t = p.read_text(encoding="utf-8", errors="ignore")
+            return ('aria-label="breadcrumb"' in t) or ('class="breadcrumbs"' in t)
+
+        if has_inject and (_has_breadcrumbs_markup(tpl_user) or _has_breadcrumbs_markup(tpl_admin)):
+            statuses[16] = "done"
+    except Exception:
+        pass
+
+    # CORE-17: UI notifications/toast (ищем признаки в css/js)
     try:
         cssp = Path(app.root_path) / "static" / "css" / "style.css"
-        jsp  = Path(app.root_path) / "static" / "js" / "main.js"
+        jsp = Path(app.root_path) / "static" / "js" / "main.js"
 
         css_text = cssp.read_text(encoding="utf-8", errors="ignore") if cssp.exists() else ""
-        js_text  = jsp.read_text(encoding="utf-8", errors="ignore") if jsp.exists() else ""
+        js_text = jsp.read_text(encoding="utf-8", errors="ignore") if jsp.exists() else ""
 
-        css_ok = ("STEP-17" in css_text) or (".toast-container" in css_text) or (".toast" in css_text)
-        js_ok  = ("STEP-17" in js_text) or ("showToast" in js_text) or ("toast" in js_text)
+        css_ok = (".toast" in css_text) or (".toast-container" in css_text) or ("STEP-17" in css_text)
+        js_ok = ("showToast" in js_text) or ("toast" in js_text) or ("STEP-17" in js_text)
 
         if css_ok and js_ok:
             statuses[17] = "done"
     except Exception:
         pass
-        return statuses
 
-        # CORE-18: forms validation (server/client) auto-detect
+    # CORE-18: валидация форм сервер/клиент
     try:
-        from pathlib import Path
-
-        server_ok = ("email_regex" in globals()) or ("phone_regex" in globals())
-        # если не хочешь globals, можно просто искать слова в app.py:
+        # server: ищем в app.py явные проверки
         app_py = Path(app.root_path) / "app.py"
+        server_ok = False
         if app_py.exists():
             t = app_py.read_text(encoding="utf-8", errors="ignore")
-            server_ok = server_ok or ("email_regex" in t and "phone_regex" in t) or ("len(name) < 2" in t)
+            server_ok = (
+                ("email_regex" in t and "phone_regex" in t)
+                or ("len(name) < 2" in t)
+                or ("required" in t and "pattern" in t)
+            )
 
+        # client: ищем minlength или pattern хотя бы в одном html + required
         tpl_root = Path(app.root_path) / "templates"
         client_ok = False
         if tpl_root.exists():
             for f in tpl_root.rglob("*.html"):
                 ht = f.read_text(encoding="utf-8", errors="ignore")
-                # минимальный набор признаков клиентской валидации
                 if ("required" in ht) and (("minlength" in ht) or ("pattern=" in ht)):
                     client_ok = True
                     break
@@ -1782,16 +1701,74 @@ except Exception:
             statuses[18] = "done"
     except Exception:
         pass
+
+    # SECURITY (база)
+    if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
+        statuses[21] = "done"
+
+    if "checkout" in globals():
+        statuses[23] = "done"
+
+    statuses[24] = "done"  # пароли hashed у тебя есть
+    statuses[27] = "done"  # cookies базово настроены
+
+    if app.config.get("MAX_CONTENT_LENGTH"):
+        statuses[29] = "done"
+
+    if "ALLOWED_EXTENSIONS" in globals():
+        statuses[30] = "done"
+
+    statuses[33] = "done"
+    statuses[34] = "done"
+
+    # CATALOG/PRODUCTS
+    if _has_model_field(Product, "is_active"):
+        statuses[56] = "done"
+
+    # Lazy-load
+    try:
+        cpath = Path(app.root_path) / "templates" / "catalog.html"
+        if cpath.exists():
+            t = cpath.read_text(encoding="utf-8", errors="ignore")
+            if 'loading="lazy"' in t:
+                statuses[64] = "done"
+    except Exception:
+        pass
+
+    statuses[68] = "done"  # скрытые товары проверяются в catalog/cart
+
+    # CART/CHECKOUT
+    statuses[72] = "done"
+    statuses[85] = "done"
+    statuses[86] = "done"
+    statuses[87] = "done"
+
+    # ORDERS/ADMIN
+    statuses[101] = "done"
+    statuses[102] = "done"
+    statuses[103] = "done"
+    statuses[104] = "done"
+    statuses[105] = "done"
+    statuses[106] = "done"
+    statuses[107] = "done"
+    statuses[108] = "done"
+    statuses[109] = "done"
+    statuses[110] = "done"
+    statuses[138] = "done"
+
+    # UX
+    statuses[142] = "done"
+    statuses[144] = "done"
+
     return statuses
 
 
-# ✅ ЗАМЕНА: теперь /admin/steps только GET и показывает АВТО-статус
+# ✅ /admin/steps только GET и показывает АВТО-статус
 @app.route("/admin/steps")
 @admin_required
 def admin_steps():
     statuses = build_steps_status_200()
 
-    # группировка
     grouped = {}
     for sid, cat, title in SITE_STEPS:
         grouped.setdefault(cat, []).append((sid, title, statuses.get(sid, "todo")))

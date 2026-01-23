@@ -1462,10 +1462,8 @@ def _project_files_for_scan():
     root = Path(app.root_path)
     files = []
 
-    # app.py
     files.append(root / "app.py")
 
-    # templates, static
     tpl = root / "templates"
     st = root / "static"
 
@@ -1479,12 +1477,6 @@ def _project_files_for_scan():
 
 
 def _scan_markers():
-    """
-    Ищет маркеры:
-      STEP-123 -> done
-      WIP-123  -> in_progress
-    в app.py / templates / static.
-    """
     done_ids = set()
     wip_ids = set()
 
@@ -1563,7 +1555,7 @@ def build_steps_status_200():
     if _static_exists("css/style.css"):
         statuses[2] = "done"
 
-    # CORE-3: flash messages (ищем get_flashed_messages в базовых шаблонах)
+    # CORE-3: flash messages
     try:
         tpl_root = Path(app.root_path) / "templates"
         candidates = [
@@ -1589,7 +1581,7 @@ def build_steps_status_200():
     if "fmt_money" in globals() and "fmt_dt" in globals():
         statuses[5] = "done"
 
-    # CORE-6: языки (у тебя есть set_lang)
+    # CORE-6: языки
     statuses[6] = "done"
 
     # CORE-7: robots + sitemap
@@ -1598,22 +1590,7 @@ def build_steps_status_200():
 
     # CORE-8: favicon + OG
     if _static_exists("images/favicon.ico"):
-        # базово считаем выполненным, если favicon есть
         statuses[8] = "done"
-        # доп. проверка og:title хотя бы в одном шаблоне
-        try:
-            tpl_root = Path(app.root_path) / "templates"
-            any_og = False
-            if tpl_root.exists():
-                for f in tpl_root.rglob("*.html"):
-                    tt = f.read_text(encoding="utf-8", errors="ignore")
-                    if "og:title" in tt:
-                        any_og = True
-                        break
-            if any_og:
-                statuses[8] = "done"
-        except Exception:
-            pass
 
     # CORE-9: логирование
     try:
@@ -1641,7 +1618,7 @@ def build_steps_status_200():
     if _has_route("/faq") and _template_exists("pages/faq.html"):
         statuses[15] = "done"
 
-    # CORE-16: breadcrumbs (важно: не внутрь if faq!)
+    # CORE-16: breadcrumbs
     try:
         has_inject = "inject_breadcrumbs" in globals()
 
@@ -1659,7 +1636,7 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-17: UI notifications/toast (ищем признаки в css/js)
+    # CORE-17: UI notifications/toast
     try:
         cssp = Path(app.root_path) / "static" / "css" / "style.css"
         jsp = Path(app.root_path) / "static" / "js" / "main.js"
@@ -1677,7 +1654,6 @@ def build_steps_status_200():
 
     # CORE-18: валидация форм сервер/клиент
     try:
-        # server: ищем в app.py явные проверки
         app_py = Path(app.root_path) / "app.py"
         server_ok = False
         if app_py.exists():
@@ -1685,10 +1661,8 @@ def build_steps_status_200():
             server_ok = (
                 ("email_regex" in t and "phone_regex" in t)
                 or ("len(name) < 2" in t)
-                or ("required" in t and "pattern" in t)
             )
 
-        # client: ищем minlength или pattern хотя бы в одном html + required
         tpl_root = Path(app.root_path) / "templates"
         client_ok = False
         if tpl_root.exists():
@@ -1703,6 +1677,16 @@ def build_steps_status_200():
     except Exception:
         pass
 
+    # CORE-19: сжатие/оптимизация изображений (авто-детект)
+    try:
+        app_py = Path(app.root_path) / "app.py"
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+            if ("optimize_image_to_webp" in t) or ("STEP-19" in t) or ('"WEBP"' in t and "quality=" in t):
+                statuses[19] = "done"
+    except Exception:
+        pass
+
     # SECURITY (база)
     if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
         statuses[21] = "done"
@@ -1710,8 +1694,8 @@ def build_steps_status_200():
     if "checkout" in globals():
         statuses[23] = "done"
 
-    statuses[24] = "done"  # пароли hashed у тебя есть
-    statuses[27] = "done"  # cookies базово настроены
+    statuses[24] = "done"
+    statuses[27] = "done"
 
     if app.config.get("MAX_CONTENT_LENGTH"):
         statuses[29] = "done"
@@ -1736,7 +1720,7 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    statuses[68] = "done"  # скрытые товары проверяются в catalog/cart
+    statuses[68] = "done"
 
     # CART/CHECKOUT
     statuses[72] = "done"

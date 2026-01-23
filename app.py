@@ -874,11 +874,6 @@ def update_cart(product_id, action):
         cart_total_items=sum(cart.values())
     )
 
-@app.route("/api/cart_count")
-def api_cart_count():
-    cart = session.get("cart", {})
-    return jsonify(cart_total_items=sum(cart.values()))
-
 @app.route("/admin")
 @login_required
 @admin_required
@@ -1760,6 +1755,15 @@ def build_steps_status_200():
     # SECURITY (база)
     if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
         statuses[21] = "done"
+
+        # SECURITY-26: brute-force protection by IP
+    if (
+        "is_ip_banned" in globals()
+        and "register_failed_attempt" in globals()
+        and "reset_attempts" in globals()
+        and "_client_ip" in globals()
+    ):
+        statuses[26] = "done"
 
     if "checkout" in globals():
         statuses[23] = "done"

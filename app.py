@@ -83,6 +83,48 @@ def send_telegram(message: str):
 # ======================
 app = Flask(__name__)
 # =========================
+# #22: Simple rate limit (in-memory)
+# =========================
+
+_rl_hits = defaultdict(lambda: deque())  # key -> timestamps
+
+
+def _rl_key(scope: str) -> str:
+    # scope примеры: "login:POST", "checkout:POST"
+    xff = request.headers.get("X-Forwarded-For", "")
+    ip = xff.split(",")[0].strip() if xff else (request.remote_addr or "unknown")
+    return f"{scope}:{ip}"
+
+
+def rate_limit(scope: str, limit: int, window_sec: int) -> bool:
+    """
+    True  -> разрешаем
+    False -> превышен лимит
+    """
+    now = time.time()
+    key = _rl_key(scope)
+    q = _rl_hits[key]
+
+    # чистим старые
+    while q and (now - q[0]) > window_sec:
+        q.popleft()
+
+    if len(q) >= limit:
+        return False
+
+    q.append(now)
+    return True
+
+
+def rate_limit_or_429(scope: str, limit: int, window_sec: int, message: str):
+    if not rate_limit(scope, limit, window_sec):
+        return render_template(
+            "errors/429.html",
+            message=message,
+            lang=session.get("lang", "ru")
+        ), 429
+    return None
+# =========================
 # #26B: Anti brute-force by IP (login)
 # =========================
 MAX_FAILS = 8          # сколько неверных попыток допускаем
@@ -720,6 +762,15 @@ def login():
         ), 429
 
     if request.method == "POST":
+
+        # ✅ #22 Rate limit на login (20 запросов в минуту с одного IP)
+        if not _rl_allow("login:POST", limit=20, window_sec=60):
+            return render_template(
+                "login.html",
+                error="Слишком много попыток входа. Подождите 1 минуту и попробуйте снова.",
+                lang=session.get("lang", "ru")
+            ), 429
+
         username = request.form.get("username")
         password = request.form.get("password")
 
@@ -914,6 +965,17 @@ def checkout():
         session["checkout_token"] = str(uuid.uuid4())
 
     if request.method == "POST":
+
+        # ✅ #22 Rate limit на checkout (5 запросов в минуту с одного IP)
+        if not _rl_allow("checkout:POST", limit=5, window_sec=60):
+            return render_template(
+                "checkout.html",
+                items=items,
+                total=total,
+                error="Слишком много попыток оформления заказа. Подождите 1 минуту.",
+                checkout_token=session.get("checkout_token")
+            ), 429
+
         name = request.form.get("name", "").strip()
         contact = request.form.get("contact", "").strip()
 
@@ -992,7 +1054,6 @@ def checkout():
         items=items,
         total=total,
         checkout_token=session.get("checkout_token")
-    )
 
 
 # ===== ADMIN PRODUCTS =====
@@ -1739,6 +1800,9 @@ def build_steps_status_200():
 
         if server_ok and client_ok:
             statuses[18] = "done"
+
+        if "_rl_allow" in globals():
+            statuses[22] = "done"
     except Exception:
         pass
 
@@ -1842,3 +1906,7 @@ def admin_steps():
         grouped=grouped,
         stats=dict(total=total, done=done, in_progress=wip, todo=todo)
     )
+
+@app.errorhandler(429)
+def too_many_requests(e):
+    return render_template("errors/429.html", message="Слишком много запросов. Попробуйте позже.", lang=session.get("lang", "ru")), 429

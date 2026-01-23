@@ -30,6 +30,9 @@ import uuid
 import secrets
 from flask import render_template_string
 from PIL import Image
+import time
+from collections import defaultdict, deque
+from flask import abort
 # ======================
 # ADMIN ACCESS CONTROL
 # ======================
@@ -79,6 +82,58 @@ def send_telegram(message: str):
 # APP CONFIG
 # ======================
 app = Flask(__name__)
+# =========================
+# #26B: Anti brute-force by IP
+# =========================
+
+MAX_FAILS = 8          # сколько неверных попыток допускаем
+WINDOW_SEC = 10 * 60   # окно 10 минут
+BAN_SEC = 30 * 60      # бан 30 минут
+
+_failed_logins = defaultdict(lambda: deque())  # ip -> timestamps
+_banned_until = {}  # ip -> unix time
+
+
+def _client_ip():
+    """
+    Railway/Render обычно прокидывают реальный IP через X-Forwarded-For.
+    Берем первый IP из списка.
+    """
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _cleanup_old(ip: str, now: float):
+    q = _failed_logins[ip]
+    while q and (now - q[0]) > WINDOW_SEC:
+        q.popleft()
+
+
+def is_ip_banned(ip: str) -> bool:
+    now = time.time()
+    until = _banned_until.get(ip)
+    if not until:
+        return False
+    if now >= until:
+        _banned_until.pop(ip, None)
+        return False
+    return True
+
+
+def register_failed_attempt(ip: str):
+    now = time.time()
+    _cleanup_old(ip, now)
+    _failed_logins[ip].append(now)
+
+    if len(_failed_logins[ip]) >= MAX_FAILS:
+        _banned_until[ip] = now + BAN_SEC
+
+
+def reset_attempts(ip: str):
+    _failed_logins.pop(ip, None)
+    _banned_until.pop(ip, None)
 # ======================
 # CORE-9: LOGGING
 # ======================
@@ -655,6 +710,12 @@ def catalog():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    ip = _client_ip()
+
+    # 1) Если IP забанен — режем сразу
+    if is_ip_banned(ip):
+        abort(429)  # Too Many Requests
+
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -662,12 +723,18 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
+            # 2) Успешный вход — сбрасываем счетчик
+            reset_attempts(ip)
+
             login_user(user, remember=True)
 
             if user.role == "admin":
                 return redirect(url_for("admin_panel"))
             else:
                 return redirect(url_for("profile"))
+
+        # 3) Любая неверная попытка (и когда user=None тоже) — считаем
+        register_failed_attempt(ip)
 
         return render_template(
             "login.html",

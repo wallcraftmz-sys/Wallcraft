@@ -1879,6 +1879,39 @@ def _has_model_field(model, field_name: str) -> bool:
     except Exception:
         pass
 
+    # SECURITY-29: MAX_CONTENT_LENGTH
+    if app.config.get("MAX_CONTENT_LENGTH"):
+        statuses[29] = "done"
+
+    # SECURITY-30: allowed extensions list
+    if "ALLOWED_EXTENSIONS" in globals():
+        statuses[30] = "done"
+
+    # Эти пункты у тебя отмечены вручную
+    statuses[33] = "done"
+    statuses[34] = "done"
+
+    # CATALOG/PRODUCTS
+    if _has_model_field(Product, "is_active"):
+        statuses[56] = "done"
+
+    # Lazy-load
+    try:
+        tpl_root = Path(app.root_path) / "templates"
+        found_lazy = False
+
+        if tpl_root.exists():
+            for f in tpl_root.rglob("*.html"):
+                t = f.read_text(encoding="utf-8", errors="ignore")
+                if 'loading="lazy"' in t:
+                    found_lazy = True
+                    break
+
+        if found_lazy:
+            statuses[64] = "done"
+    except Exception:
+        pass
+
     # Остальные у тебя отмечены вручную
     statuses[68] = "done"
 

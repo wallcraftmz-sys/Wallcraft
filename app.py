@@ -1579,11 +1579,12 @@ def links_check():
 # ======================
 # ✅ AUTO SITE STEPS (1–200): red/yellow/green
 # ======================
-   
+from pathlib import Path
+import re
+
 _STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
 _STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")
 
-def build_steps_status_200():
 
 def _project_files_for_scan():
     root = Path(app.root_path)
@@ -1658,6 +1659,9 @@ def _has_model_field(model, field_name: str) -> bool:
         return hasattr(model, field_name)
     except Exception:
         return False
+
+
+def build_steps_status_200():
     """
     Возвращает dict[step_id] -> "done" | "in_progress" | "todo"
     """
@@ -1859,41 +1863,11 @@ def _has_model_field(model, field_name: str) -> bool:
     statuses[34] = "done"
 
     # CATALOG/PRODUCTS
-    if _has_model_field(Product, "is_active"):
-        statuses[56] = "done"
-
-    # Lazy-load
     try:
-        tpl_root = Path(app.root_path) / "templates"
-        found_lazy = False
-
-        if tpl_root.exists():
-            for f in tpl_root.rglob("*.html"):
-                t = f.read_text(encoding="utf-8", errors="ignore")
-                if 'loading="lazy"' in t:
-                    found_lazy = True
-                    break
-
-        if found_lazy:
-            statuses[64] = "done"
+        if _has_model_field(Product, "is_active"):
+            statuses[56] = "done"
     except Exception:
         pass
-
-    # SECURITY-29: MAX_CONTENT_LENGTH
-    if app.config.get("MAX_CONTENT_LENGTH"):
-        statuses[29] = "done"
-
-    # SECURITY-30: allowed extensions list
-    if "ALLOWED_EXTENSIONS" in globals():
-        statuses[30] = "done"
-
-    # Эти пункты у тебя отмечены вручную
-    statuses[33] = "done"
-    statuses[34] = "done"
-
-    # CATALOG/PRODUCTS
-    if _has_model_field(Product, "is_active"):
-        statuses[56] = "done"
 
     # Lazy-load
     try:
@@ -1940,6 +1914,7 @@ def _has_model_field(model, field_name: str) -> bool:
 
     return statuses
 
+
 # ✅ /admin/steps только GET и показывает АВТО-статус
 @app.route("/admin/steps")
 @admin_required
@@ -1961,6 +1936,11 @@ def admin_steps():
         stats=dict(total=total, done=done, in_progress=wip, todo=todo)
     )
 
+
 @app.errorhandler(429)
 def too_many_requests(e):
-    return render_template("errors/429.html", message="Слишком много запросов. Попробуйте позже.", lang=session.get("lang", "ru")), 429
+    return render_template(
+        "errors/429.html",
+        message="Слишком много запросов. Попробуйте позже.",
+        lang=session.get("lang", "ru")
+    ), 429

@@ -1575,6 +1575,89 @@ def links_check():
     return jsonify(ok=True, links=links)
 
 def build_steps_status_200():
+    # ======================
+# ✅ AUTO SITE STEPS (1–200): red/yellow/green
+# ======================
+from pathlib import Path
+import re
+
+_STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
+_STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")
+
+
+def _project_files_for_scan():
+    root = Path(app.root_path)
+    files = []
+
+    # app.py
+    files.append(root / "app.py")
+
+    # templates, static
+    tpl = root / "templates"
+    st = root / "static"
+
+    if tpl.exists():
+        files += list(tpl.rglob("*.html"))
+    if st.exists():
+        files += list(st.rglob("*.js"))
+        files += list(st.rglob("*.css"))
+
+    return files
+
+
+def _scan_markers():
+    """
+    Ищет маркеры:
+      STEP-123 -> done
+      WIP-123  -> in_progress
+    в app.py / templates / static.
+    """
+    done_ids = set()
+    wip_ids = set()
+
+    for f in _project_files_for_scan():
+        try:
+            text = f.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+
+        for m in _STEP_DONE_RE.findall(text):
+            try:
+                done_ids.add(int(m))
+            except Exception:
+                pass
+
+        for m in _STEP_WIP_RE.findall(text):
+            try:
+                wip_ids.add(int(m))
+            except Exception:
+                pass
+
+    return done_ids, wip_ids
+
+
+def _has_route(path: str) -> bool:
+    try:
+        return any(r.rule == path for r in app.url_map.iter_rules())
+    except Exception:
+        return False
+
+
+def _template_exists(rel_path: str) -> bool:
+    p = Path(app.root_path) / "templates" / rel_path
+    return p.exists()
+
+
+def _static_exists(rel_path: str) -> bool:
+    p = Path(app.root_path) / "static" / rel_path
+    return p.exists()
+
+
+def _has_model_field(model, field_name: str) -> bool:
+    try:
+        return hasattr(model, field_name)
+    except Exception:
+        return False
     """
     Возвращает dict[step_id] -> "done" | "in_progress" | "todo"
     """

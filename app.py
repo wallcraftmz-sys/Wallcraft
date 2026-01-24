@@ -1576,11 +1576,11 @@ def links_check():
     }
     return jsonify(ok=True, links=links)
 
-def build_steps_status_200():
-    # ======================
+# ======================
 # ✅ AUTO SITE STEPS (1–200): red/yellow/green
 # ======================
-
+def build_steps_status_200():
+    
 _STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
 _STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")
 

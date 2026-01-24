@@ -33,6 +33,8 @@ from PIL import Image
 import time
 from collections import defaultdict, deque
 from flask import abort
+from pathlib import Path
+import re
 # ======================
 # ADMIN ACCESS CONTROL
 # ======================
@@ -1578,8 +1580,6 @@ def build_steps_status_200():
     # ======================
 # ✅ AUTO SITE STEPS (1–200): red/yellow/green
 # ======================
-from pathlib import Path
-import re
 
 _STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
 _STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")

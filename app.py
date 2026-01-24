@@ -1574,83 +1574,6 @@ def links_check():
     }
     return jsonify(ok=True, links=links)
 
-# ======================
-# ✅ AUTO SITE STEPS (1–200): red/yellow/green
-# ======================
-from pathlib import Path
-import re
-
-_STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
-_STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")
-
-
-def _project_files_for_scan():
-    root = Path(app.root_path)
-    files = []
-
-    files.append(root / "app.py")
-
-    tpl = root / "templates"
-    st = root / "static"
-
-    if tpl.exists():
-        files += list(tpl.rglob("*.html"))
-    if st.exists():
-        files += list(st.rglob("*.js"))
-        files += list(st.rglob("*.css"))
-
-    return files
-
-
-def _scan_markers():
-    done_ids = set()
-    wip_ids = set()
-
-    for f in _project_files_for_scan():
-        try:
-            text = f.read_text(encoding="utf-8", errors="ignore")
-        except Exception:
-            continue
-
-        for m in _STEP_DONE_RE.findall(text):
-            try:
-                done_ids.add(int(m))
-            except Exception:
-                pass
-
-        for m in _STEP_WIP_RE.findall(text):
-            try:
-                wip_ids.add(int(m))
-            except Exception:
-                pass
-
-    return done_ids, wip_ids
-
-
-def _has_route(path: str) -> bool:
-    try:
-        return any(r.rule == path for r in app.url_map.iter_rules())
-    except Exception:
-        return False
-
-
-def _template_exists(rel_path: str) -> bool:
-    p = Path(app.root_path) / "templates" / rel_path
-    return p.exists()
-
-
-def _static_exists(rel_path: str) -> bool:
-    p = Path(app.root_path) / "static" / rel_path
-    return p.exists()
-
-
-def _has_model_field(model, field_name: str) -> bool:
-    try:
-        return hasattr(model, field_name)
-    except Exception:
-        return False
-
-
 def build_steps_status_200():
     """
     Возвращает dict[step_id] -> "done" | "in_progress" | "todo"
@@ -1744,8 +1667,136 @@ def build_steps_status_200():
     if _has_route("/faq") and _template_exists("pages/faq.html"):
         statuses[15] = "done"
 
-   
+    # CORE-16: breadcrumbs (ищем по всем html)
+    try:
+        has_inject = "inject_breadcrumbs" in globals()
 
+        tpl_root = Path(app.root_path) / "templates"
+        found_markup = False
+
+        if tpl_root.exists():
+            for f in tpl_root.rglob("*.html"):
+                t = f.read_text(encoding="utf-8", errors="ignore")
+                if ('aria-label="breadcrumb"' in t) or ('class="breadcrumbs"' in t):
+                    found_markup = True
+                    break
+
+        if has_inject and found_markup:
+            statuses[16] = "done"
+    except Exception:
+        pass
+
+    # CORE-17: UI notifications/toast
+    try:
+        cssp = Path(app.root_path) / "static" / "css" / "style.css"
+        jsp = Path(app.root_path) / "static" / "js" / "main.js"
+
+        css_text = cssp.read_text(encoding="utf-8", errors="ignore") if cssp.exists() else ""
+        js_text = jsp.read_text(encoding="utf-8", errors="ignore") if jsp.exists() else ""
+
+        css_ok = (".toast" in css_text) or (".toast-container" in css_text) or ("STEP-17" in css_text)
+        js_ok = ("showToast" in js_text) or ("toast" in js_text) or ("STEP-17" in js_text)
+
+        if css_ok and js_ok:
+            statuses[17] = "done"
+    except Exception:
+        pass
+
+    # CORE-18: валидация форм сервер/клиент
+    try:
+        app_py = Path(app.root_path) / "app.py"
+        server_ok = False
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+            server_ok = (
+                ("email_regex" in t and "phone_regex" in t)
+                or ("len(name) < 2" in t)
+                or ("Введите корректный телефон или email" in t)
+            )
+
+        tpl_root = Path(app.root_path) / "templates"
+        client_ok = False
+        if tpl_root.exists():
+            for f in tpl_root.rglob("*.html"):
+                ht = f.read_text(encoding="utf-8", errors="ignore")
+                if ("required" in ht) or ("minlength" in ht) or ("pattern=" in ht):
+                    client_ok = True
+                    break
+
+        if server_ok and client_ok:
+            statuses[18] = "done"
+    except Exception:
+        pass
+
+    # CORE-19: сжатие/оптимизация изображений (авто-детект)
+    try:
+        app_py = Path(app.root_path) / "app.py"
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+            if ("optimize_image_to_webp" in t) or ("STEP-19" in t) or ('"WEBP"' in t and "quality=" in t):
+                statuses[19] = "done"
+    except Exception:
+        pass
+
+    # SECURITY-21: CSRF
+    if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
+        statuses[21] = "done"
+
+    # SECURITY-22: rate limit present
+    if "_rl_allow" in globals():
+        statuses[22] = "done"
+
+    # SECURITY-23: checkout exists
+    if "checkout" in globals():
+        statuses[23] = "done"
+
+    # SECURITY-24..27 (у тебя уже сделано)
+    statuses[24] = "done"
+    statuses[27] = "done"
+
+    # SECURITY-26: brute-force protection by IP
+    if (
+        "is_ip_banned" in globals()
+        and "register_failed_attempt" in globals()
+        and "reset_attempts" in globals()
+        and "_client_ip" in globals()
+    ):
+        statuses[26] = "done"
+
+    # SECURITY-29: MAX_CONTENT_LENGTH
+    if app.config.get("MAX_CONTENT_LENGTH"):
+        statuses[29] = "done"
+
+    # SECURITY-30: allowed extensions list
+    if "ALLOWED_EXTENSIONS" in globals():
+        statuses[30] = "done"
+
+    # Эти пункты у тебя отмечены вручную
+    statuses[33] = "done"
+    statuses[34] = "done"
+
+    # CATALOG/PRODUCTS
+    if _has_model_field(Product, "is_active"):
+        statuses[56] = "done"
+
+    # Lazy-load
+    try:
+        tpl_root = Path(app.root_path) / "templates"
+        found_lazy = False
+
+        if tpl_root.exists():
+            for f in tpl_root.rglob("*.html"):
+                t = f.read_text(encoding="utf-8", errors="ignore")
+                if 'loading="lazy"' in t:
+                    found_lazy = True
+                    break
+
+        if found_lazy:
+            statuses[64] = "done"
+    except Exception:
+        pass
+
+    # Остальные у тебя отмечены вручную
     statuses[68] = "done"
 
     # CART/CHECKOUT
@@ -1772,7 +1823,6 @@ def build_steps_status_200():
     statuses[144] = "done"
 
     return statuses
-
 
 # ✅ /admin/steps только GET и показывает АВТО-статус
 @app.route("/admin/steps")

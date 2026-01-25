@@ -1075,6 +1075,12 @@ def admin_products():
                 flash("Файл слишком большой", "error")
                 return redirect(url_for("admin_products"))
 
+            # SECURITY-28: MIME check
+            allowed_mimes = {"image/png", "image/jpeg", "image/webp"}
+            if file.mimetype not in allowed_mimes:
+                flash("Неверный тип файла (разрешены PNG/JPG/WEBP)", "error")
+                return redirect(url_for("admin_products"))
+
             # проверяем расширение
             if allowed_file(file.filename):
                 filename = secure_filename(file.filename)
@@ -1087,11 +1093,6 @@ def admin_products():
             else:
                 flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
                 return redirect(url_for("admin_products"))
-
-            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-            file.save(upload_path)
-
-            image_path = f"uploads/{filename}"
 
         product = Product(
             name_ru=request.form["name_ru"],

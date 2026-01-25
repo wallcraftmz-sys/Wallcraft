@@ -2001,6 +2001,9 @@ def build_steps_status_200():
     statuses[33] = "done"
     statuses[34] = "done"
 
+        # SECURITY-35: admin audit log present
+    if "audit_admin" in globals():
+        statuses[35] = "done"
     # CATALOG/PRODUCTS
     try:
         if _has_model_field(Product, "is_active"):

@@ -704,9 +704,7 @@ def inject_cart_total():
     cart = session.get("cart", {})
     return dict(cart_total_items=sum(cart.values()))
 
-@app.context_processor
-def inject_breadcrumbs():
- # ======================
+# ======================
 # CORE-16: BREADCRUMBS MAP
 # ======================
 BREADCRUMBS_MAP = {

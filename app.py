@@ -1825,6 +1825,10 @@ def build_steps_status_200():
     except Exception:
         pass
 
+        # CORE-20: MENU/LINK CHECK (admin)
+    if _has_route("/admin/links_check"):
+        statuses[20] = "done"
+        
     # SECURITY-21: CSRF
     if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
         statuses[21] = "done"

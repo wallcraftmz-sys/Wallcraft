@@ -1114,16 +1114,16 @@ def admin_products():
                 flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
                 return redirect(url_for("admin_products"))
 
-        name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
-        name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
+                name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
+                name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
 
-         product = Product(
-         name_ru=name_ru,
-         name_lv=name_lv,
-         price=float(request.form["price"]),
-         image=image_path,
-         is_active=True
-      )
+                product = Product(
+                name_ru=name_ru,
+                name_lv=name_lv,
+                price=float(request.form["price"]),
+                image=image_path,
+                is_active=True
+              )
 
         db.session.add(product)
         db.session.commit()

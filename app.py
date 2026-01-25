@@ -35,6 +35,26 @@ from collections import defaultdict, deque
 from flask import abort
 from pathlib import Path
 import re
+def norm_text(s: str, max_len: int = 120) -> str:
+    if not s:
+        return ""
+    s = str(s).strip()
+    s = re.sub(r"\s+", " ", s)  # убираем двойные пробелы
+    s = s.replace("\x00", "")   # убираем нулевой байт
+    return s[:max_len]
+
+def norm_contact(s: str, max_len: int = 80) -> str:
+    if not s:
+        return ""
+    s = str(s).strip()
+    s = re.sub(r"\s+", " ", s)
+    s = s.replace("\x00", "")
+
+    # если похоже на телефон — чистим до + и цифр
+    if any(ch.isdigit() for ch in s) and ("@" not in s):
+        s = re.sub(r"[^0-9+]", "", s)
+
+    return s[:max_len]
 # ======================
 # ADMIN ACCESS CONTROL
 # ======================
@@ -978,8 +998,8 @@ def checkout():
                 checkout_token=session.get("checkout_token")
             ), 429
 
-        name = request.form.get("name", "").strip()
-        contact = request.form.get("contact", "").strip()
+        name = norm_text(request.form.get("name", ""), max_len=60)
+        contact = norm_contact(request.form.get("contact", ""), max_len=80)
 
         form_token = request.form.get("checkout_token")
         session_token = session.get("checkout_token")
@@ -1094,13 +1114,16 @@ def admin_products():
                 flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
                 return redirect(url_for("admin_products"))
 
-        product = Product(
-            name_ru=request.form["name_ru"],
-            name_lv=request.form["name_lv"],
-            price=float(request.form["price"]),
-            image=image_path,
-            is_active=True
-        )
+        name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
+        name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
+
+         product = Product(
+         name_ru=name_ru,
+         name_lv=name_lv,
+         price=float(request.form["price"]),
+         image=image_path,
+         is_active=True
+      )
 
         db.session.add(product)
         db.session.commit()
@@ -1875,6 +1898,16 @@ def build_steps_status_200():
     if "ALLOWED_EXTENSIONS" in globals():
         statuses[30] = "done"
 
+        # SECURITY-31: input normalization present
+    try:
+        app_py = Path(app.root_path) / "app.py"
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+            if ("def norm_text" in t) and ("def norm_contact" in t):
+                statuses[31] = "done"
+    except Exception:
+        pass
+        
     # Эти пункты у тебя отмечены вручную
     statuses[33] = "done"
     statuses[34] = "done"

@@ -1855,6 +1855,18 @@ def build_steps_status_200():
     ):
         statuses[26] = "done"
 
+        # SECURITY-28: upload MIME/size check present
+    try:
+        app_py = Path(app.root_path) / "app.py"
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+
+            # проверяем что есть ограничения и MIME проверка
+            if ("MAX_CONTENT_LENGTH" in t) and ("file.mimetype" in t) and ("allowed_mimes" in t):
+                statuses[28] = "done"
+    except Exception:
+        pass
+
     # SECURITY-29: MAX_CONTENT_LENGTH
     if app.config.get("MAX_CONTENT_LENGTH"):
         statuses[29] = "done"

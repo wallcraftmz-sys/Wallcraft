@@ -708,61 +708,74 @@ def inject_cart_total():
 def inject_breadcrumbs():
     # словарь: endpoint -> (текст, "родитель endpoint" или None)
     # ВАЖНО: тексты — по языкам
-    MAP = {
-        "index": ({"ru": "Главная", "lv": "Sākums", "en": "Home"}, None),
-        "catalog": ({"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"}, "index"),
-        "cart": ({"ru": "Корзина", "lv": "Grozs", "en": "Cart"}, "catalog"),
-        "checkout": ({"ru": "Оформление", "lv": "Noformēšana", "en": "Checkout"}, "cart"),
-        "profile": ({"ru": "Профиль", "lv": "Profils", "en": "Profile"}, "index"),
+ # ======================
+# CORE-16: BREADCRUMBS MAP
+# ======================
+BREADCRUMBS_MAP = {
+    "index": ({"ru": "Главная", "lv": "Sākums", "en": "Home"}, None),
+    "catalog": ({"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"}, "index"),
+    "cart": ({"ru": "Корзина", "lv": "Grozs", "en": "Cart"}, "catalog"),
+    "checkout": ({"ru": "Оформление", "lv": "Noformēšana", "en": "Checkout"}, "cart"),
+    "profile": ({"ru": "Профиль", "lv": "Profils", "en": "Profile"}, "index"),
 
-        # статические страницы
-        "about": ({"ru": "О нас", "lv": "Par mums", "en": "About"}, "index"),
-        "policy": ({"ru": "Политика", "lv": "Politika", "en": "Policy"}, "index"),
-        "shipping": ({"ru": "Доставка/Оплата", "lv": "Piegāde/Apmaksa", "en": "Shipping/Payment"}, "index"),
-        "faq": ({"ru": "FAQ", "lv": "BUJ", "en": "FAQ"}, "index"),
+    # статические страницы
+    "about": ({"ru": "О нас", "lv": "Par mums", "en": "About"}, "index"),
+    "policy": ({"ru": "Политика", "lv": "Politika", "en": "Policy"}, "index"),
+    "shipping": ({"ru": "Доставка/Оплата", "lv": "Piegāde/Apmaksa", "en": "Shipping/Payment"}, "index"),
+    "faq": ({"ru": "FAQ", "lv": "BUJ", "en": "FAQ"}, "index"),
 
-        # админка (по желанию)
-        "admin_panel": ({"ru": "Админка", "lv": "Admin", "en": "Admin"}, "index"),
-        "admin_orders": ({"ru": "Заказы", "lv": "Pasūtījumi", "en": "Orders"}, "admin_panel"),
-        "admin_products": ({"ru": "Товары", "lv": "Preces", "en": "Products"}, "admin_panel"),
-        "admin_steps": ({"ru": "200 шагов", "lv": "200 soļi", "en": "200 steps"}, "admin_panel"),
-    }
+    # админка
+    "admin_panel": ({"ru": "Админка", "lv": "Admin", "en": "Admin"}, "index"),
+    "admin_orders": ({"ru": "Заказы", "lv": "Pasūtījumi", "en": "Orders"}, "admin_panel"),
+    "admin_products": ({"ru": "Товары", "lv": "Preces", "en": "Products"}, "admin_panel"),
+    "admin_steps": ({"ru": "200 шагов", "lv": "200 soļi", "en": "200 steps"}, "admin_panel"),
+}
 
-    def build_breadcrumbs():
-        lang = session.get("lang", "ru")
-        endpoint = request.endpoint
 
-        if not endpoint or endpoint not in MAP:
-            # если страница не описана — не показываем крошки
-            return []
+def build_breadcrumbs():
+    lang = session.get("lang", "ru")
+    endpoint = request.endpoint
 
-        crumbs = []
-        seen = set()
+    if not endpoint or endpoint not in BREADCRUMBS_MAP:
+        return []
 
-        cur = endpoint
-        while cur and cur in MAP and cur not in seen:
-            seen.add(cur)
+    crumbs = []
+    seen = set()
 
-            title_dict, parent = MAP[cur]
-            title = title_dict.get(lang, title_dict.get("ru", cur))
+    cur = endpoint
+    while cur and cur in BREADCRUMBS_MAP and cur not in seen:
+        seen.add(cur)
 
-            try:
-                url = url_for(cur, lang=lang)
-            except Exception:
-                url = "#"
+        title_dict, parent = BREADCRUMBS_MAP[cur]
+        title = title_dict.get(lang, title_dict.get("ru", cur))
 
-            crumbs.append({"title": title, "url": url})
-            cur = parent
+        try:
+            url = url_for(cur, lang=lang)
+        except Exception:
+            url = "#"
 
-        crumbs.reverse()
-        return crumbs
+        crumbs.append({"title": title, "url": url})
+        cur = parent
 
-    def audit_admin(action: str, entity: str = None, entity_id: int = None, details: str = None):
+    crumbs.reverse()
+    return crumbs
+
+
+@app.context_processor
+def inject_breadcrumbs():
+    return dict(breadcrumbs=build_breadcrumbs())
+
+
+# ======================
+# SECURITY-35: ADMIN AUDIT LOG
+# ======================
+def audit_admin(action: str, entity: str = None, entity_id: int = None, details: str = None):
     """
     Пишет лог действий админа в БД. Не ломает сайт, даже если логирование упало.
     """
     try:
         username = getattr(current_user, "username", "unknown")
+
         ip = request.headers.get("X-Forwarded-For", request.remote_addr)
         if ip and "," in ip:
             ip = ip.split(",")[0].strip()
@@ -785,8 +798,6 @@ def inject_breadcrumbs():
             db.session.rollback()
         except Exception:
             pass
-
-    return dict(breadcrumbs=build_breadcrumbs())
 # ======================
 # SECURITY: BLOCK EMPTY CHECKOUT
 # ======================

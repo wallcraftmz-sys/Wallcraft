@@ -706,8 +706,6 @@ def inject_cart_total():
 
 @app.context_processor
 def inject_breadcrumbs():
-    # словарь: endpoint -> (текст, "родитель endpoint" или None)
-    # ВАЖНО: тексты — по языкам
  # ======================
 # CORE-16: BREADCRUMBS MAP
 # ======================

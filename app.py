@@ -372,6 +372,19 @@ class SiteStepProgress(db.Model):
     step_id = db.Column(db.Integer, unique=True, nullable=False)
     done = db.Column(db.Boolean, default=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class AdminAuditLog(db.Model):
+    __tablename__ = "admin_audit_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    admin_username = db.Column(db.String(120), nullable=False)
+    action = db.Column(db.String(120), nullable=False)          # например: "order_status_change"
+    entity = db.Column(db.String(60), nullable=True)            # например: "Order", "Product"
+    entity_id = db.Column(db.Integer, nullable=True)            # id заказа/товара
+    ip = db.Column(db.String(64), nullable=True)
+    user_agent = db.Column(db.String(255), nullable=True)
+    details = db.Column(db.Text, nullable=True)                 # что именно произошло
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 # ======================
 # USER LOADER
 # ======================
@@ -408,6 +421,10 @@ with app.app_context():
         db.session.commit()
     except Exception:
         db.session.rollback()
+
+    # ✅ SECURITY-35: admin_audit_logs table exists (создастся через db.create_all)
+    # Если таблица уже есть — ничего не будет.
+    # Если таблицы нет — создастся автоматически, если ты добавил модель AdminAuditLog.
 
 
 ORDER_STATUSES = {
@@ -739,6 +756,35 @@ def inject_breadcrumbs():
 
         crumbs.reverse()
         return crumbs
+
+    def audit_admin(action: str, entity: str = None, entity_id: int = None, details: str = None):
+    """
+    Пишет лог действий админа в БД. Не ломает сайт, даже если логирование упало.
+    """
+    try:
+        username = getattr(current_user, "username", "unknown")
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+        if ip and "," in ip:
+            ip = ip.split(",")[0].strip()
+
+        ua = request.headers.get("User-Agent", "")[:255]
+
+        row = AdminAuditLog(
+            admin_username=username,
+            action=action,
+            entity=entity,
+            entity_id=entity_id,
+            ip=ip,
+            user_agent=ua,
+            details=(details or "")[:4000],
+        )
+        db.session.add(row)
+        db.session.commit()
+    except Exception:
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
 
     return dict(breadcrumbs=build_breadcrumbs())
 # ======================

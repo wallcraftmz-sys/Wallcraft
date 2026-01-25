@@ -35,6 +35,30 @@ from collections import defaultdict, deque
 from flask import abort
 from pathlib import Path
 import re
+from urllib.parse import urlparse, urljoin
+
+def safe_redirect_target(target: str):
+    """
+    Разрешает редирект ТОЛЬКО на свой домен/внутренние пути.
+    Если target опасный — возвращаем None.
+    """
+    if not target:
+        return None
+
+    try:
+        host_url = request.host_url  # например https://wallcraft.lv/
+        test_url = urljoin(host_url, target)
+        host_parts = urlparse(host_url)
+        test_parts = urlparse(test_url)
+
+        if test_parts.scheme in ("http", "https") and host_parts.netloc == test_parts.netloc:
+            # возвращаем нормализованный внутренний путь
+            return test_parts.path + (("?" + test_parts.query) if test_parts.query else "")
+    except Exception:
+        pass
+
+    return None
+
 def norm_text(s: str, max_len: int = 120) -> str:
     if not s:
         return ""
@@ -801,9 +825,12 @@ def login():
         if user and check_password_hash(user.password, password):
             # Успешный вход — сбрасываем счетчик
             reset_attempts(ip)
-
             login_user(user, remember=True)
-
+            
+                    next_url = safe_redirect_target(request.args.get("next"))
+            if next_url:
+                return redirect(next_url)
+            
             if user.role == "admin":
                 return redirect(url_for("admin_panel"))
             else:
@@ -1907,7 +1934,16 @@ def build_steps_status_200():
                 statuses[31] = "done"
     except Exception:
         pass
-        
+
+        # SECURITY-32: safe redirect guard present
+    try:
+        app_py = Path(app.root_path) / "app.py"
+        if app_py.exists():
+            t = app_py.read_text(encoding="utf-8", errors="ignore")
+            if ("def safe_redirect_target" in t) and ("request.args.get(\"next\")" in t or "request.args.get('next')" in t):
+                statuses[32] = "done"
+    except Exception:
+        pass
     # Эти пункты у тебя отмечены вручную
     statuses[33] = "done"
     statuses[34] = "done"

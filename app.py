@@ -823,11 +823,11 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            # Успешный вход — сбрасываем счетчик
             reset_attempts(ip)
+            
             login_user(user, remember=True)
             
-                    next_url = safe_redirect_target(request.args.get("next"))
+            next_url = safe_redirect_target(request.args.get("next"))
             if next_url:
                 return redirect(next_url)
             

@@ -1,148 +1,141 @@
 <!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin | Wallcraft</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Admin | Wallcraft</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-    <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-<meta property="og:title" content="Wallcraft">
-<meta property="og:description" content="Каталог и оформление заказов.">
-<meta property="og:image" content="{{ url_for('static', filename='images/IMG_0857.jpeg', _external=True) }}">
-<meta property="og:url" content="{{ request.url }}">
-<meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+  <meta property="og:title" content="Wallcraft">
+  <meta property="og:description" content="Каталог и оформление заказов.">
+  <meta property="og:image" content="{{ url_for('static', filename='images/IMG_0857.jpeg', _external=True) }}">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta name="twitter:card" content="summary_large_image">
 </head>
+
 <body>
 
 <header class="top-header">
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-    <!-- MENU BUTTON -->
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="logo-center">
+    <a href="{{ url_for('admin_panel') }}" class="logo-link">
+      <img
+        src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}"
+        alt="Wallcraft"
+        class="logo-img"
+      >
+      <span class="logo-text">Wallcraft</span>
+    </a>
+  </div>
 
-    <!-- LOGO -->
-    <div class="logo-center">
-        <a href="{{ url_for('admin_panel') }}" class="logo-link">
-            <img
-                src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}"
-                alt="Wallcraft"
-                class="logo-img"
-            >
-            <span class="logo-text">Wallcraft</span>
-        </a>
-    </div>
-
-    <!-- LANGUAGE SWITCH -->
-    <div class="lang-switch">
-        <a href="?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
-        <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
-        <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
-    </div>
-
+  <div class="lang-switch">
+    <a href="?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
+    <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
+    <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
+  </div>
 </header>
 
-<!-- OVERLAY -->
 <div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
-
-<!-- SIDE MENU -->
 <div id="sideMenu" class="side-menu">
-    <a href="{{ url_for('catalog', cat='all', lang=lang) }}">Каталог</a>
 
-<hr>
+  <a href="{{ url_for('catalog', cat='all', lang=lang) }}" onclick="closeMenu()">Каталог</a>
 
-{% for c in menu_categories %}
-  <a href="{{ url_for('catalog', cat=c.slug, lang=lang) }}">
-    {% if lang == 'lv' %}{{ c.title_lv }}
-    {% elif lang == 'en' %}{{ c.title_en }}
-    {% else %}{{ c.title_ru }}{% endif %}
-  </a>
-{% endfor %}
+  <hr>
 
-    <!-- QUICK ACTIONS (fast, no duplicates) -->
-    <div class="quick-actions">
-        <div class="quick-actions-title">Быстрые действия</div>
+  {% for c in menu_categories %}
+    <a href="{{ url_for('catalog', cat=c.slug, lang=lang) }}" onclick="closeMenu()">
+      {% if lang == 'lv' %}{{ c.title_lv }}
+      {% elif lang == 'en' %}{{ c.title_en }}
+      {% else %}{{ c.title_ru }}{% endif %}
+    </a>
+  {% endfor %}
 
-        <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">
-            <span class="qa-ico">➕</span>
-            <span>Добавить товар</span>
-        </a>
+  <div class="quick-actions">
+    <div class="quick-actions-title">Быстрые действия</div>
 
-        <a href="{{ url_for('catalog') }}" onclick="closeMenu()">
-            <span class="qa-ico">🛍️</span>
-            <span>Открыть каталог</span>
-        </a>
+    <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">
+      <span class="qa-ico">➕</span>
+      <span>Добавить товар</span>
+    </a>
 
-        <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">
-            <span class="qa-ico">🧾</span>
-            <span>Перейти к заказам</span>
-        </a>
-        <a href="{{ url_for('admin_steps') }}" onclick="closeMenu()">
-    <span class="qa-ico">📋</span>
-    <span>200 шагов (чек-лист)</span>
-</a>
-    </div>
+    <a href="{{ url_for('catalog') }}" onclick="closeMenu()">
+      <span class="qa-ico">🛍️</span>
+      <span>Открыть каталог</span>
+    </a>
 
-    <hr>
+    <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">
+      <span class="qa-ico">🧾</span>
+      <span>Перейти к заказам</span>
+    </a>
 
-    <!-- classic links hidden by CSS to avoid repeating -->
-    <div class="classic-admin-links">
-        <a href="{{ url_for('admin_panel') }}" onclick="closeMenu()">Админка</a>
-        <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">Товары</a>
-        <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">Заказы</a>
-        <a href="{{ url_for('catalog') }}" onclick="closeMenu()">Каталог</a>
-    </div>
+    <a href="{{ url_for('admin_steps') }}" onclick="closeMenu()">
+      <span class="qa-ico">📋</span>
+      <span>200 шагов (чек-лист)</span>
+    </a>
+  </div>
 
-    <a class="logout-link" href="{{ url_for('logout') }}" onclick="closeMenu()">Выйти</a>
-</div>
+  <hr>
+
+  <div class="classic-admin-links">
+    <a href="{{ url_for('admin_panel') }}" onclick="closeMenu()">Админка</a>
+    <a href="{{ url_for('admin_products') }}" onclick="closeMenu()">Товары</a>
+    <a href="{{ url_for('admin_orders') }}" onclick="closeMenu()">Заказы</a>
+    <a href="{{ url_for('catalog') }}" onclick="closeMenu()">Каталог</a>
+  </div>
+
+  <a class="logout-link" href="{{ url_for('logout') }}" onclick="closeMenu()">Выйти</a>
 </div>
 
 <main class="container admin-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flash-wrap">
-      {% for category, msg in messages %}
-        <div class="flash flash-{{ category }}">{{ msg }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-  {% if breadcrumbs and breadcrumbs|length > 1 %}
-<nav class="breadcrumbs" aria-label="breadcrumb">
-  {% for c in breadcrumbs %}
-    {% if loop.last %}
-      <span class="bc-current">{{ c.title }}</span>
-    {% else %}
-      <a class="bc-link" href="{{ c.url }}">{{ c.title }}</a>
-      <span class="bc-sep">/</span>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, msg in messages %}
+          <div class="flash flash-{{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
     {% endif %}
-  {% endfor %}
-</nav>
-{% endif %}  
-    {% block content %}{% endblock %}
+  {% endwith %}
+
+  {% if breadcrumbs and breadcrumbs|length > 1 %}
+    <nav class="breadcrumbs" aria-label="breadcrumb">
+      {% for c in breadcrumbs %}
+        {% if loop.last %}
+          <span class="bc-current">{{ c.title }}</span>
+        {% else %}
+          <a class="bc-link" href="{{ c.url }}">{{ c.title }}</a>
+          <span class="bc-sep">/</span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+  {% block content %}{% endblock %}
 </main>
 
 <script>
-function toggleMenu() {
+  function toggleMenu() {
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
-
     if (!menu || !overlay) return;
-
     menu.classList.toggle("open");
     overlay.classList.toggle("show");
-}
+  }
 
-function closeMenu() {
+  function closeMenu() {
     const menu = document.getElementById("sideMenu");
     const overlay = document.getElementById("menuOverlay");
-
     if (menu) menu.classList.remove("open");
     if (overlay) overlay.classList.remove("show");
-}
+  }
 </script>
 
 </body>

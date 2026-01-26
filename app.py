@@ -284,15 +284,6 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name_ru = db.Column(db.String(200), nullable=False)
-    name_lv = db.Column(db.String(200), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String(200))
-    is_active = db.Column(db.Boolean, default=True)
-
-
 class OrderStatusHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

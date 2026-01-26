@@ -338,6 +338,15 @@ class AdminAuditLog(db.Model):
     details = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name_ru = db.Column(db.String(200), nullable=False)
+    name_lv = db.Column(db.String(200), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    image = db.Column(db.String(200))
+    is_active = db.Column(db.Boolean, default=True)
+
+    category = db.Column(db.String(50), default="doors")
 
 # ======================
 # USER LOADER
@@ -367,6 +376,12 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
+    # migration: product.category
+    try:
+        db.session.execute(text("ALTER TABLE product ADD COLUMN category VARCHAR(50) DEFAULT 'doors'"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -1060,59 +1075,50 @@ def admin_panel():
 @login_required
 @admin_required
 def admin_products():
-    if request.method == "POST":
-        file = request.files.get("image")
-        image_path = None
+    CATEGORIES = [
+        ("doors", {"ru": "Двери", "lv": "Durvis", "en": "Doors"}),
+        ("windows", {"ru": "Окна", "lv": "Logi", "en": "Windows"}),
+    ]
 
+    if request.method == "POST":
+        # CSRF (у вас общий csrf_protect_admin уже есть, но в форме token тоже оставляем)
         name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
         name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
-
-        if not name_ru or not name_lv:
-            flash("Заполните названия RU и LV", "error")
-            return redirect(url_for("admin_products"))
-
-        if file and file.filename:
-            if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
-                flash("Файл слишком большой", "error")
-                return redirect(url_for("admin_products"))
-
-            allowed_mimes = {"image/png", "image/jpeg", "image/webp"}
-            if file.mimetype not in allowed_mimes:
-                flash("Неверный тип файла (разрешены PNG/JPG/WEBP)", "error")
-                return redirect(url_for("admin_products"))
-
-            if not allowed_file(file.filename):
-                flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
-                return redirect(url_for("admin_products"))
-
-            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
-            base = secure_filename(os.path.splitext(file.filename)[0]) or "image"
-            base = f"{base}-{uuid.uuid4().hex[:8]}"
-            raw_path = os.path.join(app.config["UPLOAD_FOLDER"], base + ".upload")
-            file.save(raw_path)
-
-            webp_path = os.path.join(app.config["UPLOAD_FOLDER"], base + ".webp")
-            ok = optimize_image_to_webp(raw_path, webp_path, max_size=(1600, 1600), quality=82)
-            try:
-                os.remove(raw_path)
-            except Exception:
-                pass
-
-            if not ok:
-                flash("Не удалось обработать изображение", "error")
-                return redirect(url_for("admin_products"))
-
-            image_path = f"uploads/{base}.webp"
-        else:
-            flash("Добавьте изображение товара", "error")
-            return redirect(url_for("admin_products"))
-
+        category = request.form.get("category", "doors")
         try:
             price = float(request.form.get("price", "0"))
         except Exception:
-            flash("Некорректная цена", "error")
+            price = 0
+
+        file = request.files.get("image")
+        image_path = None
+
+        # файл обязателен (как у вас в форме required)
+        if not file or not file.filename:
+            flash("Добавьте изображение товара", "error")
             return redirect(url_for("admin_products"))
+
+        # размер (MAX_CONTENT_LENGTH уже ограничивает, но проверка не мешает)
+        if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
+            flash("Файл слишком большой", "error")
+            return redirect(url_for("admin_products"))
+
+        # MIME check
+        allowed_mimes = {"image/png", "image/jpeg", "image/webp"}
+        if file.mimetype not in allowed_mimes:
+            flash("Неверный тип файла (разрешены PNG/JPG/WEBP)", "error")
+            return redirect(url_for("admin_products"))
+
+        # extension check
+        if not allowed_file(file.filename):
+            flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
+            return redirect(url_for("admin_products"))
+
+        filename = secure_filename(file.filename)
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+        upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(upload_path)
+        image_path = f"uploads/{filename}"
 
         product = Product(
             name_ru=name_ru,
@@ -1120,14 +1126,15 @@ def admin_products():
             price=price,
             image=image_path,
             is_active=True,
+            category=category
         )
+
         db.session.add(product)
         db.session.commit()
-
         flash("Товар добавлен", "success")
-        audit_admin("product_create", entity="Product", entity_id=product.id, details=f"{name_ru} / {name_lv}")
-        return redirect(url_for("admin_products"))
+        return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
+    # GET
     show = request.args.get("show", "active")
     if show == "inactive":
         products = Product.query.filter_by(is_active=False).all()
@@ -1136,7 +1143,26 @@ def admin_products():
     else:
         products = Product.query.filter_by(is_active=True).all()
 
-    return render_template("admin/products.html", products=products, show=show, lang=session.get("lang", "ru"))
+    # группировка по категориям
+    grouped = {}
+    for key, labels in CATEGORIES:
+        grouped[key] = {"labels": labels, "items": []}
+
+    # если есть товары с неизвестной категорией — в "other"
+    grouped.setdefault("other", {"labels": {"ru": "Другое", "lv": "Cits", "en": "Other"}, "items": []})
+
+    for p in products:
+        cat = getattr(p, "category", None) or "doors"
+        if cat not in grouped:
+            cat = "other"
+        grouped[cat]["items"].append(p)
+
+    return render_template(
+        "admin/products.html",
+        grouped=grouped,
+        show=show,
+        lang=session.get("lang", "ru")
+    )
 
 
 @app.route("/admin/products/delete/<int:id>", methods=["POST"])

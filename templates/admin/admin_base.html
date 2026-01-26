@@ -50,6 +50,17 @@
 
 <!-- SIDE MENU -->
 <div id="sideMenu" class="side-menu">
+    <a href="{{ url_for('catalog', cat='all', lang=lang) }}">Каталог</a>
+
+<hr>
+
+{% for c in menu_categories %}
+  <a href="{{ url_for('catalog', cat=c.slug, lang=lang) }}">
+    {% if lang == 'lv' %}{{ c.title_lv }}
+    {% elif lang == 'en' %}{{ c.title_en }}
+    {% else %}{{ c.title_ru }}{% endif %}
+  </a>
+{% endfor %}
 
     <!-- QUICK ACTIONS (fast, no duplicates) -->
     <div class="quick-actions">

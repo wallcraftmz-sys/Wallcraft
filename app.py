@@ -328,9 +328,20 @@ class AdminAuditLog(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
+class Category(db.Model):
+    __tablename__ = "category"
+
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(60), unique=True, nullable=False)   # например: doors, windows, wallpaper
+    title_ru = db.Column(db.String(120), nullable=False)
+    title_lv = db.Column(db.String(120), nullable=False)
+    title_en = db.Column(db.String(120), nullable=False)
+    sort = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+
+
 class Product(db.Model):
     __tablename__ = "product"
-    __table_args__ = {"extend_existing": True}  # фикс для ошибки "Table 'product' is already defined"
 
     id = db.Column(db.Integer, primary_key=True)
     name_ru = db.Column(db.String(200), nullable=False)
@@ -338,7 +349,13 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200))
     is_active = db.Column(db.Boolean, default=True)
-    category = db.Column(db.String(50), default="doors")
+
+    # новая нормальная категория
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
+    category = db.relationship("Category", backref="products")
+
+    # (опционально) оставь старое поле, чтобы ничего не ломать при миграции
+    legacy_category = db.Column(db.String(50), nullable=True)
 
 
 # ======================
@@ -376,6 +393,43 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
+with app.app_context():
+    db.create_all()
+
+    # 1) если старое поле category уже было — переименуем в legacy_category (мягко)
+    try:
+        db.session.execute(text("ALTER TABLE product RENAME COLUMN category TO legacy_category"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    # 2) добавим category_id
+    try:
+        db.session.execute(text("ALTER TABLE product ADD COLUMN category_id INTEGER"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    # 3) создадим дефолтные категории, если их нет
+    def ensure_category(slug, ru, lv, en, sort):
+        if not Category.query.filter_by(slug=slug).first():
+            db.session.add(Category(slug=slug, title_ru=ru, title_lv=lv, title_en=en, sort=sort, is_active=True))
+
+    ensure_category("wallpaper", "Обои", "Tapetes", "Wallpaper", 1)
+    ensure_category("doors", "Двери", "Durvis", "Doors", 2)
+    ensure_category("windows", "Окна", "Logi", "Windows", 3)
+    db.session.commit()
+
+    # 4) бэкап: привяжем старые товары по legacy_category к новым
+    try:
+        mapping = {c.slug: c.id for c in Category.query.all()}
+        products = Product.query.filter(Product.category_id.is_(None)).all()
+        for p in products:
+            slug = (p.legacy_category or "").strip() or "doors"
+            p.category_id = mapping.get(slug, mapping.get("doors"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -544,6 +598,17 @@ def inject_cart_total():
     cart = session.get("cart", {})
     return dict(cart_total_items=sum(cart.values()))
 
+@app.context_processor
+def inject_categories_menu():
+    try:
+        cats = (
+            Category.query.filter_by(is_active=True)
+            .order_by(Category.sort.asc(), Category.id.asc())
+            .all()
+        )
+    except Exception:
+        cats = []
+    return dict(menu_categories=cats)
 
 # ======================
 # CORE-16: BREADCRUMBS
@@ -747,8 +812,32 @@ def faq():
 
 @app.route("/catalog")
 def catalog():
-    products = Product.query.filter_by(is_active=True).all()
-    return render_template("catalog.html", products=products, lang=session.get("lang", "ru"))
+    slug = request.args.get("cat", "all")
+
+    categories = (
+        Category.query.filter_by(is_active=True)
+        .order_by(Category.sort.asc(), Category.id.asc())
+        .all()
+    )
+
+    q = Product.query.filter_by(is_active=True)
+
+    if slug != "all":
+        cat = Category.query.filter_by(slug=slug, is_active=True).first()
+        if cat:
+            q = q.filter(Product.category_id == cat.id)
+        else:
+            slug = "all"
+
+    products = q.order_by(Product.id.desc()).all()
+
+    return render_template(
+        "catalog.html",
+        categories=categories,
+        active_cat=slug,
+        products=products,
+        lang=session.get("lang", "ru"),
+    )
 
 
 # ======================

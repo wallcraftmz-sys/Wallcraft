@@ -7,12 +7,24 @@ from flask import (
     redirect,
     url_for,
     jsonify,
-    flash
+    flash,
+    render_template_string,
+    Response,
 )
 import os
+import re
+import time
+import uuid
+import secrets
+import logging
+import csv
 import requests
-from datetime import timedelta
-from datetime import datetime
+from io import StringIO
+from datetime import timedelta, datetime
+from pathlib import Path
+from urllib.parse import urlparse, urljoin
+from functools import wraps
+from collections import defaultdict, deque
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -21,22 +33,17 @@ from flask_login import (
     login_user,
     logout_user,
     current_user,
-    login_required
+    login_required,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
 from werkzeug.utils import secure_filename
-import uuid
-import secrets
-from flask import render_template_string
+from sqlalchemy import text, or_
 from PIL import Image
-import time
-from collections import defaultdict, deque
-from flask import abort
-from pathlib import Path
-import re
-from urllib.parse import urlparse, urljoin
 
+
+# ======================
+# SECURITY: SAFE REDIRECT + INPUT NORMALIZATION
+# ======================
 def safe_redirect_target(target: str):
     """
     Разрешает редирект ТОЛЬКО на свой домен/внутренние пути.
@@ -44,28 +51,27 @@ def safe_redirect_target(target: str):
     """
     if not target:
         return None
-
     try:
-        host_url = request.host_url  # например https://wallcraft.lv/
+        host_url = request.host_url
         test_url = urljoin(host_url, target)
         host_parts = urlparse(host_url)
         test_parts = urlparse(test_url)
 
         if test_parts.scheme in ("http", "https") and host_parts.netloc == test_parts.netloc:
-            # возвращаем нормализованный внутренний путь
             return test_parts.path + (("?" + test_parts.query) if test_parts.query else "")
     except Exception:
         pass
-
     return None
+
 
 def norm_text(s: str, max_len: int = 120) -> str:
     if not s:
         return ""
     s = str(s).strip()
-    s = re.sub(r"\s+", " ", s)  # убираем двойные пробелы
-    s = s.replace("\x00", "")   # убираем нулевой байт
+    s = re.sub(r"\s+", " ", s)
+    s = s.replace("\x00", "")
     return s[:max_len]
+
 
 def norm_contact(s: str, max_len: int = 80) -> str:
     if not s:
@@ -73,76 +79,102 @@ def norm_contact(s: str, max_len: int = 80) -> str:
     s = str(s).strip()
     s = re.sub(r"\s+", " ", s)
     s = s.replace("\x00", "")
-
-    # если похоже на телефон — чистим до + и цифр
     if any(ch.isdigit() for ch in s) and ("@" not in s):
         s = re.sub(r"[^0-9+]", "", s)
-
     return s[:max_len]
-# ======================
-# ADMIN ACCESS CONTROL
-# ======================
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not current_user.is_authenticated:
-            return redirect(url_for("login"))
-
-        if getattr(current_user, "role", None) != "admin":
-            return redirect(url_for("profile"))
-
-        return f(*args, **kwargs)
-    return decorated
-
-
-# ======================
-# TELEGRAM
-# ======================
-def send_telegram(message: str):
-    token = os.getenv("TG_BOT_TOKEN")
-    chat_id = os.getenv("TG_CHAT_ID")
-
-    if not token or not chat_id:
-        print("❌ Telegram ENV vars not set:", {
-            "TG_BOT_TOKEN": bool(token),
-            "TG_CHAT_ID": bool(chat_id)
-        })
-        return False
-
-    try:
-        r = requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": message},
-            timeout=10
-        )
-
-        print("✅ TG response:", r.status_code, r.text)
-
-        return r.ok
-    except Exception as e:
-        print("❌ TG ERROR:", repr(e))
-        return False
 
 
 # ======================
 # APP CONFIG
 # ======================
 app = Flask(__name__)
-# =========================
-# #22: Simple rate limit (in-memory)
-# =========================
 
+
+# ======================
+# CORE-9: LOGGING
+# ======================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("wallcraft")
+
+
+# ======================
+# CORE-10: CONFIG dev/prod
+# ======================
+class BaseConfig:
+    SECRET_KEY = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "Lax"
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8MB upload limit (CORE-19/SEC)
+
+
+class ProdConfig(BaseConfig):
+    DEBUG = False
+    TESTING = False
+
+
+class DevConfig(BaseConfig):
+    DEBUG = True
+    TESTING = False
+
+
+APP_ENV = os.getenv("APP_ENV", "prod").lower()
+app.config.from_object(DevConfig if APP_ENV == "dev" else ProdConfig)
+app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
+
+# Railway / ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+# Cookies
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    REMEMBER_COOKIE_HTTPONLY=True,
+    REMEMBER_COOKIE_SAMESITE="Lax",
+)
+
+# Uploads
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# Sessions
+app.permanent_session_lifetime = timedelta(days=7)
+app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)
+
+# DB
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# ======================
+# #22: Simple rate limit (in-memory)
+# ======================
 _rl_hits = defaultdict(lambda: deque())  # key -> timestamps
 
 
 def _rl_key(scope: str) -> str:
-    # scope примеры: "login:POST", "checkout:POST"
     xff = request.headers.get("X-Forwarded-For", "")
     ip = xff.split(",")[0].strip() if xff else (request.remote_addr or "unknown")
     return f"{scope}:{ip}"
 
 
-def rate_limit(scope: str, limit: int, window_sec: int) -> bool:
+def _rl_allow(scope: str, limit: int, window_sec: int) -> bool:
     """
     True  -> разрешаем
     False -> превышен лимит
@@ -151,7 +183,6 @@ def rate_limit(scope: str, limit: int, window_sec: int) -> bool:
     key = _rl_key(scope)
     q = _rl_hits[key]
 
-    # чистим старые
     while q and (now - q[0]) > window_sec:
         q.popleft()
 
@@ -162,30 +193,18 @@ def rate_limit(scope: str, limit: int, window_sec: int) -> bool:
     return True
 
 
-def rate_limit_or_429(scope: str, limit: int, window_sec: int, message: str):
-    if not rate_limit(scope, limit, window_sec):
-        return render_template(
-            "errors/429.html",
-            message=message,
-            lang=session.get("lang", "ru")
-        ), 429
-    return None
 # =========================
 # #26B: Anti brute-force by IP (login)
 # =========================
-MAX_FAILS = 8          # сколько неверных попыток допускаем
-WINDOW_SEC = 10 * 60   # окно 10 минут
-BAN_SEC = 30 * 60      # бан 30 минут
+MAX_FAILS = 8
+WINDOW_SEC = 10 * 60
+BAN_SEC = 30 * 60
 
 _failed_logins = defaultdict(lambda: deque())  # ip -> timestamps
 _banned_until = {}  # ip -> unix time
 
 
 def _client_ip():
-    """
-    Railway обычно прокидывает реальный IP через X-Forwarded-For.
-    Берём первый IP.
-    """
     xff = request.headers.get("X-Forwarded-For", "")
     if xff:
         return xff.split(",")[0].strip()
@@ -213,7 +232,6 @@ def register_failed_attempt(ip: str):
     now = time.time()
     _cleanup_old(ip, now)
     _failed_logins[ip].append(now)
-
     if len(_failed_logins[ip]) >= MAX_FAILS:
         _banned_until[ip] = now + BAN_SEC
 
@@ -221,73 +239,6 @@ def register_failed_attempt(ip: str):
 def reset_attempts(ip: str):
     _failed_logins.pop(ip, None)
     _banned_until.pop(ip, None)
-# ======================
-# CORE-9: LOGGING
-# ======================
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
-logger = logging.getLogger("wallcraft")
-# ======================
-# CORE-10: CONFIG dev/prod
-# ======================
-class BaseConfig:
-    SECRET_KEY = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = "Lax"
-    REMEMBER_COOKIE_HTTPONLY = True
-    REMEMBER_COOKIE_SAMESITE = "Lax"
-    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # CORE-19/SEC: 8MB upload limit
-
-class ProdConfig(BaseConfig):
-    DEBUG = False
-    TESTING = False
-
-class DevConfig(BaseConfig):
-    DEBUG = True
-    TESTING = False
-
-APP_ENV = os.getenv("APP_ENV", "prod").lower()
-app.config.from_object(DevConfig if APP_ENV == "dev" else ProdConfig)
-app.secret_key = os.getenv("SECRET_KEY", "wallcraft_super_secret_key")
-UPLOAD_FOLDER = "static/uploads"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
-
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-# Railway / ProxyFix
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-
-# Cookies
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    REMEMBER_COOKIE_HTTPONLY=True,
-    REMEMBER_COOKIE_SAMESITE="Lax",
-)
-
-# 🔥 DATABASE (КРИТИЧНО)
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set")
-
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Sessions
-app.permanent_session_lifetime = timedelta(days=7)
-app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=7)
 
 
 # ======================
@@ -298,6 +249,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
+
 
 @login_manager.unauthorized_handler
 def unauthorized():
@@ -327,7 +279,6 @@ class Order(db.Model):
     total = db.Column(db.Float, nullable=False)
 
     status = db.Column(db.String(30), default="new")
-
     is_deleted = db.Column(db.Boolean, default=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -339,7 +290,6 @@ class Product(db.Model):
     name_lv = db.Column(db.String(200), nullable=False)
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200))
-
     is_active = db.Column(db.Boolean, default=True)
 
 
@@ -367,24 +317,28 @@ class OrderComment(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 class SiteStepProgress(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     step_id = db.Column(db.Integer, unique=True, nullable=False)
     done = db.Column(db.Boolean, default=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 class AdminAuditLog(db.Model):
     __tablename__ = "admin_audit_logs"
 
     id = db.Column(db.Integer, primary_key=True)
     admin_username = db.Column(db.String(120), nullable=False)
-    action = db.Column(db.String(120), nullable=False)          # например: "order_status_change"
-    entity = db.Column(db.String(60), nullable=True)            # например: "Order", "Product"
-    entity_id = db.Column(db.Integer, nullable=True)            # id заказа/товара
+    action = db.Column(db.String(120), nullable=False)
+    entity = db.Column(db.String(60), nullable=True)
+    entity_id = db.Column(db.Integer, nullable=True)
     ip = db.Column(db.String(64), nullable=True)
     user_agent = db.Column(db.String(255), nullable=True)
-    details = db.Column(db.Text, nullable=True)                 # что именно произошло
+    details = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
 # ======================
 # USER LOADER
 # ======================
@@ -396,37 +350,65 @@ def load_user(user_id):
 # ======================
 # INIT DB (SAFE)
 # ======================
-from sqlalchemy import text, or_
-from io import StringIO
-import csv
-from flask import Response
-
 with app.app_context():
     db.create_all()
 
     # migration: order.is_deleted
     try:
-        db.session.execute(
-            text('ALTER TABLE "order" ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE')
-        )
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE'))
         db.session.commit()
     except Exception:
         db.session.rollback()
 
     # migration: product.is_active
     try:
-        db.session.execute(
-            text("ALTER TABLE product ADD COLUMN is_active BOOLEAN DEFAULT TRUE")
-        )
+        db.session.execute(text("ALTER TABLE product ADD COLUMN is_active BOOLEAN DEFAULT TRUE"))
         db.session.commit()
     except Exception:
         db.session.rollback()
 
-    # ✅ SECURITY-35: admin_audit_logs table exists (создастся через db.create_all)
-    # Если таблица уже есть — ничего не будет.
-    # Если таблицы нет — создастся автоматически, если ты добавил модель AdminAuditLog.
+
+# ======================
+# ADMIN ACCESS CONTROL
+# ======================
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for("login"))
+        if getattr(current_user, "role", None) != "admin":
+            return redirect(url_for("profile"))
+        return f(*args, **kwargs)
+
+    return decorated
 
 
+# ======================
+# TELEGRAM
+# ======================
+def send_telegram(message: str):
+    token = os.getenv("TG_BOT_TOKEN")
+    chat_id = os.getenv("TG_CHAT_ID")
+    if not token or not chat_id:
+        logger.warning("Telegram ENV vars not set")
+        return False
+
+    try:
+        r = requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": message},
+            timeout=10,
+        )
+        logger.info("TG response: %s %s", r.status_code, r.text)
+        return r.ok
+    except Exception as e:
+        logger.exception("TG error: %r", e)
+        return False
+
+
+# ======================
+# CONSTANTS
+# ======================
 ORDER_STATUSES = {
     "new": {"ru": "Новый", "lv": "Jauns", "en": "New"},
     "confirmed": {"ru": "В работе", "lv": "Darbā", "en": "In progress"},
@@ -444,7 +426,6 @@ ALLOWED_STATUS_TRANSITIONS = {
 }
 
 SITE_STEPS = [
-    # CORE / STRUCTURE (1–20)
     (1, "Core", "Единая структура шаблонов (base/admin_base)"),
     (2, "Core", "Единые компоненты кнопок/таблиц/форм"),
     (3, "Core", "Единые сообщения flash (success/error)"),
@@ -465,8 +446,6 @@ SITE_STEPS = [
     (18, "Core", "Валидация форм сервер/клиент"),
     (19, "Core", "Сжатие/оптимизация изображений"),
     (20, "Core", "Проверка корректности ссылок/меню"),
-
-    # SECURITY (21–40)
     (21, "Security", "CSRF на все формы"),
     (22, "Security", "Rate limit на login/checkout"),
     (23, "Security", "Блок повторной отправки checkout"),
@@ -482,77 +461,13 @@ SITE_STEPS = [
     (33, "Security", "Роли (admin/user) (есть)"),
     (34, "Security", "Защита админки (есть)"),
     (35, "Security", "Аудит действий админа (лог)"),
-    (36, "Security", "CSP headers"),
-    (37, "Security", "HSTS headers"),
-    (38, "Security", "X-Frame-Options / clickjacking"),
-    (39, "Security", "Sanitize выводимых данных"),
-    (40, "Security", "Бэкап базы данных"),
-
-    # CATALOG / PRODUCTS (41–70)
-    (41, "Catalog", "Категории товаров"),
-    (42, "Catalog", "Фильтры по цене/категории"),
-    (43, "Catalog", "Сортировка по цене/новизне"),
-    (44, "Catalog", "Поиск по каталогу"),
-    (45, "Catalog", "Страница товара (детально)"),
-    (46, "Catalog", "Галерея изображений товара"),
-    (47, "Catalog", "Товар: описание RU/LV/EN"),
-    (48, "Catalog", "Товар: SEO title/description"),
-    (49, "Catalog", "Товар: наличие/склад"),
-    (50, "Catalog", "Товар: вариации (цвет/размер)"),
-    (51, "Catalog", "Товар: скидка/старая цена"),
-    (52, "Catalog", "Товар: штрихкод/SKU"),
-    (53, "Catalog", "Массовое редактирование товаров"),
-    (54, "Catalog", "Импорт товаров CSV"),
-    (55, "Catalog", "Экспорт товаров CSV"),
     (56, "Catalog", "Архив товаров (есть is_active)"),
-    (57, "Catalog", "История изменений товара"),
-    (58, "Catalog", "Лимит количества в корзине"),
-    (59, "Catalog", "Похожие товары"),
-    (60, "Catalog", "Популярные товары"),
-    (61, "Catalog", "Новинки"),
-    (62, "Catalog", "Хиты продаж"),
-    (63, "Catalog", "Блок “Вы недавно смотрели”"),
     (64, "Catalog", "Lazy-load изображений"),
-    (65, "Catalog", "WebP версии картинок"),
-    (66, "Catalog", "Нормализация цен (2 знака)"),
-    (67, "Catalog", "Ограничение длины названий в UI"),
     (68, "Catalog", "Проверка “товар скрыт” на всех страницах"),
-    (69, "Catalog", "Кнопка “поделиться товаром”"),
-    (70, "Catalog", "Отзывы о товаре"),
-
-    # CART / CHECKOUT (71–100)
-    (71, "Checkout", "Корзина: удаление товара"),
     (72, "Checkout", "Корзина: пересчет суммы (есть)"),
-    (73, "Checkout", "Корзина: сохранение между сессиями"),
-    (74, "Checkout", "Корзина: промокод"),
-    (75, "Checkout", "Корзина: скидка по промокоду"),
-    (76, "Checkout", "Checkout: адрес доставки"),
-    (77, "Checkout", "Checkout: способ доставки"),
-    (78, "Checkout", "Checkout: способ оплаты"),
-    (79, "Checkout", "Checkout: подтверждение условий"),
-    (80, "Checkout", "Checkout: email уведомление клиенту"),
-    (81, "Checkout", "Checkout: SMS уведомление"),
-    (82, "Checkout", "Checkout: инвойс/счет"),
-    (83, "Checkout", "Checkout: сохранение адресов профиля"),
-    (84, "Checkout", "Checkout: комментарий клиента к заказу"),
     (85, "Checkout", "Checkout: контроль дублей (есть токен)"),
     (86, "Checkout", "Checkout: антиспам (есть)"),
     (87, "Checkout", "Checkout: валидация телефона/почты (есть)"),
-    (88, "Checkout", "Checkout: повторный заказ"),
-    (89, "Checkout", "Checkout: статус оплаты"),
-    (90, "Checkout", "Checkout: webhook платежа"),
-    (91, "Checkout", "Автогенерация номера заказа"),
-    (92, "Checkout", "Время обработки/ETA"),
-    (93, "Checkout", "Локализация валюты/формата"),
-    (94, "Checkout", "Ограничения по стране доставки"),
-    (95, "Checkout", "Бесплатная доставка от суммы"),
-    (96, "Checkout", "Налоги/НДС"),
-    (97, "Checkout", "Подарочная упаковка"),
-    (98, "Checkout", "Купоны на подарочную карту"),
-    (99, "Checkout", "Согласие на маркетинг"),
-    (100, "Checkout", "Согласие на обработку данных"),
-
-    # ORDERS / ADMIN (101–140)
     (101, "Orders", "Фильтр активные/архив (есть)"),
     (102, "Orders", "Автоархив по completed (есть)"),
     (103, "Orders", "Поиск заказов (есть)"),
@@ -563,101 +478,12 @@ SITE_STEPS = [
     (108, "Orders", "История статусов (есть)"),
     (109, "Orders", "Восстановление заказа из архива (есть)"),
     (110, "Orders", "Удаление заказа навсегда (есть)"),
-    (111, "Orders", "Фильтр по статусу"),
-    (112, "Orders", "Фильтр по дате (с/по)"),
-    (113, "Orders", "Фильтр по сумме (min/max)"),
-    (114, "Orders", "Изменение контакта/имени заказа"),
-    (115, "Orders", "Изменение состава заказа"),
-    (116, "Orders", "Скрытие персональных данных (GDPR)"),
-    (117, "Orders", "Теги заказов"),
-    (118, "Orders", "Приоритет заказа"),
-    (119, "Orders", "Назначение ответственного"),
-    (120, "Orders", "Автосмена статуса по оплате"),
-    (121, "Orders", "Автосмена статуса по доставке"),
-    (122, "Orders", "Шаблоны сообщений клиенту"),
-    (123, "Orders", "Email клиенту из админки"),
-    (124, "Orders", "SMS клиенту из админки"),
-    (125, "Orders", "Экспорт в XLSX"),
-    (126, "Orders", "Отчет по продажам"),
-    (127, "Orders", "Отчет по товарам"),
-    (128, "Orders", "Отчет по источникам"),
-    (129, "Orders", "Сверка оплат"),
-    (130, "Orders", "Возвраты"),
-    (131, "Orders", "Рефанды"),
-    (132, "Orders", "Частичная отгрузка"),
-    (133, "Orders", "Пакетная печать"),
-    (134, "Orders", "Пакетная смена статуса"),
-    (135, "Orders", "Логи действий админов"),
-    (136, "Orders", "Роли: менеджер/оператор"),
-    (137, "Orders", "Ограничение прав по ролям"),
     (138, "Orders", "Уведомления при новом заказе (TG есть)"),
-    (139, "Orders", "Уведомления по статусам"),
-    (140, "Orders", "Автоочистка старых сессий"),
-
-    # UX / UI (141–170)
-    (141, "UX", "Адаптивная шапка"),
     (142, "UX", "Меню для админа (есть)"),
-    (143, "UX", "Меню для пользователя"),
     (144, "UX", "Быстрые действия без дублей (есть в admin_base)"),
-    (145, "UX", "Исправить “контент залезает под шапку”"),
-    (146, "UX", "Ширина меню 50% экрана"),
-    (147, "UX", "Анимации открытия/закрытия меню"),
-    (148, "UX", "Плавающая кнопка корзины"),
-    (149, "UX", "Skeleton loaders"),
-    (150, "UX", "Пустые состояния (нет товаров/нет заказов)"),
-    (151, "UX", "Toast уведомления"),
-    (152, "UX", "Подтверждение опасных действий"),
-    (153, "UX", "Единые размеры кнопок"),
-    (154, "UX", "Единые поля ввода"),
-    (155, "UX", "Темная тема"),
-    (156, "UX", "Автосохранение форм"),
-    (157, "UX", "Избранное"),
-    (158, "UX", "Сравнение"),
-    (159, "UX", "Промо баннеры"),
-    (160, "UX", "Карта сайта для пользователей"),
-    (161, "UX", "Кнопка “наверх”"),
-    (162, "UX", "Плавная прокрутка"),
-    (163, "UX", "Шрифты и типографика"),
-    (164, "UX", "Единый стиль карточек"),
-    (165, "UX", "Микроанимации корзины"),
-    (166, "UX", "Фокус/outline доступность"),
-    (167, "UX", "ARIA атрибуты"),
-    (168, "UX", "Контрастность"),
-    (169, "UX", "Локальные форматы телефона LV"),
-    (170, "UX", "Скрытие дубликатов ссылок в меню"),
-
-    # OPS / QUALITY (171–200)
-    (171, "Ops", "Мониторинг ошибок (Sentry)"),
-    (172, "Ops", "Метрики (Prometheus/сервис)"),
-    (173, "Ops", "Логи запросов"),
-    (174, "Ops", "CI/CD pipeline"),
-    (175, "Ops", "Unit tests"),
-    (176, "Ops", "Integration tests"),
-    (177, "Ops", "Lint/format (black/isort)"),
-    (178, "Ops", "Pre-commit хуки"),
-    (179, "Ops", "Автодеплой при push"),
-    (180, "Ops", "Rollback стратегия"),
-    (181, "Ops", "Миграции Alembic"),
-    (182, "Ops", "Ротация секретов"),
-    (183, "Ops", "Конфиги окружений Railway"),
-    (184, "Ops", "Кеширование страниц/ответов"),
-    (185, "Ops", "CDN для статических файлов"),
-    (186, "Ops", "Оптимизация DB индексы"),
-    (187, "Ops", "Профилирование медленных запросов"),
-    (188, "Ops", "Очистка неиспользуемых файлов uploads"),
-    (189, "Ops", "Ограничение размера БД/архивирование"),
-    (190, "Ops", "Экспорт/импорт бэкапов"),
-    (191, "Ops", "Управление версиями API"),
-    (192, "Ops", "A/B тесты"),
-    (193, "Ops", "Фичефлаги"),
-    (194, "Ops", "Мульти-домен / canonical"),
-    (195, "Ops", "Проверка SSL/HTTPS"),
-    (196, "Ops", "Redirect www/non-www"),
-    (197, "Ops", "Скорость (Lighthouse)"),
-    (198, "Ops", "Web Vitals контроль"),
-    (199, "Ops", "Документация админки"),
-    (200, "Ops", "Runbook (что делать при ошибках)"),
 ]
+
+
 # ======================
 # LANGUAGE
 # ======================
@@ -665,7 +491,6 @@ SITE_STEPS = [
 def set_lang():
     if "lang" in request.args:
         session["lang"] = request.args.get("lang")
-
     if session.get("lang") not in ["ru", "lv", "en"]:
         session["lang"] = "ru"
 
@@ -673,6 +498,7 @@ def set_lang():
 @app.context_processor
 def inject_lang():
     return dict(lang=session.get("lang", "ru"))
+
 
 # ======================
 # CORE-5: FORMAT HELPERS
@@ -683,15 +509,19 @@ def fmt_money(x):
     except Exception:
         return f"{x} €"
 
+
 def fmt_dt(dt):
     try:
         return dt.strftime("%d.%m.%Y %H:%M")
     except Exception:
         return ""
 
+
 @app.context_processor
 def inject_formatters():
     return dict(fmt_money=fmt_money, fmt_dt=fmt_dt)
+
+
 # CSRF token into templates
 @app.context_processor
 def inject_csrf_token():
@@ -699,13 +529,15 @@ def inject_csrf_token():
         session["csrf_token"] = secrets.token_hex(16)
     return dict(csrf_token=session["csrf_token"])
 
+
 @app.context_processor
 def inject_cart_total():
     cart = session.get("cart", {})
     return dict(cart_total_items=sum(cart.values()))
 
+
 # ======================
-# CORE-16: BREADCRUMBS MAP
+# CORE-16: BREADCRUMBS
 # ======================
 BREADCRUMBS_MAP = {
     "index": ({"ru": "Главная", "lv": "Sākums", "en": "Home"}, None),
@@ -713,14 +545,10 @@ BREADCRUMBS_MAP = {
     "cart": ({"ru": "Корзина", "lv": "Grozs", "en": "Cart"}, "catalog"),
     "checkout": ({"ru": "Оформление", "lv": "Noformēšana", "en": "Checkout"}, "cart"),
     "profile": ({"ru": "Профиль", "lv": "Profils", "en": "Profile"}, "index"),
-
-    # статические страницы
     "about": ({"ru": "О нас", "lv": "Par mums", "en": "About"}, "index"),
     "policy": ({"ru": "Политика", "lv": "Politika", "en": "Policy"}, "index"),
     "shipping": ({"ru": "Доставка/Оплата", "lv": "Piegāde/Apmaksa", "en": "Shipping/Payment"}, "index"),
     "faq": ({"ru": "FAQ", "lv": "BUJ", "en": "FAQ"}, "index"),
-
-    # админка
     "admin_panel": ({"ru": "Админка", "lv": "Admin", "en": "Admin"}, "index"),
     "admin_orders": ({"ru": "Заказы", "lv": "Pasūtījumi", "en": "Orders"}, "admin_panel"),
     "admin_products": ({"ru": "Товары", "lv": "Preces", "en": "Products"}, "admin_panel"),
@@ -731,25 +559,21 @@ BREADCRUMBS_MAP = {
 def build_breadcrumbs():
     lang = session.get("lang", "ru")
     endpoint = request.endpoint
-
     if not endpoint or endpoint not in BREADCRUMBS_MAP:
         return []
 
     crumbs = []
     seen = set()
-
     cur = endpoint
+
     while cur and cur in BREADCRUMBS_MAP and cur not in seen:
         seen.add(cur)
-
         title_dict, parent = BREADCRUMBS_MAP[cur]
         title = title_dict.get(lang, title_dict.get("ru", cur))
-
         try:
             url = url_for(cur, lang=lang)
         except Exception:
             url = "#"
-
         crumbs.append({"title": title, "url": url})
         cur = parent
 
@@ -766,17 +590,12 @@ def inject_breadcrumbs():
 # SECURITY-35: ADMIN AUDIT LOG
 # ======================
 def audit_admin(action: str, entity: str = None, entity_id: int = None, details: str = None):
-    """
-    Пишет лог действий админа в БД. Не ломает сайт, даже если логирование упало.
-    """
     try:
         username = getattr(current_user, "username", "unknown")
-
         ip = request.headers.get("X-Forwarded-For", request.remote_addr)
         if ip and "," in ip:
             ip = ip.split(",")[0].strip()
-
-        ua = request.headers.get("User-Agent", "")[:255]
+        ua = (request.headers.get("User-Agent", "") or "")[:255]
 
         row = AdminAuditLog(
             admin_username=username,
@@ -794,6 +613,8 @@ def audit_admin(action: str, entity: str = None, entity_id: int = None, details:
             db.session.rollback()
         except Exception:
             pass
+
+
 # ======================
 # SECURITY: BLOCK EMPTY CHECKOUT
 # ======================
@@ -811,10 +632,27 @@ def csrf_protect_admin():
     if request.method == "POST" and request.path.startswith("/admin"):
         form_token = request.form.get("csrf_token")
         session_token = session.get("csrf_token")
-
         if not form_token or not session_token or form_token != session_token:
             flash("CSRF ошибка. Обновите страницу.", "error")
             return redirect(url_for("admin_orders"))
+
+
+# ======================
+# CORE-19: IMAGE OPTIMIZATION (WEBP)
+# ======================
+def optimize_image_to_webp(src_path: str, dst_path: str, max_size=(1600, 1600), quality: int = 82) -> bool:
+    """
+    STEP-19: конвертирует изображение в WEBP + уменьшает до max_size.
+    """
+    try:
+        with Image.open(src_path) as im:
+            im = im.convert("RGB")
+            im.thumbnail(max_size)
+            os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+            im.save(dst_path, "WEBP", quality=quality, method=6)
+        return True
+    except Exception:
+        return False
 
 
 # ======================
@@ -822,80 +660,135 @@ def csrf_protect_admin():
 # ======================
 @app.route("/")
 def index():
-    return render_template("index.html", lang=session["lang"])
+    return render_template("index.html", lang=session.get("lang", "ru"))
 
-# ======================
-# CORE-11: HEALTH CHECK
-# ======================
+
 @app.route("/health")
 def health():
     return jsonify(status="ok", time=datetime.utcnow().isoformat() + "Z")
 
-# ======================
-# CORE-4: ERROR PAGES
-# ======================
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("errors/404.html", lang=session.get("lang", "ru")), 404
+
 
 @app.errorhandler(500)
 def server_error(e):
     return render_template("errors/500.html", lang=session.get("lang", "ru")), 500
 
+
+@app.errorhandler(429)
+def too_many_requests(e):
+    return render_template(
+        "errors/429.html",
+        message="Слишком много запросов. Попробуйте позже.",
+        lang=session.get("lang", "ru"),
+    ), 429
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin",
+        "Sitemap: " + request.url_root.rstrip("/") + "/sitemap.xml",
+    ]
+    return Response("\n".join(lines), mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    pages = [
+        url_for("index", _external=True),
+        url_for("catalog", _external=True),
+        url_for("cart", _external=True),
+        url_for("about", _external=True),
+        url_for("policy", _external=True),
+        url_for("shipping", _external=True),
+        url_for("faq", _external=True),
+    ]
+    xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for p in pages:
+        xml.append(f"<url><loc>{p}</loc></url>")
+    xml.append("</urlset>")
+    return Response("\n".join(xml), mimetype="application/xml")
+
+
+@app.route("/about")
+def about():
+    return render_template("pages/about.html", lang=session.get("lang", "ru"))
+
+
+@app.route("/policy")
+def policy():
+    return render_template("pages/policy.html", lang=session.get("lang", "ru"))
+
+
+@app.route("/shipping")
+def shipping():
+    return render_template("pages/shipping.html", lang=session.get("lang", "ru"))
+
+
+@app.route("/faq")
+def faq():
+    return render_template("pages/faq.html", lang=session.get("lang", "ru"))
+
+
 @app.route("/catalog")
 def catalog():
     products = Product.query.filter_by(is_active=True).all()
-    return render_template("catalog.html", products=products, lang=session["lang"])
+    return render_template("catalog.html", products=products, lang=session.get("lang", "ru"))
 
 
+# ======================
+# AUTH
+# ======================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     ip = _client_ip()
 
-    # Если IP забанен — показываем сообщение
     if is_ip_banned(ip):
         return render_template(
             "login.html",
             error="Слишком много попыток входа. Подождите 30 минут и попробуйте снова.",
-            lang=session.get("lang", "ru")
+            lang=session.get("lang", "ru"),
         ), 429
 
     if request.method == "POST":
-
-        # ✅ #22 Rate limit на login (20 запросов в минуту с одного IP)
         if not _rl_allow("login:POST", limit=20, window_sec=60):
             return render_template(
                 "login.html",
                 error="Слишком много попыток входа. Подождите 1 минуту и попробуйте снова.",
-                lang=session.get("lang", "ru")
+                lang=session.get("lang", "ru"),
             ), 429
 
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
 
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
             reset_attempts(ip)
-            
             login_user(user, remember=True)
-            
+
             next_url = safe_redirect_target(request.args.get("next"))
             if next_url:
                 return redirect(next_url)
-            
+
             if user.role == "admin":
                 return redirect(url_for("admin_panel"))
-            else:
-                return redirect(url_for("profile"))
+            return redirect(url_for("profile"))
 
-        # Неверно — записываем попытку
         register_failed_attempt(ip)
-
         return render_template(
             "login.html",
             error="Неверный логин или пароль",
-            lang=session.get("lang", "ru")
+            lang=session.get("lang", "ru"),
         )
 
     return render_template("login.html", lang=session.get("lang", "ru"))
@@ -911,43 +804,40 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
 
         if User.query.filter_by(username=username).first():
-            return render_template(
-                "register.html",
-                error="Пользователь уже существует",
-                lang=session["lang"]
-            )
+            return render_template("register.html", error="Пользователь уже существует", lang=session.get("lang", "ru"))
 
         user = User(
             username=username,
             password=generate_password_hash(password),
-            role="user"
+            role="user",
         )
-
         db.session.add(user)
         db.session.commit()
 
         login_user(user, remember=True)
         return redirect(url_for("profile"))
 
-    return render_template("register.html", lang=session["lang"])
+    return render_template("register.html", lang=session.get("lang", "ru"))
 
 
 @app.route("/profile")
 @login_required
 def profile():
     orders = (
-        Order.query
-        .filter_by(user_id=current_user.id)
+        Order.query.filter_by(user_id=current_user.id)
         .order_by(Order.created_at.desc())
         .all()
     )
-    return render_template("profile.html", orders=orders, ORDER_STATUSES=ORDER_STATUSES)
+    return render_template("profile.html", orders=orders, ORDER_STATUSES=ORDER_STATUSES, lang=session.get("lang", "ru"))
 
 
+# ======================
+# CART
+# ======================
 @app.route("/api/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     cart = session.get("cart", {})
@@ -959,34 +849,37 @@ def add_to_cart(product_id):
 
     return jsonify(success=True, cart_total_items=sum(cart.values()))
 
+
 @app.route("/api/cart_count")
 def cart_count():
     cart = session.get("cart", {})
     return jsonify(cart_total_items=sum(cart.values()))
 
+
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
-
     items = []
-    total = 0
+    total = 0.0
 
     for pid, qty in cart.items():
         product = Product.query.get(int(pid))
-        if not product or not product.is_active:
+        if not product or not product.is_active or qty <= 0:
             continue
 
-        item_total = product.price * qty
+        item_total = float(product.price) * int(qty)
         total += item_total
 
-        items.append({
-            "id": product.id,
-            "name": product.name_ru,
-            "price": product.price,
-            "qty": qty,
-            "total": item_total,
-            "image": product.image
-        })
+        items.append(
+            {
+                "id": product.id,
+                "name": product.name_ru,
+                "price": product.price,
+                "qty": qty,
+                "total": item_total,
+                "image": product.image,
+            }
+        )
 
     return render_template("cart.html", items=items, total=total, lang=session.get("lang", "ru"))
 
@@ -1011,49 +904,41 @@ def update_cart(product_id, action):
 
     qty = cart.get(pid, 0)
     product = Product.query.get(product_id)
-    subtotal = product.price * qty if product else 0
+    subtotal = float(product.price) * int(qty) if product else 0.0
 
-    total = 0
+    total = 0.0
     for k, v in cart.items():
         p = Product.query.get(int(k))
         if p:
-            total += p.price * v
+            total += float(p.price) * int(v)
 
     return jsonify(
         success=True,
         qty=qty,
         subtotal=subtotal,
         total=total,
-        cart_total_items=sum(cart.values())
+        cart_total_items=sum(cart.values()),
     )
 
-@app.route("/admin")
-@login_required
-@admin_required
-def admin_panel():
-    return redirect(url_for("admin_orders"))
 
-
-# ===== CHECKOUT =====
-import re
-
+# ======================
+# CHECKOUT
+# ======================
 @app.route("/checkout", methods=["GET", "POST"])
 @login_required
 def checkout():
     cart = session.get("cart", {})
-
     if not cart or sum(cart.values()) == 0:
         return redirect(url_for("cart"))
 
     items = []
-    total = 0
+    total = 0.0
 
     for pid, qty in cart.items():
         product = Product.query.get(int(pid))
         if not product or qty <= 0:
             continue
-
-        subtotal = product.price * qty
+        subtotal = float(product.price) * int(qty)
         total += subtotal
         items.append(f"{product.name_ru} × {qty}")
 
@@ -1067,15 +952,14 @@ def checkout():
         session["checkout_token"] = str(uuid.uuid4())
 
     if request.method == "POST":
-
-        # ✅ #22 Rate limit на checkout (5 запросов в минуту с одного IP)
         if not _rl_allow("checkout:POST", limit=5, window_sec=60):
             return render_template(
                 "checkout.html",
                 items=items,
                 total=total,
                 error="Слишком много попыток оформления заказа. Подождите 1 минуту.",
-                checkout_token=session.get("checkout_token")
+                checkout_token=session.get("checkout_token"),
+                lang=session.get("lang", "ru"),
             ), 429
 
         name = norm_text(request.form.get("name", ""), max_len=60)
@@ -1094,7 +978,8 @@ def checkout():
                 items=items,
                 total=total,
                 error="Имя слишком короткое",
-                checkout_token=session.get("checkout_token")
+                checkout_token=session.get("checkout_token"),
+                lang=session.get("lang", "ru"),
             )
 
         email_regex = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
@@ -1105,21 +990,23 @@ def checkout():
                 items=items,
                 total=total,
                 error="Введите корректный телефон или email",
-                checkout_token=session.get("checkout_token")
+                checkout_token=session.get("checkout_token"),
+                lang=session.get("lang", "ru"),
             )
 
         if not session.get("cart"):
             return redirect(url_for("cart"))
 
         last_order_ts = session.get("last_order_ts")
-        now = datetime.utcnow().timestamp()
-        if last_order_ts and now - last_order_ts < 60:
+        now_ts = datetime.utcnow().timestamp()
+        if last_order_ts and now_ts - last_order_ts < 60:
             return render_template(
                 "checkout.html",
                 items=items,
                 total=total,
                 error="Подождите минуту перед следующим заказом",
-                checkout_token=session.get("checkout_token")
+                checkout_token=session.get("checkout_token"),
+                lang=session.get("lang", "ru"),
             )
 
         order = Order(
@@ -1129,19 +1016,18 @@ def checkout():
             items=items_text,
             total=total,
             status="new",
-            is_deleted=False
+            is_deleted=False,
         )
 
         db.session.add(order)
         db.session.commit()
 
         session["last_order_ts"] = datetime.utcnow().timestamp()
-
         session.pop("cart", None)
         session.modified = True
 
         send_telegram(
-            f"🛒 НОВЫЙ ЗАКАЗ\n"
+            "🛒 НОВЫЙ ЗАКАЗ\n"
             f"Пользователь: {current_user.username}\n"
             f"Имя: {name}\n"
             f"Контакт: {contact}\n\n"
@@ -1155,62 +1041,94 @@ def checkout():
         "checkout.html",
         items=items,
         total=total,
-        checkout_token=session.get("checkout_token")
+        checkout_token=session.get("checkout_token"),
+        lang=session.get("lang", "ru"),
     )
-    
-# ===== ADMIN PRODUCTS =====
+
+
+# ======================
+# ADMIN
+# ======================
+@app.route("/admin")
+@login_required
+@admin_required
+def admin_panel():
+    return redirect(url_for("admin_orders"))
+
+
 @app.route("/admin/products", methods=["GET", "POST"])
 @login_required
 @admin_required
 def admin_products():
     if request.method == "POST":
         file = request.files.get("image")
-
         image_path = None
 
-        # если файл есть — проверяем
+        name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
+        name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
+
+        if not name_ru or not name_lv:
+            flash("Заполните названия RU и LV", "error")
+            return redirect(url_for("admin_products"))
+
         if file and file.filename:
-            # CORE-19/SEC: upload size guard (MAX_CONTENT_LENGTH)
             if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
                 flash("Файл слишком большой", "error")
                 return redirect(url_for("admin_products"))
 
-            # SECURITY-28: MIME check
             allowed_mimes = {"image/png", "image/jpeg", "image/webp"}
             if file.mimetype not in allowed_mimes:
                 flash("Неверный тип файла (разрешены PNG/JPG/WEBP)", "error")
                 return redirect(url_for("admin_products"))
 
-            # проверяем расширение
-            if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
-                os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-                file.save(upload_path)
-
-                image_path = f"uploads/{filename}"
-            else:
+            if not allowed_file(file.filename):
                 flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
                 return redirect(url_for("admin_products"))
 
-                name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
-                name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
+            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-                product = Product(
-                name_ru=name_ru,
-                name_lv=name_lv,
-                price=float(request.form["price"]),
-                image=image_path,
-                is_active=True
-              )
+            base = secure_filename(os.path.splitext(file.filename)[0]) or "image"
+            base = f"{base}-{uuid.uuid4().hex[:8]}"
+            raw_path = os.path.join(app.config["UPLOAD_FOLDER"], base + ".upload")
+            file.save(raw_path)
 
+            webp_path = os.path.join(app.config["UPLOAD_FOLDER"], base + ".webp")
+            ok = optimize_image_to_webp(raw_path, webp_path, max_size=(1600, 1600), quality=82)
+            try:
+                os.remove(raw_path)
+            except Exception:
+                pass
+
+            if not ok:
+                flash("Не удалось обработать изображение", "error")
+                return redirect(url_for("admin_products"))
+
+            image_path = f"uploads/{base}.webp"
+        else:
+            flash("Добавьте изображение товара", "error")
+            return redirect(url_for("admin_products"))
+
+        try:
+            price = float(request.form.get("price", "0"))
+        except Exception:
+            flash("Некорректная цена", "error")
+            return redirect(url_for("admin_products"))
+
+        product = Product(
+            name_ru=name_ru,
+            name_lv=name_lv,
+            price=price,
+            image=image_path,
+            is_active=True,
+        )
         db.session.add(product)
         db.session.commit()
+
+        flash("Товар добавлен", "success")
+        audit_admin("product_create", entity="Product", entity_id=product.id, details=f"{name_ru} / {name_lv}")
         return redirect(url_for("admin_products"))
 
     show = request.args.get("show", "active")
-
     if show == "inactive":
         products = Product.query.filter_by(is_active=False).all()
     elif show == "all":
@@ -1218,7 +1136,7 @@ def admin_products():
     else:
         products = Product.query.filter_by(is_active=True).all()
 
-    return render_template("admin/products.html", products=products, show=show)
+    return render_template("admin/products.html", products=products, show=show, lang=session.get("lang", "ru"))
 
 
 @app.route("/admin/products/delete/<int:id>", methods=["POST"])
@@ -1228,6 +1146,20 @@ def delete_product(id):
     product = Product.query.get_or_404(id)
     product.is_active = False
     db.session.commit()
+    flash("Товар скрыт", "success")
+    audit_admin("product_hide", entity="Product", entity_id=product.id, details=product.name_ru)
+    return redirect(url_for("admin_products"))
+
+
+@app.route("/admin/products/restore/<int:id>", methods=["POST"])
+@login_required
+@admin_required
+def restore_product(id):
+    product = Product.query.get_or_404(id)
+    product.is_active = True
+    db.session.commit()
+    flash("Товар восстановлен", "success")
+    audit_admin("product_restore", entity="Product", entity_id=product.id, details=product.name_ru)
     return redirect(url_for("admin_products"))
 
 
@@ -1238,18 +1170,23 @@ def edit_product(id):
     product = Product.query.get_or_404(id)
 
     if request.method == "POST":
-        product.name_ru = request.form["name_ru"]
-        product.name_lv = request.form["name_lv"]
-        product.price = float(request.form["price"])
-        product.image = request.form["image"]
+        product.name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
+        product.name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
+        try:
+            product.price = float(request.form.get("price", "0"))
+        except Exception:
+            flash("Некорректная цена", "error")
+            return redirect(url_for("edit_product", id=id))
 
+        product.image = request.form.get("image", product.image)
         db.session.commit()
+        flash("Товар обновлён", "success")
+        audit_admin("product_edit", entity="Product", entity_id=product.id, details=product.name_ru)
         return redirect(url_for("admin_products"))
 
-    return render_template("admin/edit_product.html", product=product)
+    return render_template("admin/edit_product.html", product=product, lang=session.get("lang", "ru"))
 
 
-# ===== ADMIN ORDERS =====
 @app.route("/admin/orders")
 @admin_required
 def admin_orders():
@@ -1264,35 +1201,18 @@ def admin_orders():
     query = Order.query
 
     if show == "archive":
-        query = query.filter(
-            or_(
-                Order.is_deleted.is_(True),
-                Order.status.in_(ARCHIVE_STATUSES)
-            )
-        )
+        query = query.filter(or_(Order.is_deleted.is_(True), Order.status.in_(ARCHIVE_STATUSES)))
     else:
-        query = query.filter(
-            Order.is_deleted.is_(False),
-            Order.status.in_(ACTIVE_STATUSES)
-        )
+        query = query.filter(Order.is_deleted.is_(False), Order.status.in_(ACTIVE_STATUSES))
 
     if q:
         if q.isdigit():
             query = query.filter(Order.id == int(q))
         else:
             like = f"%{q}%"
-            query = query.filter(
-                or_(
-                    Order.name.ilike(like),
-                    Order.contact.ilike(like)
-                )
-            )
+            query = query.filter(or_(Order.name.ilike(like), Order.contact.ilike(like)))
 
-    pagination = (
-        query
-        .order_by(Order.created_at.desc())
-        .paginate(page=page, per_page=PER_PAGE, error_out=False)
-    )
+    pagination = query.order_by(Order.created_at.desc()).paginate(page=page, per_page=PER_PAGE, error_out=False)
 
     return render_template(
         "admin/orders.html",
@@ -1301,22 +1221,14 @@ def admin_orders():
         ORDER_STATUSES=ORDER_STATUSES,
         ALLOWED_STATUS_TRANSITIONS=ALLOWED_STATUS_TRANSITIONS,
         lang=session.get("lang", "ru"),
-        show=show
+        show=show,
     )
-
-
-@app.route("/dashboard")
-@login_required
-@admin_required
-def dashboard_redirect():
-    return redirect(url_for("admin_panel"))
 
 
 @app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
 @admin_required
 def update_order_status(order_id):
     order = Order.query.get_or_404(order_id)
-
     new_status = request.form.get("status")
     old_status = order.status
 
@@ -1332,8 +1244,6 @@ def update_order_status(order_id):
         return redirect(url_for("admin_orders"))
 
     order.status = new_status
-
-    # ✅ Авто-архив при completed (чтобы сразу ушел в Архив)
     if new_status == "completed":
         order.is_deleted = True
 
@@ -1341,12 +1251,19 @@ def update_order_status(order_id):
         order_id=order.id,
         old_status=old_status,
         new_status=new_status,
-        changed_by=current_user.username
+        changed_by=current_user.username,
     )
 
     db.session.add(history)
     db.session.commit()
 
+    flash("Статус обновлён", "success")
+    audit_admin(
+        "order_status_change",
+        entity="Order",
+        entity_id=order.id,
+        details=f"{old_status} -> {new_status}",
+    )
     return redirect(url_for("admin_orders"))
 
 
@@ -1358,19 +1275,15 @@ def delete_order(order_id):
     order.is_deleted = True
     db.session.commit()
     flash("Заказ перемещён в архив", "success")
+    audit_admin("order_archive", entity="Order", entity_id=order.id)
     return redirect(url_for("admin_orders"))
 
 
-# ======================
-# ✅ ПУНКТ 24: RESTORE ORDER
-# ======================
 @app.route("/admin/orders/restore/<int:order_id>", methods=["POST"])
 @login_required
 @admin_required
 def restore_order(order_id):
     order = Order.query.get_or_404(order_id)
-
-    # завершенный заказ логикой статусов не возвращаем назад
     if order.status == "completed":
         flash("Завершённый заказ нельзя вернуть из архива.", "error")
         return redirect(url_for("admin_orders", show="archive"))
@@ -1378,19 +1291,16 @@ def restore_order(order_id):
     order.is_deleted = False
     db.session.commit()
     flash("Заказ восстановлен из архива", "success")
+    audit_admin("order_restore", entity="Order", entity_id=order.id)
     return redirect(url_for("admin_orders", show="archive"))
 
 
-# ======================
-# ✅ ПУНКТ 25: HARD DELETE ORDER (навсегда)
-# ======================
 @app.route("/admin/orders/hard_delete/<int:order_id>", methods=["POST"])
 @login_required
 @admin_required
 def hard_delete_order(order_id):
     order = Order.query.get_or_404(order_id)
 
-    # сначала удаляем зависимые записи
     OrderStatusHistory.query.filter_by(order_id=order.id).delete()
     OrderComment.query.filter_by(order_id=order.id).delete()
 
@@ -1398,69 +1308,49 @@ def hard_delete_order(order_id):
     db.session.commit()
 
     flash("Заказ удалён навсегда", "success")
+    audit_admin("order_hard_delete", entity="Order", entity_id=order_id)
     return redirect(url_for("admin_orders", show="archive"))
-
-
-@app.route("/admin/products/restore/<int:id>", methods=["POST"])
-@login_required
-@admin_required
-def restore_product(id):
-    product = Product.query.get_or_404(id)
-    product.is_active = True
-    db.session.commit()
-    return redirect(url_for("admin_products"))
 
 
 @app.route("/admin/orders/<int:order_id>")
 @admin_required
 def admin_order_view(order_id):
     order = Order.query.get_or_404(order_id)
-
     history = (
-        OrderStatusHistory.query
-        .filter_by(order_id=order.id)
+        OrderStatusHistory.query.filter_by(order_id=order.id)
         .order_by(OrderStatusHistory.created_at.desc())
         .all()
     )
-
     return render_template(
         "admin/order_view.html",
         order=order,
         history=history,
         ORDER_STATUSES=ORDER_STATUSES,
-        lang=session.get("lang", "ru")
+        lang=session.get("lang", "ru"),
     )
 
 
-# ======================
-# ✅ ПУНКТ 27: PRINT ORDER
-# ======================
 @app.route("/admin/orders/<int:order_id>/print")
 @admin_required
 def admin_order_print(order_id):
     order = Order.query.get_or_404(order_id)
-
     history = (
-        OrderStatusHistory.query
-        .filter_by(order_id=order.id)
+        OrderStatusHistory.query.filter_by(order_id=order.id)
         .order_by(OrderStatusHistory.created_at.desc())
         .all()
     )
-
     comments = (
-        OrderComment.query
-        .filter_by(order_id=order.id)
+        OrderComment.query.filter_by(order_id=order.id)
         .order_by(OrderComment.created_at.desc())
         .all()
     )
-
     return render_template(
         "admin/order_print.html",
         order=order,
         history=history,
         comments=comments,
         ORDER_STATUSES=ORDER_STATUSES,
-        lang=session.get("lang", "ru")
+        lang=session.get("lang", "ru"),
     )
 
 
@@ -1476,55 +1366,44 @@ def export_orders_csv():
     query = Order.query
 
     if show == "archive":
-        query = query.filter(
-            or_(
-                Order.is_deleted.is_(True),
-                Order.status.in_(ARCHIVE_STATUSES)
-            )
-        )
+        query = query.filter(or_(Order.is_deleted.is_(True), Order.status.in_(ARCHIVE_STATUSES)))
     else:
-        query = query.filter(
-            Order.is_deleted.is_(False),
-            Order.status.in_(ACTIVE_STATUSES)
-        )
+        query = query.filter(Order.is_deleted.is_(False), Order.status.in_(ACTIVE_STATUSES))
 
     if q:
         if q.isdigit():
             query = query.filter(Order.id == int(q))
         else:
             like = f"%{q}%"
-            query = query.filter(
-                or_(
-                    Order.name.ilike(like),
-                    Order.contact.ilike(like)
-                )
-            )
+            query = query.filter(or_(Order.name.ilike(like), Order.contact.ilike(like)))
 
     orders = query.order_by(Order.created_at.desc()).all()
 
     si = StringIO()
     writer = csv.writer(si)
-
     writer.writerow(["ID", "Имя", "Контакт", "Состав", "Сумма", "Статус", "Дата"])
 
     for o in orders:
-        writer.writerow([
-            o.id,
-            o.name,
-            o.contact,
-            o.items,
-            f"{o.total:.2f}",
-            ORDER_STATUSES.get(o.status, {}).get("ru", o.status),
-            o.created_at.strftime("%d.%m.%Y %H:%M")
-        ])
+        writer.writerow(
+            [
+                o.id,
+                o.name,
+                o.contact,
+                o.items,
+                f"{o.total:.2f}",
+                ORDER_STATUSES.get(o.status, {}).get("ru", o.status),
+                o.created_at.strftime("%d.%m.%Y %H:%M"),
+            ]
+        )
 
     output = si.getvalue()
     si.close()
 
+    audit_admin("orders_export_csv", entity="Order", details=f"show={show} q={q}")
     return Response(
         output,
         mimetype="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=orders_{show}.csv"}
+        headers={"Content-Disposition": f"attachment; filename=orders_{show}.csv"},
     )
 
 
@@ -1533,21 +1412,26 @@ def export_orders_csv():
 def add_order_comment(order_id):
     order = Order.query.get_or_404(order_id)
 
-    text_comment = request.form.get("comment", "").strip()
+    text_comment = (request.form.get("comment", "") or "").strip()
     if not text_comment:
         return redirect(url_for("admin_order_view", order_id=order.id))
 
     comment = OrderComment(
         order_id=order.id,
         author=current_user.username,
-        text=text_comment
+        text=text_comment,
     )
-
     db.session.add(comment)
     db.session.commit()
 
+    flash("Комментарий добавлен", "success")
+    audit_admin("order_comment_add", entity="Order", entity_id=order.id, details=text_comment[:200])
     return redirect(url_for("admin_order_view", order_id=order.id))
 
+
+# ======================
+# /admin/steps_manual (ручная отметка)
+# ======================
 @app.route("/admin/steps_manual", methods=["GET", "POST"])
 @admin_required
 def admin_steps_manual():
@@ -1571,7 +1455,6 @@ def admin_steps_manual():
     progress_rows = SiteStepProgress.query.all()
     progress = {r.step_id: r.done for r in progress_rows}
 
-    # группировка по категориям
     grouped = {}
     for sid, cat, title in SITE_STEPS:
         grouped.setdefault(cat, []).append((sid, title, progress.get(sid, False)))
@@ -1580,10 +1463,7 @@ def admin_steps_manual():
     {% extends "admin/admin_base.html" %}
     {% block content %}
     <h1>📋 Чек-лист 200 шагов</h1>
-
-    <p style="opacity:0.7; margin-bottom:16px;">
-      Отмечай выполненные пункты — сохраняется в базе.
-    </p>
+    <p style="opacity:0.7; margin-bottom:16px;">Отмечай выполненные пункты — сохраняется в базе.</p>
 
     {% for cat, items in grouped.items() %}
       <div style="margin:18px 0; padding:14px; border:1px solid rgba(0,0,0,0.08); border-radius:12px;">
@@ -1611,55 +1491,6 @@ def admin_steps_manual():
     """
     return render_template_string(tmpl, grouped=grouped)
 
-# ======================
-# CORE-7: ROBOTS + SITEMAP
-# ======================
-@app.route("/robots.txt")
-def robots_txt():
-    lines = [
-        "User-agent: *",
-        "Allow: /",
-        "Disallow: /admin",
-        "Sitemap: " + request.url_root.rstrip("/") + "/sitemap.xml"
-    ]
-    return Response("\n".join(lines), mimetype="text/plain")
-
-@app.route("/sitemap.xml")
-def sitemap_xml():
-    pages = [
-        url_for("index", _external=True),
-        url_for("catalog", _external=True),
-        url_for("cart", _external=True),
-        url_for("about", _external=True),
-        url_for("policy", _external=True),
-        url_for("shipping", _external=True),
-        url_for("faq", _external=True),
-    ]
-    xml = ['<?xml version="1.0" encoding="UTF-8"?>',
-           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for p in pages:
-        xml.append("<url><loc>%s</loc></url>" % p)
-    xml.append("</urlset>")
-    return Response("\n".join(xml), mimetype="application/xml")
-
-# ======================
-# CORE-12/13/14/15: STATIC PAGES
-# ======================
-@app.route("/about")
-def about():
-    return render_template("pages/about.html", lang=session.get("lang", "ru"))
-
-@app.route("/policy")
-def policy():
-    return render_template("pages/policy.html", lang=session.get("lang", "ru"))
-
-@app.route("/shipping")
-def shipping():
-    return render_template("pages/shipping.html", lang=session.get("lang", "ru"))
-
-@app.route("/faq")
-def faq():
-    return render_template("pages/faq.html", lang=session.get("lang", "ru"))
 
 # ======================
 # CORE-20: MENU/LINK CHECK (admin)
@@ -1680,24 +1511,18 @@ def links_check():
     }
     return jsonify(ok=True, links=links)
 
+
 # ======================
 # ✅ AUTO SITE STEPS (1–200): red/yellow/green
 # ======================
-from pathlib import Path
-import re
-
 _STEP_DONE_RE = re.compile(r"\bSTEP-(\d{1,3})\b")
-_STEP_WIP_RE  = re.compile(r"\bWIP-(\d{1,3})\b")
+_STEP_WIP_RE = re.compile(r"\bWIP-(\d{1,3})\b")
 
 
 def _project_files_for_scan():
     root = Path(app.root_path)
-    files = []
+    files = [root / "app.py"]
 
-    # app.py
-    files.append(root / "app.py")
-
-    # templates, static
     tpl = root / "templates"
     st = root / "static"
 
@@ -1711,28 +1536,22 @@ def _project_files_for_scan():
 
 
 def _scan_markers():
-    """
-    Ищет маркеры:
-      STEP-123 -> done
-      WIP-123  -> in_progress
-    в app.py / templates / static.
-    """
     done_ids = set()
     wip_ids = set()
 
     for f in _project_files_for_scan():
         try:
-            text = f.read_text(encoding="utf-8", errors="ignore")
+            text_ = f.read_text(encoding="utf-8", errors="ignore")
         except Exception:
             continue
 
-        for m in _STEP_DONE_RE.findall(text):
+        for m in _STEP_DONE_RE.findall(text_):
             try:
                 done_ids.add(int(m))
             except Exception:
                 pass
 
-        for m in _STEP_WIP_RE.findall(text):
+        for m in _STEP_WIP_RE.findall(text_):
             try:
                 wip_ids.add(int(m))
             except Exception:
@@ -1749,13 +1568,11 @@ def _has_route(path: str) -> bool:
 
 
 def _template_exists(rel_path: str) -> bool:
-    p = Path(app.root_path) / "templates" / rel_path
-    return p.exists()
+    return (Path(app.root_path) / "templates" / rel_path).exists()
 
 
 def _static_exists(rel_path: str) -> bool:
-    p = Path(app.root_path) / "static" / rel_path
-    return p.exists()
+    return (Path(app.root_path) / "static" / rel_path).exists()
 
 
 def _has_model_field(model, field_name: str) -> bool:
@@ -1766,14 +1583,9 @@ def _has_model_field(model, field_name: str) -> bool:
 
 
 def build_steps_status_200():
-    """
-    Возвращает dict[step_id] -> "done" | "in_progress" | "todo"
-    """
     statuses = {sid: "todo" for (sid, _, _) in SITE_STEPS}
 
-    # 1) Маркеры STEP-/WIP-
     done_ids, wip_ids = _scan_markers()
-
     for sid in wip_ids:
         if sid in statuses:
             statuses[sid] = "in_progress"
@@ -1781,21 +1593,15 @@ def build_steps_status_200():
         if sid in statuses:
             statuses[sid] = "done"
 
-    # 2) Авто-проверки
-
-    # CORE-1: структура шаблонов
-    if (
-        _template_exists("admin/admin_base.html")
-        or _template_exists("base.html")
-        or _template_exists("base_user.html")
-    ):
+    # CORE-1
+    if _template_exists("admin/admin_base.html") or _template_exists("base.html") or _template_exists("base_user.html"):
         statuses[1] = "done"
 
-    # CORE-2: общий CSS
+    # CORE-2
     if _static_exists("css/style.css"):
         statuses[2] = "done"
 
-    # CORE-3: flash messages
+    # CORE-3
     try:
         tpl_root = Path(app.root_path) / "templates"
         candidates = [
@@ -1813,42 +1619,41 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-4: error pages
+    # CORE-4
     if _template_exists("errors/404.html") and _template_exists("errors/500.html"):
         statuses[4] = "done"
 
-    # CORE-5: форматтеры
+    # CORE-5
     if "fmt_money" in globals() and "fmt_dt" in globals():
         statuses[5] = "done"
 
-    # CORE-6: языки
+    # CORE-6
     statuses[6] = "done"
 
-    # CORE-7: robots + sitemap
+    # CORE-7
     if _has_route("/robots.txt") and _has_route("/sitemap.xml"):
         statuses[7] = "done"
 
-    # CORE-8: favicon + OG
+    # CORE-8
     if _static_exists("images/favicon.ico"):
         statuses[8] = "done"
 
-    # CORE-9: логирование
+    # CORE-9
     try:
-        import logging
         if logging.getLogger().handlers:
             statuses[9] = "done"
     except Exception:
         pass
 
-    # CORE-10: dev/prod
+    # CORE-10
     if "APP_ENV" in globals():
         statuses[10] = "done"
 
-    # CORE-11: health
+    # CORE-11
     if _has_route("/health"):
         statuses[11] = "done"
 
-    # CORE-12..15: статические страницы
+    # CORE-12..15
     if _has_route("/about") and _template_exists("pages/about.html"):
         statuses[12] = "done"
     if _has_route("/policy") and _template_exists("pages/policy.html"):
@@ -1858,59 +1663,49 @@ def build_steps_status_200():
     if _has_route("/faq") and _template_exists("pages/faq.html"):
         statuses[15] = "done"
 
-    # CORE-16: breadcrumbs (ищем по всем html)
+    # CORE-16
     try:
         has_inject = "inject_breadcrumbs" in globals()
-
         tpl_root = Path(app.root_path) / "templates"
         found_markup = False
-
         if tpl_root.exists():
             for f in tpl_root.rglob("*.html"):
                 t = f.read_text(encoding="utf-8", errors="ignore")
                 if ('aria-label="breadcrumb"' in t) or ('class="breadcrumbs"' in t):
                     found_markup = True
                     break
-
         if has_inject and found_markup:
             statuses[16] = "done"
     except Exception:
         pass
 
-    # CORE-17: UI notifications/toast
+    # CORE-17
     try:
         cssp = Path(app.root_path) / "static" / "css" / "style.css"
         jsp = Path(app.root_path) / "static" / "js" / "main.js"
-
         css_text = cssp.read_text(encoding="utf-8", errors="ignore") if cssp.exists() else ""
         js_text = jsp.read_text(encoding="utf-8", errors="ignore") if jsp.exists() else ""
-
         css_ok = (".toast" in css_text) or (".toast-container" in css_text) or ("STEP-17" in css_text)
         js_ok = ("showToast" in js_text) or ("toast" in js_text) or ("STEP-17" in js_text)
-
         if css_ok and js_ok:
             statuses[17] = "done"
     except Exception:
         pass
 
-    # CORE-18: валидация форм сервер/клиент
+    # CORE-18
     try:
         app_py = Path(app.root_path) / "app.py"
         server_ok = False
         if app_py.exists():
             t = app_py.read_text(encoding="utf-8", errors="ignore")
-            server_ok = (
-                ("email_regex" in t and "phone_regex" in t)
-                or ("len(name) < 2" in t)
-                or ("Введите корректный телефон или email" in t)
-            )
+            server_ok = ("email_regex" in t and "phone_regex" in t) or ("Введите корректный телефон или email" in t)
 
         tpl_root = Path(app.root_path) / "templates"
         client_ok = False
         if tpl_root.exists():
             for f in tpl_root.rglob("*.html"):
                 ht = f.read_text(encoding="utf-8", errors="ignore")
-                if ("required" in ht) or ("minlength" in ht) or ("pattern=" in ht):
+                if ("required" in ht) and (("minlength" in ht) or ("pattern=" in ht)):
                     client_ok = True
                     break
 
@@ -1919,125 +1714,87 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-19: сжатие/оптимизация изображений (авто-детект)
+    # CORE-19
     try:
         app_py = Path(app.root_path) / "app.py"
         if app_py.exists():
             t = app_py.read_text(encoding="utf-8", errors="ignore")
-            if ("optimize_image_to_webp" in t) or ("STEP-19" in t) or ('"WEBP"' in t and "quality=" in t):
+            if ("optimize_image_to_webp" in t) or ('"WEBP"' in t and "quality" in t):
                 statuses[19] = "done"
     except Exception:
         pass
 
-        # CORE-20: MENU/LINK CHECK (admin)
+    # CORE-20
     if _has_route("/admin/links_check"):
         statuses[20] = "done"
-        
-    # SECURITY-21: CSRF
+
+    # SECURITY-21
     if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
         statuses[21] = "done"
 
-    # SECURITY-22: rate limit present
+    # SECURITY-22
     if "_rl_allow" in globals():
         statuses[22] = "done"
 
-    # SECURITY-23: checkout exists
+    # SECURITY-23
     if "checkout" in globals():
         statuses[23] = "done"
 
-    # SECURITY-24..27 (у тебя уже сделано)
+    # SECURITY-24/27
     statuses[24] = "done"
     statuses[27] = "done"
 
-    # SECURITY-26: brute-force protection by IP
-    if (
-        "is_ip_banned" in globals()
-        and "register_failed_attempt" in globals()
-        and "reset_attempts" in globals()
-        and "_client_ip" in globals()
-    ):
+    # SECURITY-26
+    if "is_ip_banned" in globals() and "register_failed_attempt" in globals() and "reset_attempts" in globals() and "_client_ip" in globals():
         statuses[26] = "done"
 
-        # SECURITY-28: upload MIME/size check present
+    # SECURITY-28 (по факту проверок в коде)
     try:
         app_py = Path(app.root_path) / "app.py"
         if app_py.exists():
             t = app_py.read_text(encoding="utf-8", errors="ignore")
-
-            # проверяем что есть ограничения и MIME проверка
             if ("MAX_CONTENT_LENGTH" in t) and ("file.mimetype" in t) and ("allowed_mimes" in t):
                 statuses[28] = "done"
     except Exception:
         pass
 
-    # SECURITY-29: MAX_CONTENT_LENGTH
+    # SECURITY-29/30/31/32/35
     if app.config.get("MAX_CONTENT_LENGTH"):
         statuses[29] = "done"
-
-    # SECURITY-30: allowed extensions list
     if "ALLOWED_EXTENSIONS" in globals():
         statuses[30] = "done"
-
-        # SECURITY-31: input normalization present
-    try:
-        app_py = Path(app.root_path) / "app.py"
-        if app_py.exists():
-            t = app_py.read_text(encoding="utf-8", errors="ignore")
-            if ("def norm_text" in t) and ("def norm_contact" in t):
-                statuses[31] = "done"
-    except Exception:
-        pass
-
-        # SECURITY-32: safe redirect guard present
-    try:
-        app_py = Path(app.root_path) / "app.py"
-        if app_py.exists():
-            t = app_py.read_text(encoding="utf-8", errors="ignore")
-            if ("def safe_redirect_target" in t) and ("request.args.get(\"next\")" in t or "request.args.get('next')" in t):
-                statuses[32] = "done"
-    except Exception:
-        pass
-    # Эти пункты у тебя отмечены вручную
-    statuses[33] = "done"
-    statuses[34] = "done"
-
-        # SECURITY-35: admin audit log present
+    if "norm_text" in globals() and "norm_contact" in globals():
+        statuses[31] = "done"
+    if "safe_redirect_target" in globals():
+        statuses[32] = "done"
     if "audit_admin" in globals():
         statuses[35] = "done"
-    # CATALOG/PRODUCTS
-    try:
-        if _has_model_field(Product, "is_active"):
-            statuses[56] = "done"
-    except Exception:
-        pass
+
+    # Catalog flags
+    if _has_model_field(Product, "is_active"):
+        statuses[56] = "done"
 
     # Lazy-load
     try:
         tpl_root = Path(app.root_path) / "templates"
         found_lazy = False
-
         if tpl_root.exists():
             for f in tpl_root.rglob("*.html"):
                 t = f.read_text(encoding="utf-8", errors="ignore")
                 if 'loading="lazy"' in t:
                     found_lazy = True
                     break
-
         if found_lazy:
             statuses[64] = "done"
     except Exception:
         pass
 
-    # Остальные у тебя отмечены вручную
+    # Отмеченные вручную (как было у тебя)
     statuses[68] = "done"
-
-    # CART/CHECKOUT
     statuses[72] = "done"
     statuses[85] = "done"
     statuses[86] = "done"
     statuses[87] = "done"
-
-    # ORDERS/ADMIN
     statuses[101] = "done"
     statuses[102] = "done"
     statuses[103] = "done"
@@ -2049,15 +1806,12 @@ def build_steps_status_200():
     statuses[109] = "done"
     statuses[110] = "done"
     statuses[138] = "done"
-
-    # UX
     statuses[142] = "done"
     statuses[144] = "done"
 
     return statuses
 
 
-# ✅ /admin/steps только GET и показывает АВТО-статус
 @app.route("/admin/steps")
 @admin_required
 def admin_steps():
@@ -2075,9 +1829,9 @@ def admin_steps():
     return render_template(
         "admin/steps.html",
         grouped=grouped,
-        stats=dict(total=total, done=done, in_progress=wip, todo=todo)
+        stats=dict(total=total, done=done, in_progress=wip, todo=todo),
+        lang=session.get("lang", "ru"),
     )
-
 
 @app.errorhandler(429)
 def too_many_requests(e):
@@ -2086,3 +1840,6 @@ def too_many_requests(e):
         message="Слишком много запросов. Попробуйте позже.",
         lang=session.get("lang", "ru")
     ), 429
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

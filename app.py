@@ -89,7 +89,6 @@ def norm_contact(s: str, max_len: int = 80) -> str:
 # ======================
 app = Flask(__name__)
 
-
 # ======================
 # CORE-9: LOGGING
 # ======================
@@ -98,7 +97,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("wallcraft")
-
 
 # ======================
 # CORE-10: CONFIG dev/prod
@@ -109,7 +107,7 @@ class BaseConfig:
     SESSION_COOKIE_SAMESITE = "Lax"
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = "Lax"
-    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8MB upload limit (CORE-19/SEC)
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8MB upload limit
 
 
 class ProdConfig(BaseConfig):
@@ -329,15 +327,19 @@ class AdminAuditLog(db.Model):
     details = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+
 class Product(db.Model):
+    __tablename__ = "product"
+    __table_args__ = {"extend_existing": True}  # фикс для ошибки "Table 'product' is already defined"
+
     id = db.Column(db.Integer, primary_key=True)
     name_ru = db.Column(db.String(200), nullable=False)
     name_lv = db.Column(db.String(200), nullable=False)
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200))
     is_active = db.Column(db.Boolean, default=True)
-
     category = db.Column(db.String(50), default="doors")
+
 
 # ======================
 # USER LOADER
@@ -373,6 +375,7 @@ with app.app_context():
         db.session.commit()
     except Exception:
         db.session.rollback()
+
 
 # ======================
 # ADMIN ACCESS CONTROL
@@ -647,9 +650,6 @@ def csrf_protect_admin():
 # CORE-19: IMAGE OPTIMIZATION (WEBP)
 # ======================
 def optimize_image_to_webp(src_path: str, dst_path: str, max_size=(1600, 1600), quality: int = 82) -> bool:
-    """
-    STEP-19: конвертирует изображение в WEBP + уменьшает до max_size.
-    """
     try:
         with Image.open(src_path) as im:
             im = im.convert("RGB")
@@ -814,7 +814,11 @@ def register():
         password = request.form.get("password", "")
 
         if User.query.filter_by(username=username).first():
-            return render_template("register.html", error="Пользователь уже существует", lang=session.get("lang", "ru"))
+            return render_template(
+                "register.html",
+                error="Пользователь уже существует",
+                lang=session.get("lang", "ru"),
+            )
 
         user = User(
             username=username,
@@ -833,12 +837,13 @@ def register():
 @app.route("/profile")
 @login_required
 def profile():
-    orders = (
-        Order.query.filter_by(user_id=current_user.id)
-        .order_by(Order.created_at.desc())
-        .all()
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
+    return render_template(
+        "profile.html",
+        orders=orders,
+        ORDER_STATUSES=ORDER_STATUSES,
+        lang=session.get("lang", "ru"),
     )
-    return render_template("profile.html", orders=orders, ORDER_STATUSES=ORDER_STATUSES, lang=session.get("lang", "ru"))
 
 
 # ======================
@@ -968,15 +973,13 @@ def checkout():
                 lang=session.get("lang", "ru"),
             ), 429
 
-        name = norm_text(request.form.get("name", ""), max_len=60)
-        contact = norm_contact(request.form.get("contact", ""), max_len=80)
-
         form_token = request.form.get("checkout_token")
         session_token = session.get("checkout_token")
         if not form_token or form_token != session_token:
             return redirect(url_for("cart"))
 
-        session.pop("checkout_token", None)
+        name = norm_text(request.form.get("name", ""), max_len=60)
+        contact = norm_contact(request.form.get("contact", ""), max_len=80)
 
         if len(name) < 2:
             return render_template(
@@ -1028,6 +1031,9 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
+        # токен “одноразовый” — удаляем только после успешного оформления
+        session.pop("checkout_token", None)
+
         session["last_order_ts"] = datetime.utcnow().timestamp()
         session.pop("cart", None)
         session.modified = True
@@ -1072,43 +1078,45 @@ def admin_products():
     ]
 
     if request.method == "POST":
-        # CSRF (у вас общий csrf_protect_admin уже есть, но в форме token тоже оставляем)
         name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
         name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
-        category = request.form.get("category", "doors")
+        category = norm_text(request.form.get("category", "doors"), max_len=50)
+
         try:
-            price = float(request.form.get("price", "0"))
+            price = float(request.form.get("price", "0") or 0)
         except Exception:
             price = 0
 
-        file = request.files.get("image")
-        image_path = None
+        if not name_ru or not name_lv or price <= 0:
+            flash("Заполните название и корректную цену", "error")
+            return redirect(url_for("admin_products"))
 
-        # файл обязателен (как у вас в форме required)
+        file = request.files.get("image")
         if not file or not file.filename:
             flash("Добавьте изображение товара", "error")
             return redirect(url_for("admin_products"))
 
-        # размер (MAX_CONTENT_LENGTH уже ограничивает, но проверка не мешает)
         if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
             flash("Файл слишком большой", "error")
             return redirect(url_for("admin_products"))
 
-        # MIME check
         allowed_mimes = {"image/png", "image/jpeg", "image/webp"}
         if file.mimetype not in allowed_mimes:
             flash("Неверный тип файла (разрешены PNG/JPG/WEBP)", "error")
             return redirect(url_for("admin_products"))
 
-        # extension check
         if not allowed_file(file.filename):
             flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
             return redirect(url_for("admin_products"))
 
-        filename = secure_filename(file.filename)
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+        # уникальное имя, чтобы файлы не перетирались
+        ext = file.filename.rsplit(".", 1)[1].lower()
+        filename = secure_filename(f"{uuid.uuid4().hex}.{ext}")
         upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(upload_path)
+
         image_path = f"uploads/{filename}"
 
         product = Product(
@@ -1117,11 +1125,12 @@ def admin_products():
             price=price,
             image=image_path,
             is_active=True,
-            category=category
+            category=category,
         )
 
         db.session.add(product)
         db.session.commit()
+
         flash("Товар добавлен", "success")
         return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
@@ -1134,12 +1143,7 @@ def admin_products():
     else:
         products = Product.query.filter_by(is_active=True).all()
 
-    # группировка по категориям
-    grouped = {}
-    for key, labels in CATEGORIES:
-        grouped[key] = {"labels": labels, "items": []}
-
-    # если есть товары с неизвестной категорией — в "other"
+    grouped = {key: {"labels": labels, "items": []} for key, labels in CATEGORIES}
     grouped.setdefault("other", {"labels": {"ru": "Другое", "lv": "Cits", "en": "Other"}, "items": []})
 
     for p in products:
@@ -1152,7 +1156,7 @@ def admin_products():
         "admin/products.html",
         grouped=grouped,
         show=show,
-        lang=session.get("lang", "ru")
+        lang=session.get("lang", "ru"),
     )
 
 
@@ -1189,14 +1193,16 @@ def edit_product(id):
     if request.method == "POST":
         product.name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
         product.name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
+
         try:
-            product.price = float(request.form.get("price", "0"))
+            product.price = float(request.form.get("price", "0") or 0)
         except Exception:
             flash("Некорректная цена", "error")
             return redirect(url_for("edit_product", id=id))
 
         product.image = request.form.get("image", product.image)
         db.session.commit()
+
         flash("Товар обновлён", "success")
         audit_admin("product_edit", entity="Product", entity_id=product.id, details=product.name_ru)
         return redirect(url_for("admin_products"))
@@ -1275,12 +1281,7 @@ def update_order_status(order_id):
     db.session.commit()
 
     flash("Статус обновлён", "success")
-    audit_admin(
-        "order_status_change",
-        entity="Order",
-        entity_id=order.id,
-        details=f"{old_status} -> {new_status}",
-    )
+    audit_admin("order_status_change", entity="Order", entity_id=order.id, details=f"{old_status} -> {new_status}")
     return redirect(url_for("admin_orders"))
 
 
@@ -1333,11 +1334,7 @@ def hard_delete_order(order_id):
 @admin_required
 def admin_order_view(order_id):
     order = Order.query.get_or_404(order_id)
-    history = (
-        OrderStatusHistory.query.filter_by(order_id=order.id)
-        .order_by(OrderStatusHistory.created_at.desc())
-        .all()
-    )
+    history = OrderStatusHistory.query.filter_by(order_id=order.id).order_by(OrderStatusHistory.created_at.desc()).all()
     return render_template(
         "admin/order_view.html",
         order=order,
@@ -1351,16 +1348,8 @@ def admin_order_view(order_id):
 @admin_required
 def admin_order_print(order_id):
     order = Order.query.get_or_404(order_id)
-    history = (
-        OrderStatusHistory.query.filter_by(order_id=order.id)
-        .order_by(OrderStatusHistory.created_at.desc())
-        .all()
-    )
-    comments = (
-        OrderComment.query.filter_by(order_id=order.id)
-        .order_by(OrderComment.created_at.desc())
-        .all()
-    )
+    history = OrderStatusHistory.query.filter_by(order_id=order.id).order_by(OrderStatusHistory.created_at.desc()).all()
+    comments = OrderComment.query.filter_by(order_id=order.id).order_by(OrderComment.created_at.desc()).all()
     return render_template(
         "admin/order_print.html",
         order=order,
@@ -1610,15 +1599,12 @@ def build_steps_status_200():
         if sid in statuses:
             statuses[sid] = "done"
 
-    # CORE-1
     if _template_exists("admin/admin_base.html") or _template_exists("base.html") or _template_exists("base_user.html"):
         statuses[1] = "done"
 
-    # CORE-2
     if _static_exists("css/style.css"):
         statuses[2] = "done"
 
-    # CORE-3
     try:
         tpl_root = Path(app.root_path) / "templates"
         candidates = [
@@ -1636,41 +1622,32 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-4
     if _template_exists("errors/404.html") and _template_exists("errors/500.html"):
         statuses[4] = "done"
 
-    # CORE-5
     if "fmt_money" in globals() and "fmt_dt" in globals():
         statuses[5] = "done"
 
-    # CORE-6
     statuses[6] = "done"
 
-    # CORE-7
     if _has_route("/robots.txt") and _has_route("/sitemap.xml"):
         statuses[7] = "done"
 
-    # CORE-8
     if _static_exists("images/favicon.ico"):
         statuses[8] = "done"
 
-    # CORE-9
     try:
         if logging.getLogger().handlers:
             statuses[9] = "done"
     except Exception:
         pass
 
-    # CORE-10
     if "APP_ENV" in globals():
         statuses[10] = "done"
 
-    # CORE-11
     if _has_route("/health"):
         statuses[11] = "done"
 
-    # CORE-12..15
     if _has_route("/about") and _template_exists("pages/about.html"):
         statuses[12] = "done"
     if _has_route("/policy") and _template_exists("pages/policy.html"):
@@ -1680,7 +1657,6 @@ def build_steps_status_200():
     if _has_route("/faq") and _template_exists("pages/faq.html"):
         statuses[15] = "done"
 
-    # CORE-16
     try:
         has_inject = "inject_breadcrumbs" in globals()
         tpl_root = Path(app.root_path) / "templates"
@@ -1696,7 +1672,6 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-17
     try:
         cssp = Path(app.root_path) / "static" / "css" / "style.css"
         jsp = Path(app.root_path) / "static" / "js" / "main.js"
@@ -1709,7 +1684,6 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-18
     try:
         app_py = Path(app.root_path) / "app.py"
         server_ok = False
@@ -1731,7 +1705,6 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-19
     try:
         app_py = Path(app.root_path) / "app.py"
         if app_py.exists():
@@ -1741,31 +1714,24 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # CORE-20
     if _has_route("/admin/links_check"):
         statuses[20] = "done"
 
-    # SECURITY-21
     if "inject_csrf_token" in globals() and "csrf_protect_admin" in globals():
         statuses[21] = "done"
 
-    # SECURITY-22
     if "_rl_allow" in globals():
         statuses[22] = "done"
 
-    # SECURITY-23
     if "checkout" in globals():
         statuses[23] = "done"
 
-    # SECURITY-24/27
     statuses[24] = "done"
     statuses[27] = "done"
 
-    # SECURITY-26
     if "is_ip_banned" in globals() and "register_failed_attempt" in globals() and "reset_attempts" in globals() and "_client_ip" in globals():
         statuses[26] = "done"
 
-    # SECURITY-28 (по факту проверок в коде)
     try:
         app_py = Path(app.root_path) / "app.py"
         if app_py.exists():
@@ -1775,7 +1741,6 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # SECURITY-29/30/31/32/35
     if app.config.get("MAX_CONTENT_LENGTH"):
         statuses[29] = "done"
     if "ALLOWED_EXTENSIONS" in globals():
@@ -1787,11 +1752,9 @@ def build_steps_status_200():
     if "audit_admin" in globals():
         statuses[35] = "done"
 
-    # Catalog flags
     if _has_model_field(Product, "is_active"):
         statuses[56] = "done"
 
-    # Lazy-load
     try:
         tpl_root = Path(app.root_path) / "templates"
         found_lazy = False
@@ -1806,7 +1769,6 @@ def build_steps_status_200():
     except Exception:
         pass
 
-    # Отмеченные вручную (как было у тебя)
     statuses[68] = "done"
     statuses[72] = "done"
     statuses[85] = "done"
@@ -1850,13 +1812,6 @@ def admin_steps():
         lang=session.get("lang", "ru"),
     )
 
-@app.errorhandler(429)
-def too_many_requests(e):
-    return render_template(
-        "errors/429.html",
-        message="Слишком много запросов. Попробуйте позже.",
-        lang=session.get("lang", "ru")
-    ), 429
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

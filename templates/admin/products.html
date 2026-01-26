@@ -4,97 +4,93 @@
 <h1 class="page-title">Товары</h1>
 
 <div style="margin-bottom:20px; display:flex; gap:10px;">
-    <a href="{{ url_for('admin_products', show='active') }}"
-       class="admin-link {% if show == 'active' %}primary{% endif %}">
-        Активные
-    </a>
+  <a href="{{ url_for('admin_products', show='active') }}"
+     class="admin-link {% if show == 'active' %}primary{% endif %}">Активные</a>
 
-    <a href="{{ url_for('admin_products', show='inactive') }}"
-       class="admin-link {% if show == 'inactive' %}primary{% endif %}">
-        Скрытые
-    </a>
+  <a href="{{ url_for('admin_products', show='inactive') }}"
+     class="admin-link {% if show == 'inactive' %}primary{% endif %}">Скрытые</a>
 
-    <a href="{{ url_for('admin_products', show='all') }}"
-       class="admin-link {% if show == 'all' %}primary{% endif %}">
-        Все
-    </a>
+  <a href="{{ url_for('admin_products', show='all') }}"
+     class="admin-link {% if show == 'all' %}primary{% endif %}">Все</a>
 </div>
 
-<div class="product-grid admin-products">
+{% for cat_key, block in grouped.items() %}
+  <div class="admin-card" style="margin-bottom:18px;">
+    <h2 style="margin-bottom:12px;">
+      {{ block.labels[lang] if block.labels and block.labels.get(lang) else block.labels['ru'] }}
+    </h2>
 
-    <!-- ADD PRODUCT -->
-    <form method="post"
-          enctype="multipart/form-data"
-          class="product-card add-product-card">
+    <div class="product-grid admin-products">
+
+      <!-- ADD PRODUCT (внутри категории) -->
+      <form method="post" enctype="multipart/form-data" class="product-card add-product-card">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="category" value="{{ cat_key }}">
 
         <div class="product-image add-image">
-            ➕
-            <img id="preview"
-                 style="display:none;width:100%;border-radius:12px;margin-top:10px;">
+          ➕
+          <img class="preview"
+               style="display:none;width:100%;border-radius:12px;margin-top:10px;">
         </div>
 
         <div class="product-info">
-            <input name="name_ru" placeholder="Название RU" required>
-            <input name="name_lv" placeholder="Название LV" required>
-            <input name="price" type="number" step="0.01" placeholder="Цена €" required>
+          <input name="name_ru" placeholder="Название RU" required>
+          <input name="name_lv" placeholder="Название LV" required>
+          <input name="price" type="number" step="0.01" placeholder="Цена €" required>
 
-            <input type="file"
-                   name="image"
-                   accept="image/*"
-                   onchange="previewImage(event)"
-                   required>
+          <input type="file" name="image" accept="image/*" required
+                 onchange="previewImage(event, this)">
 
-            <button class="add-to-cart-btn">Добавить товар</button>
+          <button class="add-to-cart-btn" type="submit">Добавить товар</button>
         </div>
-    </form>
+      </form>
 
-    <!-- PRODUCTS -->
-    {% for product in products %}
-    <div class="product-card {% if not product.is_active %}inactive{% endif %}">
-
-        <div class="product-image">
+      <!-- PRODUCTS -->
+      {% for product in block.items %}
+        <div class="product-card {% if not product.is_active %}inactive{% endif %}">
+          <div class="product-image">
             <img src="{{ url_for('static', filename=product.image or 'images/no-image.png') }}">
-        </div>
+          </div>
 
-        <div class="product-info">
+          <div class="product-info">
             <h3 class="product-title">{{ product.name_ru }}</h3>
             <div class="product-price">{{ product.price }} €</div>
 
             <div class="admin-product-actions">
 
-                <a href="{{ url_for('edit_product', id=product.id) }}"
-                   class="admin-btn edit">✏️</a>
+              <a href="{{ url_for('edit_product', id=product.id) }}" class="admin-btn edit">✏️</a>
 
-                {% if product.is_active %}
-                    <!-- SOFT DELETE -->
-                    <form action="{{ url_for('delete_product', id=product.id) }}"
-                          method="post"
-                          onsubmit="return confirm('Скрыть товар из каталога?');">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        <button type="submit" class="admin-btn delete">❌</button>
-                    </form>
-                {% else %}
-                    <!-- RESTORE -->
-                    <form action="{{ url_for('restore_product', id=product.id) }}"
-                          method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        <button type="submit" class="admin-btn edit">♻️</button>
-                    </form>
-                {% endif %}
+              {% if product.is_active %}
+                <form action="{{ url_for('delete_product', id=product.id) }}"
+                      method="post"
+                      onsubmit="return confirm('Скрыть товар из каталога?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="admin-btn delete">❌</button>
+                </form>
+              {% else %}
+                <form action="{{ url_for('restore_product', id=product.id) }}" method="post">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="admin-btn edit">♻️</button>
+                </form>
+              {% endif %}
 
             </div>
+          </div>
         </div>
-    </div>
-    {% endfor %}
+      {% endfor %}
 
-</div>
+    </div>
+  </div>
+{% endfor %}
 
 <script>
-function previewImage(event) {
-    const img = document.getElementById("preview");
-    img.src = URL.createObjectURL(event.target.files[0]);
-    img.style.display = "block";
+function previewImage(event, input) {
+  const card = input.closest("form");
+  if (!card) return;
+  const img = card.querySelector(".preview");
+  if (!img) return;
+  img.src = URL.createObjectURL(event.target.files[0]);
+  img.style.display = "block";
 }
 </script>
 

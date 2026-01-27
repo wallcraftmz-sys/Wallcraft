@@ -1925,6 +1925,28 @@ def admin_steps():
     )
 
 
+@app.route("/admin/steps")
+@admin_required
+def admin_steps():
+    statuses = build_steps_status_200()
+
+    grouped = {}
+    for sid, cat, title in SITE_STEPS:
+        grouped.setdefault(cat, []).append((sid, title, statuses.get(sid, "todo")))
+
+    total = len(SITE_STEPS)
+    done = sum(1 for s in statuses.values() if s == "done")
+    wip = sum(1 for s in statuses.values() if s == "in_progress")
+    todo = total - done - wip
+
+    return render_template(
+        "admin/steps.html",
+        grouped=grouped,
+        stats=dict(total=total, done=done, in_progress=wip, todo=todo),
+        lang=session.get("lang", "ru"),
+    )
+
+
  @app.route("/admin/categories", methods=["GET", "POST"])
  @login_required
  @admin_required

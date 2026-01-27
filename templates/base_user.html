@@ -29,11 +29,17 @@
     </a>
   </div>
 
-  <div class="lang-switch">
-    <a href="?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
-    <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
-    <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
-  </div>
+  <div class="header-auth">
+  {% if current_user.is_authenticated %}
+    <a class="header-link" href="{{ url_for('profile', lang=lang) }}">Профиль</a>
+    <span class="header-sep">|</span>
+    <a class="header-link" href="{{ url_for('logout', lang=lang) }}">Выйти</a>
+  {% else %}
+    <a class="header-link" href="{{ url_for('login', lang=lang) }}">Войти</a>
+    <span class="header-sep">|</span>
+    <a class="header-link" href="{{ url_for('register', lang=lang) }}">Регистрация</a>
+  {% endif %}
+</div>
 </header>
 
 <!-- OVERLAY (вне header) -->

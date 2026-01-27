@@ -1161,7 +1161,7 @@ def admin_panel():
 @login_required
 @admin_required
 def admin_products():
-    # категории из базы (чтобы можно было добавлять сколько угодно)
+    # берём категории из БД (сколько угодно — хоть 100)
     categories = (
         Category.query.filter_by(is_active=True)
         .order_by(Category.sort.asc(), Category.id.asc())
@@ -1171,7 +1171,7 @@ def admin_products():
     if request.method == "POST":
         name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
         name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
-        category_slug = norm_text(request.form.get("category", ""), max_len=50)
+        category_slug = norm_text(request.form.get("category", ""), max_len=60)
 
         try:
             price = float(request.form.get("price", "0") or 0)
@@ -1180,25 +1180,31 @@ def admin_products():
 
         if not name_ru or not name_lv or price <= 0:
             flash("Заполните название и корректную цену", "error")
-            return redirect(url_for("admin_products"))
+            return redirect(url_for("admin_products", show=request.args.get("show", "active")))
+
+        # ищем категорию по SLUG (doors/windows/wallpaper/...)
+        cat = Category.query.filter_by(slug=category_slug).first()
+        if not cat:
+            flash("Категория не найдена", "error")
+            return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
         file = request.files.get("image")
         if not file or not file.filename:
             flash("Добавьте изображение товара", "error")
-            return redirect(url_for("admin_products"))
+            return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
         if request.content_length and request.content_length > app.config.get("MAX_CONTENT_LENGTH", 0):
             flash("Файл слишком большой", "error")
-            return redirect(url_for("admin_products"))
+            return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
         allowed_mimes = {"image/png", "image/jpeg", "image/webp"}
         if file.mimetype not in allowed_mimes:
             flash("Неверный тип файла (разрешены PNG/JPG/WEBP)", "error")
-            return redirect(url_for("admin_products"))
+            return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
         if not allowed_file(file.filename):
             flash("Неверный формат файла (только png/jpg/jpeg/webp)", "error")
-            return redirect(url_for("admin_products"))
+            return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
@@ -1209,11 +1215,6 @@ def admin_products():
 
         image_path = f"uploads/{filename}"
 
-        cat = Category.query.filter_by(slug=category_slug, is_active=True).first()
-        if not cat:
-            flash("Категория не найдена", "error")
-            return redirect(url_for("admin_products"))
-
         product = Product(
             name_ru=name_ru,
             name_lv=name_lv,
@@ -1221,7 +1222,7 @@ def admin_products():
             image=image_path,
             is_active=True,
             category_id=cat.id,
-            legacy_category=category_slug,
+            legacy_category=category_slug,  # оставим строку как бэкап
         )
 
         db.session.add(product)
@@ -1230,32 +1231,38 @@ def admin_products():
         flash("Товар добавлен", "success")
         return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
-    # GET
+    # ---------- GET ----------
     show = request.args.get("show", "active")
 
-    query = Product.query
+    q = Product.query
     if show == "inactive":
-        query = query.filter_by(is_active=False)
-    elif show == "active":
-        query = query.filter_by(is_active=True)
-    # show == "all" -> без фильтра
+        q = q.filter(Product.is_active.is_(False))
+    elif show == "all":
+        pass
+    else:
+        q = q.filter(Product.is_active.is_(True))
 
-    products = query.order_by(Product.id.desc()).all()
+    products = q.order_by(Product.id.desc()).all()
 
-    # группировка под шаблон grouped[slug] = {labels..., items...}
+    # grouped: slug -> {labels:{ru/lv/en}, items:[]}
     grouped = {}
     for c in categories:
         grouped[c.slug] = {
             "labels": {"ru": c.title_ru, "lv": c.title_lv, "en": c.title_en},
             "items": [],
         }
-    grouped.setdefault("other", {"labels": {"ru": "Другое", "lv": "Cits", "en": "Other"}, "items": []})
+
+    grouped.setdefault(
+        "other",
+        {"labels": {"ru": "Другое", "lv": "Cits", "en": "Other"}, "items": []},
+    )
 
     for p in products:
-        slug = p.category.slug if p.category else (p.legacy_category or "other")
-        if slug not in grouped:
-            slug = "other"
-        grouped[slug]["items"].append(p)
+        slug = p.category.slug if p.category else (p.legacy_category or "")
+        if slug in grouped:
+            grouped[slug]["items"].append(p)
+        else:
+            grouped["other"]["items"].append(p)
 
     return render_template(
         "admin/products.html",

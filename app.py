@@ -367,50 +367,47 @@ def load_user(user_id):
 
 
 # ======================
-# INIT DB (SAFE)
+# INIT DB (SAFE) — ONE BLOCK
 # ======================
 with app.app_context():
     db.create_all()
 
-    # migration: order.is_deleted
+    # order.is_deleted
     try:
-        db.session.execute(text('ALTER TABLE "order" ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE'))
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE'))
         db.session.commit()
     except Exception:
         db.session.rollback()
 
-    # migration: product.is_active
+    # product.is_active
     try:
-        db.session.execute(text("ALTER TABLE product ADD COLUMN is_active BOOLEAN DEFAULT TRUE"))
+        db.session.execute(text("ALTER TABLE product ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"))
         db.session.commit()
     except Exception:
         db.session.rollback()
 
-    # migration: product.category
-    try:
-        db.session.execute(text("ALTER TABLE product ADD COLUMN category VARCHAR(50) DEFAULT 'doors'"))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-with app.app_context():
-    db.create_all()
-
-    # 1) если старое поле category уже было — переименуем в legacy_category (мягко)
+    # если раньше было product.category — переименуем в legacy_category
     try:
         db.session.execute(text("ALTER TABLE product RENAME COLUMN category TO legacy_category"))
         db.session.commit()
     except Exception:
         db.session.rollback()
 
-    # 2) добавим category_id
+    # на всякий случай: legacy_category может отсутствовать
     try:
-        db.session.execute(text("ALTER TABLE product ADD COLUMN category_id INTEGER"))
+        db.session.execute(text("ALTER TABLE product ADD COLUMN IF NOT EXISTS legacy_category VARCHAR(50)"))
         db.session.commit()
     except Exception:
         db.session.rollback()
 
-    # 3) создадим дефолтные категории, если их нет
+    # product.category_id
+    try:
+        db.session.execute(text("ALTER TABLE product ADD COLUMN IF NOT EXISTS category_id INTEGER"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    # дефолтные категории
     def ensure_category(slug, ru, lv, en, sort):
         if not Category.query.filter_by(slug=slug).first():
             db.session.add(Category(slug=slug, title_ru=ru, title_lv=lv, title_en=en, sort=sort, is_active=True))
@@ -420,13 +417,16 @@ with app.app_context():
     ensure_category("windows", "Окна", "Logi", "Windows", 3)
     db.session.commit()
 
-    # 4) бэкап: привяжем старые товары по legacy_category к новым
+    # привязка старых товаров к новым категориям
     try:
         mapping = {c.slug: c.id for c in Category.query.all()}
+        default_id = mapping.get("doors")
+
         products = Product.query.filter(Product.category_id.is_(None)).all()
         for p in products:
             slug = (p.legacy_category or "").strip() or "doors"
-            p.category_id = mapping.get(slug, mapping.get("doors"))
+            p.category_id = mapping.get(slug, default_id)
+
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -1208,14 +1208,16 @@ def admin_products():
 
         image_path = f"uploads/{filename}"
 
-        product = Product(
-            name_ru=name_ru,
-            name_lv=name_lv,
-            price=price,
-            image=image_path,
-            is_active=True,
-            category=category,
-        )
+        cat = Category.query.filter_by(slug=category, is_active=True).first()
+product = Product(
+    name_ru=name_ru,
+    name_lv=name_lv,
+    price=price,
+    image=image_path,
+    is_active=True,
+    category_id=(cat.id if cat else None),
+    legacy_category=category,  # чтобы не потерять строку
+)
 
         db.session.add(product)
         db.session.commit()

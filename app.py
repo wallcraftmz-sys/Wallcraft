@@ -1161,15 +1161,17 @@ def admin_panel():
 @login_required
 @admin_required
 def admin_products():
-    CATEGORIES = [
-        ("doors", {"ru": "Двери", "lv": "Durvis", "en": "Doors"}),
-        ("windows", {"ru": "Окна", "lv": "Logi", "en": "Windows"}),
-    ]
+    # категории из базы (чтобы можно было добавлять сколько угодно)
+    categories = (
+        Category.query.filter_by(is_active=True)
+        .order_by(Category.sort.asc(), Category.id.asc())
+        .all()
+    )
 
     if request.method == "POST":
         name_ru = norm_text(request.form.get("name_ru", ""), max_len=80)
         name_lv = norm_text(request.form.get("name_lv", ""), max_len=80)
-        category = norm_text(request.form.get("category", "doors"), max_len=50)
+        category_slug = norm_text(request.form.get("category", ""), max_len=50)
 
         try:
             price = float(request.form.get("price", "0") or 0)
@@ -1200,7 +1202,6 @@ def admin_products():
 
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-        # уникальное имя, чтобы файлы не перетирались
         ext = file.filename.rsplit(".", 1)[1].lower()
         filename = secure_filename(f"{uuid.uuid4().hex}.{ext}")
         upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
@@ -1208,40 +1209,53 @@ def admin_products():
 
         image_path = f"uploads/{filename}"
 
-        cat = Category.query.filter_by(slug=category, is_active=True).first()
-product = Product(
-    name_ru=name_ru,
-    name_lv=name_lv,
-    price=price,
-    image=image_path,
-    is_active=True,
-    category_id=(cat.id if cat else None),
-    legacy_category=category,  # чтобы не потерять строку
-)
+        cat = Category.query.filter_by(slug=category_slug, is_active=True).first()
+        if not cat:
+            flash("Категория не найдена", "error")
+            return redirect(url_for("admin_products"))
 
-            db.session.add(product)
-            db.session.commit()
+        product = Product(
+            name_ru=name_ru,
+            name_lv=name_lv,
+            price=price,
+            image=image_path,
+            is_active=True,
+            category_id=cat.id,
+            legacy_category=category_slug,
+        )
 
-             flash("Товар добавлен", "success")
-             return redirect(url_for("admin_products", show=request.args.get("show", "active")))
+        db.session.add(product)
+        db.session.commit()
+
+        flash("Товар добавлен", "success")
+        return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
     # GET
     show = request.args.get("show", "active")
-    if show == "inactive":
-        products = Product.query.filter_by(is_active=False).all()
-    elif show == "all":
-        products = Product.query.all()
-    else:
-        products = Product.query.filter_by(is_active=True).all()
 
-    grouped = {key: {"labels": labels, "items": []} for key, labels in CATEGORIES}
+    query = Product.query
+    if show == "inactive":
+        query = query.filter_by(is_active=False)
+    elif show == "active":
+        query = query.filter_by(is_active=True)
+    # show == "all" -> без фильтра
+
+    products = query.order_by(Product.id.desc()).all()
+
+    # группировка под шаблон grouped[slug] = {labels..., items...}
+    grouped = {}
+    for c in categories:
+        grouped[c.slug] = {
+            "labels": {"ru": c.title_ru, "lv": c.title_lv, "en": c.title_en},
+            "items": [],
+        }
     grouped.setdefault("other", {"labels": {"ru": "Другое", "lv": "Cits", "en": "Other"}, "items": []})
 
     for p in products:
-        cat = getattr(p, "category", None) or "doors"
-        if cat not in grouped:
-            cat = "other"
-        grouped[cat]["items"].append(p)
+        slug = p.category.slug if p.category else (p.legacy_category or "other")
+        if slug not in grouped:
+            slug = "other"
+        grouped[slug]["items"].append(p)
 
     return render_template(
         "admin/products.html",

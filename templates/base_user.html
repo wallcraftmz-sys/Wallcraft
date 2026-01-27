@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <!-- theme.css можно оставить, но если что-то ломается — временно убери -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
 
   <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -37,10 +36,10 @@
   </div>
 </header>
 
-<!-- OVERLAY (вне header!) -->
+<!-- OVERLAY (вне header) -->
 <div id="wcMenuOverlay" class="wc-overlay" onclick="wcMenuClose()"></div>
 
-<!-- DRAWER (вне header!) -->
+<!-- DRAWER (вне header) -->
 <aside id="wcMenu" class="wc-drawer" aria-hidden="true">
   <div class="wc-drawer-head">
     <div class="wc-brand">
@@ -57,7 +56,7 @@
   </div>
 
   <nav class="wc-nav">
-    <a class="wc-item" href="{{ url_for('catalog', cat='all', lang=lang) }}">
+    <a class="wc-item" href="{{ url_for('catalog', cat='all', lang=lang) }}" onclick="wcMenuClose()">
       <span class="wc-ico">🛍️</span>
       <span class="wc-text">Каталог</span>
     </a>
@@ -65,7 +64,7 @@
     <div class="wc-sep"></div>
 
     {% for c in menu_categories %}
-      <a class="wc-item" href="{{ url_for('catalog', cat=c.slug, lang=lang) }}">
+      <a class="wc-item" href="{{ url_for('catalog', cat=c.slug, lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">📦</span>
         <span class="wc-text">
           {% if lang == 'lv' %}{{ c.title_lv }}
@@ -77,19 +76,19 @@
 
     <div class="wc-sep"></div>
 
-    <a class="wc-item" href="{{ url_for('cart', lang=lang) }}">
+    <a class="wc-item" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
       <span class="wc-ico">🛒</span>
       <span class="wc-text">Корзина</span>
       <span class="wc-badge">{{ cart_total_items }}</span>
     </a>
 
     {% if current_user.is_authenticated %}
-      <a class="wc-item" href="{{ url_for('profile', lang=lang) }}">
+      <a class="wc-item" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">👤</span>
         <span class="wc-text">Профиль</span>
       </a>
     {% else %}
-      <a class="wc-item" href="{{ url_for('login', lang=lang) }}">
+      <a class="wc-item" href="{{ url_for('login', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">🔑</span>
         <span class="wc-text">Войти</span>
       </a>
@@ -99,22 +98,22 @@
       <div class="wc-sep"></div>
       <div class="wc-section-title">Быстрые действия</div>
 
-      <a class="wc-card" href="{{ url_for('admin_categories', lang=lang) }}">
+      <a class="wc-card" href="{{ url_for('admin_categories', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-card-ico">🗂️</span>
         <span class="wc-card-text">Категории</span>
       </a>
 
-      <a class="wc-card" href="{{ url_for('admin_products', lang=lang) }}">
+      <a class="wc-card" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-card-ico">➕</span>
         <span class="wc-card-text">Добавить товар</span>
       </a>
 
-      <a class="wc-card" href="{{ url_for('admin_orders', lang=lang) }}">
+      <a class="wc-card" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-card-ico">🧾</span>
         <span class="wc-card-text">Заказы</span>
       </a>
 
-      <a class="wc-card" href="{{ url_for('admin_steps', lang=lang) }}">
+      <a class="wc-card" href="{{ url_for('admin_steps', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-card-ico">📋</span>
         <span class="wc-card-text">200 шагов</span>
       </a>
@@ -123,7 +122,7 @@
     <div class="wc-sep"></div>
 
     {% if current_user.is_authenticated %}
-      <a class="wc-item wc-danger" href="{{ url_for('logout', lang=lang) }}">
+      <a class="wc-item wc-danger" href="{{ url_for('logout', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">🚪</span>
         <span class="wc-text">Выйти</span>
       </a>
@@ -171,6 +170,7 @@ function wcMenuOpen(){
   m.classList.add("open");
   o.classList.add("show");
   m.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
 }
 function wcMenuClose(){
   const m = document.getElementById("wcMenu");
@@ -179,6 +179,7 @@ function wcMenuClose(){
   m.classList.remove("open");
   o.classList.remove("show");
   m.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
 }
 document.addEventListener("keydown", (e)=>{
   if(e.key === "Escape") wcMenuClose();

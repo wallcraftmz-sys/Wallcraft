@@ -87,6 +87,27 @@ async function refreshCartCount() {
 }
 
 document.addEventListener("DOMContentLoaded", refreshCartCount);
-</script>    
+</script>  
+<script>
+function wcMenuOpen(){
+  const m = document.getElementById("wcMenu");
+  const o = document.getElementById("wcMenuOverlay");
+  if(!m || !o) return;
+  m.classList.add("open");
+  o.classList.add("show");
+  m.setAttribute("aria-hidden","false");
+}
+function wcMenuClose(){
+  const m = document.getElementById("wcMenu");
+  const o = document.getElementById("wcMenuOverlay");
+  if(!m || !o) return;
+  m.classList.remove("open");
+  o.classList.remove("show");
+  m.setAttribute("aria-hidden","true");
+}
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") wcMenuClose();
+});
+</script>
 </body>
 </html>

@@ -879,3 +879,189 @@ select{ padding: 6px 8px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.12
 .toast-error{ background: #8b1d1d; }
 .toast-info{ background: #1b4f8b; }
 .toast-warning{ background: #8b5a1b; }
+
+/* ===== Wallcraft Drawer Menu (mobile like 1a.lv style) ===== */
+.menu-fab{
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1200;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  font-size: 18px;
+}
+
+.wc-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s;
+  z-index: 1100;
+}
+.wc-overlay.show{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wc-drawer{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: min(84vw, 340px);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  transform: translateX(-105%);
+  transition: .22s ease;
+  z-index: 1150;
+  box-shadow: 20px 0 50px rgba(0,0,0,.16);
+  padding: 14px 14px 18px 14px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-right: 1px solid rgba(0,0,0,.06);
+}
+.wc-drawer.open{ transform: translateX(0); }
+
+.wc-drawer-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom: 10px;
+}
+
+.wc-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.wc-brand-logo{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+}
+.wc-brand-title{
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.wc-close{
+  border:0;
+  background: rgba(0,0,0,0.06);
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  font-size: 16px;
+}
+
+.wc-lang{
+  display:flex;
+  gap:10px;
+  margin: 6px 0 14px 0;
+}
+.wc-lang a{
+  padding: 8px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #111;
+  background: rgba(0,0,0,0.05);
+  font-weight: 700;
+}
+.wc-lang a.active{
+  background: rgba(220,0,0,0.12);
+  color: #b40000;
+}
+
+.wc-nav{ display:flex; flex-direction:column; gap:12px; }
+
+.wc-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding: 14px 14px;
+  border-radius: 18px;
+  text-decoration:none;
+  color:#111;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 10px 26px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.04);
+}
+.wc-item:active{ transform: scale(0.99); }
+
+.wc-ico{
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(0,0,0,0.06);
+  font-size: 18px;
+}
+.wc-text{ font-weight: 800; }
+
+.wc-badge{
+  margin-left:auto;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(220,0,0,0.12);
+  color:#b40000;
+  font-weight: 900;
+}
+
+.wc-sep{
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 6px 4px;
+}
+
+.wc-section-title{
+  margin: 2px 6px 4px 6px;
+  font-weight: 900;
+  opacity: .65;
+}
+
+.wc-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding: 14px 14px;
+  border-radius: 18px;
+  text-decoration:none;
+  color:#111;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 12px 30px rgba(0,0,0,.10);
+}
+.wc-card-ico{
+  width: 42px;
+  height: 42px;
+  border-radius: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(220,0,0,0.10);
+  font-size: 20px;
+}
+.wc-card-text{
+  font-weight: 900;
+}
+
+.wc-danger{
+  background: rgba(255, 230, 230, 0.9);
+  border-color: rgba(220,0,0,0.10);
+}

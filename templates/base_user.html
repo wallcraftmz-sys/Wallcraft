@@ -18,7 +18,7 @@
 <body>
 
 <header class="top-header">
-    <button class="menu-btn" onclick="toggleUserMenu()">☰</button>
+    <button class="menu-btn" type="button" onclick="wcMenuOpen()" aria-label="Menu">☰</button>
 
     <div class="logo-center">
         <a href="{{ url_for('index') }}" class="logo-link">
@@ -31,6 +31,10 @@
         <a href="?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
         <a href="?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
     </div>
+    <div id="wcMenuOverlay" class="wc-overlay" onclick="wcMenuClose()"></div>
+<aside id="wcMenu" class="wc-drawer" aria-hidden="true">
+  ... (твой код №2) ...
+</aside>
 </header>
 
 <main class="container">

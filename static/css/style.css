@@ -491,3 +491,149 @@ body{ background: var(--bg); color: var(--text); }
 .header-sep{
   opacity:.35;
 }
+
+/* =========================
+   Minimal Drawer Menu (no cards)
+========================= */
+
+/* Drawer container */
+.wc-drawer{
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(14px);
+  border-right: 1px solid rgba(0,0,0,0.06);
+  padding: 14px 14px 18px;
+}
+
+/* header */
+.wc-drawer-head{
+  margin-bottom: 10px;
+}
+.wc-brand-title{
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+/* lang pills minimal */
+.wc-lang{
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.wc-lang a{
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.wc-lang a.active{
+  background: rgba(230,0,0,0.10);
+  border-color: rgba(230,0,0,0.12);
+}
+
+/* remove card look */
+.wc-item,
+.wc-card{
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 14px 6px !important;
+}
+
+/* list layout */
+.wc-nav{ gap: 0; }
+
+/* each row */
+.wc-item{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  text-decoration:none;
+  color:#111;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+/* hover/active */
+.wc-item:active{ opacity: .75; transform: none; }
+
+/* icon minimal */
+.wc-ico{
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.05);
+  font-size: 16px;
+}
+
+/* text */
+.wc-text{
+  font-weight: 800;
+}
+
+/* right arrow (adds minimalist “navigation” feel) */
+.wc-item::after{
+  content: "›";
+  margin-left: auto;
+  opacity: .35;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* badge */
+.wc-badge{
+  margin-left: auto;
+  margin-right: 10px;  /* before arrow */
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(230,0,0,0.10);
+  color: #b40000;
+  font-weight: 900;
+  font-size: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* separators / titles */
+.wc-sep{
+  height: 10px;
+  background: transparent;
+  margin: 6px 0;
+}
+.wc-section-title{
+  margin: 12px 0 6px;
+  font-weight: 900;
+  opacity: .55;
+  letter-spacing: .2px;
+}
+
+/* quick actions look as minimal links too */
+.wc-card{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 12px 6px !important;
+  text-decoration:none;
+  color:#111;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.wc-card-ico{
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(230,0,0,0.08);
+  font-size: 16px;
+}
+.wc-card-text{
+  font-weight: 800;
+}
+.wc-card::after{
+  content: "›";
+  margin-left:auto;
+  opacity:.35;
+  font-size:18px;
+}
+
+/* stop drawer from hiding important items under the bottom browser bar */
+.wc-drawer{
+  padding-bottom: 90px;
+}

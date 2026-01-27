@@ -1,0 +1,52 @@
+{% extends "admin/admin_base.html" %}
+{% block content %}
+
+<h1 class="page-title">Категории</h1>
+
+<div class="admin-card" style="margin-bottom:18px;">
+  <h2 style="margin-bottom:12px;">Добавить категорию</h2>
+
+  <form method="post" style="display:grid; gap:10px; max-width:520px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="add">
+
+    <input name="slug" placeholder="slug (например: doors / windows / wallpaper)" required>
+    <input name="title_ru" placeholder="Название RU" required>
+    <input name="title_lv" placeholder="Название LV" required>
+    <input name="title_en" placeholder="Название EN" required>
+    <input name="sort" type="number" placeholder="Сортировка (0..)" value="0">
+
+    <button class="add-to-cart-btn" type="submit">Добавить</button>
+  </form>
+</div>
+
+<div class="admin-card">
+  <h2 style="margin-bottom:12px;">Список категорий</h2>
+
+  {% for c in categories %}
+    <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.08);">
+      <div>
+        <div><strong>{{ c.slug }}</strong> {% if not c.is_active %}<span style="opacity:0.6;">(выключена)</span>{% endif %}</div>
+        <div style="opacity:0.75;">RU: {{ c.title_ru }} | LV: {{ c.title_lv }} | EN: {{ c.title_en }} | sort: {{ c.sort }}</div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="toggle">
+          <input type="hidden" name="id" value="{{ c.id }}">
+          <button class="admin-link" type="submit">{% if c.is_active %}Выключить{% else %}Включить{% endif %}</button>
+        </form>
+
+        <form method="post" onsubmit="return confirm('Удалить категорию?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="id" value="{{ c.id }}">
+          <button class="admin-link" type="submit" style="background:#eee;">Удалить</button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

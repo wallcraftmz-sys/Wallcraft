@@ -59,11 +59,6 @@
         <span class="wc-ico">👤</span>
         <span class="wc-text">Профиль</span>
       </a>
-    {% else %}
-      <a class="wc-item" href="{{ url_for('login', lang=lang) }}">
-        <span class="wc-ico">🔑</span>
-        <span class="wc-text">Войти</span>
-      </a>
     {% endif %}
 
     {% if current_user.is_authenticated and current_user.role == 'admin' %}

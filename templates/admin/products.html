@@ -27,9 +27,10 @@
     <div class="product-grid admin-products">
 
       <!-- ADD PRODUCT (внутри категории) -->
-      <form method="post" enctype="multipart/form-data" class="product-card add-product-card">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="category" value="{{ cat_key }}">
+      {% if cat_key != 'other' %}
+  <form method="post" enctype="multipart/form-data" class="product-card add-product-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="category" value="{{ cat_key }}">
 
         <div class="product-image add-image">
           ➕
@@ -47,7 +48,8 @@
           <button class="add-to-cart-btn" type="submit">Добавить товар</button>
         </div>
       </form>
-
+    {% endif %}
+      
       <!-- PRODUCTS -->
       {% for product in cat["items"] %}
         <div class="product-card {% if not product.is_active %}inactive{% endif %}">

@@ -473,3 +473,21 @@ body{ background: var(--bg); color: var(--text); }
 .menu-fab{
   display:none !important;
 }
+
+.header-auth{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:800;
+}
+.header-link{
+  text-decoration:none;
+  color: rgba(31,41,55,.85);
+}
+.header-link:hover{
+  color: #e60000;
+}
+.header-sep{
+  opacity:.35;
+}

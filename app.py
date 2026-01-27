@@ -1219,11 +1219,11 @@ product = Product(
     legacy_category=category,  # чтобы не потерять строку
 )
 
-        db.session.add(product)
-        db.session.commit()
+            db.session.add(product)
+            db.session.commit()
 
-        flash("Товар добавлен", "success")
-        return redirect(url_for("admin_products", show=request.args.get("show", "active")))
+             flash("Товар добавлен", "success")
+             return redirect(url_for("admin_products", show=request.args.get("show", "active")))
 
     # GET
     show = request.args.get("show", "active")

@@ -1947,16 +1947,16 @@ def admin_steps():
     )
 
 
- @app.route("/admin/categories", methods=["GET", "POST"])
- @login_required
- @admin_required
- def admin_categories():
+@app.route("/admin/categories", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_categories():
     if request.method == "POST":
         action = request.form.get("action", "")
 
         if action == "add":
             slug = norm_text(request.form.get("slug", ""), max_len=60).lower()
-            slug = re.sub(r"[^a-z0-9_-]+", "", slug)  # только безопасные символы
+            slug = re.sub(r"[^a-z0-9_-]+", "", slug)
 
             title_ru = norm_text(request.form.get("title_ru", ""), max_len=120)
             title_lv = norm_text(request.form.get("title_lv", ""), max_len=120)
@@ -1979,14 +1979,16 @@ def admin_steps():
                 flash("Такой slug уже существует", "error")
                 return redirect(url_for("admin_categories"))
 
-            db.session.add(Category(
-                slug=slug,
-                title_ru=title_ru,
-                title_lv=title_lv,
-                title_en=title_en,
-                sort=sort,
-                is_active=True
-            ))
+            db.session.add(
+                Category(
+                    slug=slug,
+                    title_ru=title_ru,
+                    title_lv=title_lv,
+                    title_en=title_en,
+                    sort=sort,
+                    is_active=True,
+                )
+            )
             db.session.commit()
             flash("Категория добавлена", "success")
             return redirect(url_for("admin_categories"))
@@ -2003,9 +2005,8 @@ def admin_steps():
             cid = request.form.get("id", type=int)
             c = Category.query.get_or_404(cid)
 
-            # безопасность: не удаляем, если есть товары
             if Product.query.filter_by(category_id=c.id).first():
-                flash("Нельзя удалить: в категории есть товары. Сначала перенеси/удали товары.", "error")
+                flash("Нельзя удалить: в категории есть товары.", "error")
                 return redirect(url_for("admin_categories"))
 
             db.session.delete(c)
@@ -2014,7 +2015,11 @@ def admin_steps():
             return redirect(url_for("admin_categories"))
 
     categories = Category.query.order_by(Category.sort.asc(), Category.id.asc()).all()
-    return render_template("admin/categories.html", categories=categories, lang=session.get("lang", "ru"))
+    return render_template(
+        "admin/categories.html",
+        categories=categories,
+        lang=session.get("lang", "ru"),
+    )
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

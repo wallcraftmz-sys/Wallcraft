@@ -29,50 +29,60 @@
     </a>
   </div>
 
+  <!-- В ШАПКЕ: ЛОГИН/РЕГИСТРАЦИЯ (а не языки) -->
   <div class="header-auth">
-  {% if current_user.is_authenticated %}
-    <a class="header-link" href="{{ url_for('profile', lang=lang) }}">Профиль</a>
-    <span class="header-sep">|</span>
-    <a class="header-link" href="{{ url_for('logout', lang=lang) }}">Выйти</a>
-  {% else %}
-    <a class="header-link" href="{{ url_for('login', lang=lang) }}">Войти</a>
-    <span class="header-sep">|</span>
-    <a class="header-link" href="{{ url_for('register', lang=lang) }}">Регистрация</a>
-  {% endif %}
-</div>
+    {% if current_user.is_authenticated %}
+      <a class="header-link" href="{{ url_for('profile', lang=lang) }}">Профиль</a>
+      <span class="header-sep">|</span>
+      <a class="header-link" href="{{ url_for('logout', lang=lang) }}">Выйти</a>
+    {% else %}
+      <a class="header-link" href="{{ url_for('login', lang=lang) }}">Войти</a>
+      <span class="header-sep">|</span>
+      <a class="header-link" href="{{ url_for('register', lang=lang) }}">Регистрация</a>
+    {% endif %}
+  </div>
 </header>
 
-<!-- OVERLAY (вне header) -->
+<!-- OVERLAY -->
 <div id="wcMenuOverlay" class="wc-overlay" onclick="wcMenuClose()"></div>
 
-<!-- DRAWER (вне header) -->
-<aside id="wcMenu" class="wc-drawer" aria-hidden="true">
-  <div class="wc-drawer-head">
-    <div class="wc-brand">
-      <img class="wc-brand-logo" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
-      <div class="wc-brand-title">Wallcraft</div>
+<!-- DRAWER -->
+<aside id="wcMenu" class="wc-drawer wc-min" aria-hidden="true">
+
+  <!-- TOP (фикс) -->
+  <div class="wc-top">
+    <div class="wc-drawer-head">
+      <div class="wc-brand">
+        <img class="wc-brand-logo" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
+        <div class="wc-brand-title">Wallcraft</div>
+      </div>
+      <button class="wc-close" type="button" onclick="wcMenuClose()" aria-label="Close">✕</button>
     </div>
-    <button class="wc-close" type="button" onclick="wcMenuClose()" aria-label="Close">✕</button>
+
+    <!-- LANG (в меню) -->
+    <div class="wc-lang">
+      <a href="?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
+      <a href="?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
+      <a href="?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
+    </div>
+
+    <div class="wc-line"></div>
   </div>
 
-  <div class="wc-lang">
-    <a href="?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
-    <a href="?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
-    <a href="?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
-  </div>
+  <!-- MIDDLE (скролл) -->
+  <div class="wc-mid" role="navigation" aria-label="Menu">
 
-  <nav class="wc-nav">
-    <a class="wc-item" href="{{ url_for('catalog', cat='all', lang=lang) }}" onclick="wcMenuClose()">
+    <a class="wc-link" href="{{ url_for('catalog', cat='all', lang=lang) }}" onclick="wcMenuClose()">
       <span class="wc-ico">🛍️</span>
-      <span class="wc-text">Каталог</span>
+      <span class="wc-txt">Каталог</span>
     </a>
 
-    <div class="wc-sep"></div>
+    <div class="wc-line"></div>
 
     {% for c in menu_categories %}
-      <a class="wc-item" href="{{ url_for('catalog', cat=c.slug, lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">📦</span>
-        <span class="wc-text">
+      <a class="wc-link" href="{{ url_for('catalog', cat=c.slug, lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">•</span>
+        <span class="wc-txt">
           {% if lang == 'lv' %}{{ c.title_lv }}
           {% elif lang == 'en' %}{{ c.title_en }}
           {% else %}{{ c.title_ru }}{% endif %}
@@ -80,60 +90,45 @@
       </a>
     {% endfor %}
 
-    <div class="wc-sep"></div>
+    <div class="wc-line"></div>
 
-    <a class="wc-item" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
+    <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
       <span class="wc-ico">🛒</span>
-      <span class="wc-text">Корзина</span>
-      <span class="wc-badge">{{ cart_total_items }}</span>
+      <span class="wc-txt">Корзина</span>
+      <span class="wc-pill">{{ cart_total_items }}</span>
     </a>
 
     {% if current_user.is_authenticated %}
-      <a class="wc-item" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
+      <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">👤</span>
-        <span class="wc-text">Профиль</span>
-      </a>
-    {% else %}
-      <a class="wc-item" href="{{ url_for('login', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">🔑</span>
-        <span class="wc-text">Войти</span>
+        <span class="wc-txt">Профиль</span>
       </a>
     {% endif %}
 
+    <!-- В МЕНЮ НЕТ: Войти/Регистрация/Выйти -->
+  </div>
+
+  <!-- BOTTOM (фикс) -->
+  <div class="wc-bot">
     {% if current_user.is_authenticated and current_user.role == 'admin' %}
-      <div class="wc-sep"></div>
-      <div class="wc-section-title">Быстрые действия</div>
+      <div class="wc-line"></div>
+      <div class="wc-subtitle">Админ</div>
 
-      <a class="wc-card" href="{{ url_for('admin_categories', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-card-ico">🗂️</span>
-        <span class="wc-card-text">Категории</span>
+      <a class="wc-link" href="{{ url_for('admin_categories', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">🗂️</span><span class="wc-txt">Категории</span>
       </a>
-
-      <a class="wc-card" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-card-ico">➕</span>
-        <span class="wc-card-text">Добавить товар</span>
+      <a class="wc-link" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">➕</span><span class="wc-txt">Товары</span>
       </a>
-
-      <a class="wc-card" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-card-ico">🧾</span>
-        <span class="wc-card-text">Заказы</span>
+      <a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">🧾</span><span class="wc-txt">Заказы</span>
       </a>
-
-      <a class="wc-card" href="{{ url_for('admin_steps', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-card-ico">📋</span>
-        <span class="wc-card-text">200 шагов</span>
+      <a class="wc-link" href="{{ url_for('admin_steps', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">📋</span><span class="wc-txt">200 шагов</span>
       </a>
     {% endif %}
+  </div>
 
-    <div class="wc-sep"></div>
-
-    {% if current_user.is_authenticated %}
-      <a class="wc-item wc-danger" href="{{ url_for('logout', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">🚪</span>
-        <span class="wc-text">Выйти</span>
-      </a>
-    {% endif %}
-  </nav>
 </aside>
 
 <main class="container">

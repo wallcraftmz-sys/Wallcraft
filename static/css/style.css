@@ -1,639 +1,249 @@
 /* =========================
-   WALLCRAFT STYLE (clean)
-   - ONE menu system: wc-drawer
-   - removes old side-menu styles to avoid conflicts
+   WC MENU — MINIMAL BUT PREMIUM
+   for HTML with: wc-top / wc-mid / wc-bot / wc-link / wc-sublist / wc-sub / wc-line / wc-pill
 ========================= */
 
-/* ===== Variables ===== */
-:root{
-  --bg: #f5f6f7;
-  --card: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --line: rgba(0,0,0,.08);
-
-  --brand: #e60000;
-  --brand2: #c70000;
-
-  --success: #16a34a;
-
-  --shadow-sm: 0 6px 18px rgba(0,0,0,0.08);
-  --shadow-md: 0 10px 28px rgba(0,0,0,0.12);
-  --shadow-lg: 0 18px 60px rgba(0,0,0,0.20);
-
-  --r10: 10px;
-  --r12: 12px;
-  --r14: 14px;
-  --r16: 16px;
-  --r18: 18px;
-
-  --header-h: 56px;
-}
-
-/* ===== Reset ===== */
-*{ margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
-html, body{ height:100%; }
-body{ background: var(--bg); color: var(--text); }
-
-/* ===== Layout ===== */
-.container{
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: calc(var(--header-h) + 16px) 16px 32px;
-}
-
-/* =========================
-   HEADER
-========================= */
-.top-header{
-  position: fixed;
-  top:0; left:0; right:0;
-  height: var(--header-h);
-  background: var(--card);
-  border-bottom: 1px solid var(--line);
-  z-index: 3000;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  padding: 0 16px;
-}
-
-.menu-btn{
-  border: 0;
-  background: rgba(0,0,0,0.04);
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  font-size: 22px;
-  cursor: pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  -webkit-tap-highlight-color: transparent;
-}
-.menu-btn:active{ transform: scale(0.98); }
-
-.logo-center{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform: translate(-50%, -50%);
-}
-.logo-link{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  text-decoration:none;
-  color: var(--text);
-}
-.logo-text{
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
-
-.lang-switch{
-  display:flex;
-  gap: 8px;
-  align-items:center;
-  font-size: 13px;
-}
-.lang-switch a{
-  text-decoration:none;
-  color: var(--muted);
-  font-weight: 700;
-}
-.lang-switch a.active{ color: var(--brand); }
-
-/* =========================
-   WC DRAWER MENU (1a-like)
-   (единственное меню)
-========================= */
+/* overlay */
 .wc-overlay{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.32);
+  background: rgba(15, 23, 42, .35);
   opacity: 0;
   pointer-events: none;
-  transition: .2s;
-  z-index: 4999; /* выше хедера */
+  transition: opacity .18s ease;
+  z-index: 4999;
 }
 .wc-overlay.show{
   opacity: 1;
   pointer-events: auto;
 }
 
+/* drawer shell */
 .wc-drawer{
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;
-  width: min(84vw, 340px);
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(14px);
-  transform: translateX(-105%);
-  transition: .22s ease;
-  z-index: 5000; /* выше overlay */
-  box-shadow: 20px 0 50px rgba(0,0,0,.16);
-  padding: 14px 14px 18px 14px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  height: 100dvh;
+  width: min(86vw, 360px);
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid rgba(0,0,0,.06);
+  box-shadow: 22px 0 60px rgba(0,0,0,.18);
+  transform: translateX(-105%);
+  transition: transform .22s ease;
+  z-index: 5000;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
 }
 .wc-drawer.open{ transform: translateX(0); }
 
+/* fixed top/mid/bot layout */
+.wc-top{ flex: 0 0 auto; }
+.wc-mid{
+  flex: 1 1 auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 2px 14px;
+}
+.wc-bot{
+  flex: 0 0 auto;
+  padding-top: 8px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+/* header inside drawer */
 .wc-drawer-head{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 4px 10px;
 }
 
 .wc-brand{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap: 10px;
+  min-width: 0;
 }
 .wc-brand-logo{
   width: 34px;
   height: 34px;
   border-radius: 10px;
   object-fit: cover;
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  box-shadow: 0 10px 26px rgba(0,0,0,.14);
 }
 .wc-brand-title{
-  font-weight: 800;
+  font-weight: 900;
   font-size: 18px;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wc-close{
-  border:0;
-  background: rgba(0,0,0,0.06);
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.wc-lang{
-  display:flex;
-  gap:10px;
-  margin: 6px 0 14px 0;
-}
-.wc-lang a{
-  padding: 8px 12px;
-  border-radius: 12px;
-  text-decoration: none;
-  color: #111;
-  background: rgba(0,0,0,0.05);
-  font-weight: 700;
-}
-.wc-lang a.active{
-  background: rgba(220,0,0,0.12);
-  color: #b40000;
-}
-
-.wc-nav{ display:flex; flex-direction:column; gap:12px; }
-
-.wc-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding: 14px 14px;
-  border-radius: 18px;
-  text-decoration:none;
-  color:#111;
-  background: rgba(255,255,255,0.8);
-  box-shadow: 0 10px 26px rgba(0,0,0,.08);
-  border: 1px solid rgba(0,0,0,.04);
-}
-.wc-item:active{ transform: scale(0.99); }
-
-.wc-ico{
-  width: 34px;
-  height: 34px;
-  border-radius: 14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: rgba(0,0,0,0.06);
-  font-size: 18px;
-}
-.wc-text{ font-weight: 800; }
-
-.wc-badge{
-  margin-left:auto;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 8px;
-  border-radius: 999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: rgba(220,0,0,0.12);
-  color:#b40000;
-  font-weight: 900;
-}
-
-.wc-sep{
-  height: 1px;
-  background: rgba(0,0,0,0.08);
-  margin: 6px 4px;
-}
-
-.wc-section-title{
-  margin: 2px 6px 4px 6px;
-  font-weight: 900;
-  opacity: .65;
-}
-
-.wc-card{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding: 14px 14px;
-  border-radius: 18px;
-  text-decoration:none;
-  color:#111;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 12px 30px rgba(0,0,0,.10);
-}
-.wc-card-ico{
+  border: 0;
   width: 42px;
   height: 42px;
-  border-radius: 18px;
+  border-radius: 14px;
+  background: rgba(0,0,0,.05);
+  cursor: pointer;
+  font-size: 18px;
+}
+.wc-close:active{ transform: scale(.98); }
+
+/* language pills (nice minimal) */
+.wc-lang{
+  display:flex;
+  gap: 8px;
+  padding: 0 4px 10px;
+}
+.wc-lang a{
+  text-decoration: none;
+  color: rgba(17,24,39,.9);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.04);
+  border: 1px solid rgba(0,0,0,.06);
+}
+.wc-lang a.active{
+  color: #b40000;
+  background: rgba(230,0,0,.10);
+  border-color: rgba(230,0,0,.14);
+}
+
+/* lines / separators */
+.wc-line{
+  height: 1px;
+  background: rgba(0,0,0,.07);
+  margin: 8px 4px;
+}
+
+/* MENU LINKS (this fixes blue/underline) */
+.wc-link{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+
+  text-decoration: none !important;
+  color: rgba(17,24,39,.92) !important;
+
+  padding: 12px 10px;
+  border-radius: 14px;
+
+  font-weight: 850;
+  letter-spacing: .1px;
+
+  transition: background .15s ease, transform .15s ease;
+}
+.wc-link:hover{ background: rgba(0,0,0,.03); }
+.wc-link:active{ background: rgba(0,0,0,.05); transform: scale(.995); }
+
+/* icon box (subtle) */
+.wc-ico{
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  background: rgba(220,0,0,0.10);
-  font-size: 20px;
-}
-.wc-card-text{ font-weight: 900; }
-
-.wc-danger{
-  background: rgba(255, 230, 230, 0.9);
-  border-color: rgba(220,0,0,0.10);
-}
-
-/* =========================
-   PRODUCTS
-========================= */
-.product-grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-@media (min-width: 768px){
-  .product-grid{ grid-template-columns: repeat(3, 1fr); }
-}
-@media (min-width: 1100px){
-  .product-grid{ grid-template-columns: repeat(4, 1fr); }
-}
-
-.product-card{
-  background: var(--card);
-  border-radius: var(--r16);
-  overflow:hidden;
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  display:flex;
-  flex-direction:column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.product-card:hover{
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.product-image{
-  width:100%;
-  aspect-ratio: 1 / 1;
-  overflow:hidden;
-  background: #f0f1f2;
-}
-.product-image img{
-  width:100%;
-  height:100%;
-  object-fit: cover;
-}
-
-.product-info{
-  padding: 12px;
-  display:flex;
-  flex-direction:column;
-  gap: 10px;
-}
-.product-title{
-  font-size: 14px;
-  font-weight: 700;
-  text-align:center;
-}
-.product-price{
+  background: rgba(0,0,0,.045);
   font-size: 16px;
-  font-weight: 900;
-  color: var(--success);
-  text-align:center;
+  flex: 0 0 auto;
+}
+.wc-txt{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.add-to-cart-btn{
-  margin-top: auto;
-  padding: 12px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--brand);
-  color:#fff;
+/* chevron for Catalog */
+.wc-chevron{
+  margin-left: auto;
+  opacity: .5;
   font-size: 14px;
-  font-weight: 900;
-  cursor:pointer;
-  box-shadow: 0 8px 18px rgba(230,0,0,0.25);
-  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
-}
-.add-to-cart-btn:hover{
-  background: var(--brand2);
-  transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(230,0,0,0.28);
-}
-.add-to-cart-btn:active{ transform: scale(0.99); }
-
-.product-card.inactive{
-  opacity: 0.42;
-  filter: grayscale(1);
 }
 
-/* =========================
-   FLOATING CART
-========================= */
-.cart-fab{
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 6000;
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 999px;
-  text-decoration:none;
-  background: rgba(17,17,17,0.92);
-  color:#fff;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-  backdrop-filter: blur(8px);
-}
-.cart-fab:active{ transform: scale(0.98); }
-.cart-fab-ico{ font-size: 18px; line-height: 1; }
-
-.cart-badge{
-  min-width: 22px;
+/* pill counter */
+.wc-pill{
+  margin-left: auto;
   height: 22px;
-  padding: 0 7px;
+  min-width: 22px;
+  padding: 0 8px;
   border-radius: 999px;
-  display: inline-flex;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
   font-size: 12px;
   font-weight: 900;
-  background: var(--brand);
-  color:#fff;
+  background: rgba(230,0,0,.10);
+  color: #b40000;
+  border: 1px solid rgba(230,0,0,.12);
 }
 
-/* =========================
-   LOGIN
-========================= */
-.login-container{
-  min-height: calc(100vh - var(--header-h));
-  margin-top: var(--header-h);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding: 20px;
+/* Catalog item special (slightly stronger) */
+.wc-catalog{
+  background: rgba(0,0,0,.02);
+  border: 1px solid rgba(0,0,0,.06);
 }
-.login-box{
-  background: var(--card);
-  padding: 28px 22px;
-  border-radius: var(--r14);
-  width: 100%;
-  max-width: 380px;
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-md);
+
+/* SUBLIST: categories inside Catalog */
+.wc-sublist{
+  margin: 6px 0 10px 0;
+  padding-left: 10px; /* indent */
 }
-.login-box h2{ margin-bottom: 14px; font-size: 20px; }
-.login-box input{
-  width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 10px;
-  font-size: 15px;
+
+/* sub links */
+.wc-sub{
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-weight: 800;
+  color: rgba(31,41,55,.92) !important;
 }
-.login-box input:focus{
-  outline: none;
-  border-color: rgba(230,0,0,0.45);
-  box-shadow: 0 0 0 3px rgba(230,0,0,0.10);
+
+/* hide the "•" icon box for categories OR make it tiny */
+.wc-sub .wc-ico{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(230,0,0,.20);
+  font-size: 0; /* hide bullet character */
 }
-.login-box button{
-  width: 100%;
-  padding: 12px;
-  background: var(--brand);
-  color:#fff;
-  font-size: 15px;
+
+/* subtitle in bottom admin block */
+.wc-subtitle{
   font-weight: 900;
-  border: none;
-  border-radius: 10px;
-  cursor:pointer;
-  transition: background .18s ease;
-}
-.login-box button:hover{ background: var(--brand2); }
-
-/* =========================
-   BREADCRUMBS
-========================= */
-.breadcrumbs{
-  margin: 10px 0 14px;
-  font-size: 14px;
-  opacity: .85;
-  display:flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items:center;
-}
-.bc-link{ text-decoration:none; }
-.bc-link:hover{ text-decoration: underline; }
-.bc-sep{ opacity: .6; }
-.bc-current{ font-weight: 700; opacity: .95; }
-
-/* hide old flash block (если у тебя тосты) */
-.flash-wrap{ display:none; }
-
-/* ===== IMPORTANT: old menu system OFF ===== */
-.side-menu,
-.menu-overlay,
-.menu-fab{
-  display:none !important;
+  font-size: 12px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  opacity: .55;
+  padding: 6px 10px 2px;
 }
 
+/* header auth (right side in top header) */
 .header-auth{
   display:flex;
   align-items:center;
   gap:8px;
-  font-size:13px;
-  font-weight:800;
+  font-size: 13px;
+  font-weight: 900;
 }
 .header-link{
   text-decoration:none;
   color: rgba(31,41,55,.85);
 }
-.header-link:hover{
-  color: #e60000;
-}
-.header-sep{
-  opacity:.35;
-}
+.header-link:hover{ color: #e60000; }
+.header-sep{ opacity: .35; }
 
-/* =========================
-   Minimal Drawer Menu (no cards)
-========================= */
-
-/* Drawer container */
-.wc-drawer{
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(14px);
-  border-right: 1px solid rgba(0,0,0,0.06);
-  padding: 14px 14px 18px;
-}
-
-/* header */
-.wc-drawer-head{
-  margin-bottom: 10px;
-}
-.wc-brand-title{
-  font-weight: 900;
-  letter-spacing: .2px;
-}
-
-/* lang pills minimal */
-.wc-lang{
-  gap: 8px;
-  margin: 8px 0 12px;
-}
-.wc-lang a{
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-.wc-lang a.active{
-  background: rgba(230,0,0,0.10);
-  border-color: rgba(230,0,0,0.12);
-}
-
-/* remove card look */
-.wc-item,
-.wc-card{
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  padding: 14px 6px !important;
-}
-
-/* list layout */
-.wc-nav{ gap: 0; }
-
-/* each row */
-.wc-item{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  text-decoration:none;
-  color:#111;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-
-/* hover/active */
-.wc-item:active{ opacity: .75; transform: none; }
-
-/* icon minimal */
-.wc-ico{
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: rgba(0,0,0,0.05);
-  font-size: 16px;
-}
-
-/* text */
-.wc-text{
-  font-weight: 800;
-}
-
-/* right arrow (adds minimalist “navigation” feel) */
-.wc-item::after{
-  content: "›";
-  margin-left: auto;
-  opacity: .35;
-  font-size: 18px;
-  line-height: 1;
-}
-
-/* badge */
-.wc-badge{
-  margin-left: auto;
-  margin-right: 10px;  /* before arrow */
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: rgba(230,0,0,0.10);
-  color: #b40000;
-  font-weight: 900;
-  font-size: 12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* separators / titles */
-.wc-sep{
-  height: 10px;
-  background: transparent;
-  margin: 6px 0;
-}
-.wc-section-title{
-  margin: 12px 0 6px;
-  font-weight: 900;
-  opacity: .55;
-  letter-spacing: .2px;
-}
-
-/* quick actions look as minimal links too */
-.wc-card{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  padding: 12px 6px !important;
-  text-decoration:none;
-  color:#111;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-.wc-card-ico{
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: rgba(230,0,0,0.08);
-  font-size: 16px;
-}
-.wc-card-text{
-  font-weight: 800;
-}
-.wc-card::after{
-  content: "›";
-  margin-left:auto;
-  opacity:.35;
-  font-size:18px;
-}
-
-/* stop drawer from hiding important items under the bottom browser bar */
-.wc-drawer{
-  padding-bottom: 90px;
+/* IMPORTANT: if you still have old menu system styles, keep them off */
+.side-menu,
+.menu-overlay,
+.menu-fab{
+  display:none !important;
 }

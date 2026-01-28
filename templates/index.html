@@ -3,23 +3,11 @@
 {% block content %}
 
 <section class="hero">
-    <div class="hero-content">
-        <h1 class="hero-title">WALLCRAFT</h1>
-        <p class="hero-subtitle">
-            {% if lang == "ru" %}
-                Жидкие обои премиум-класса
-            {% else %}
-                Premium liquid wallpaper
-            {% endif %}
-        </p>
-        <a href="/catalog" class="hero-btn">
-            {% if lang == "ru" %}
-                Перейти в каталог
-            {% else %}
-                Go to catalog
-            {% endif %}
-        </a>
-    </div>
+  <div class="hero-inner">
+    <h1 class="hero-title">WALLCRAFT</h1>
+    <p class="hero-sub">Жидкие обои премиум-класса</p>
+    <a class="hero-cta" href="{{ url_for('catalog', cat='all', lang=lang) }}">Перейти в каталог</a>
+  </div>
 </section>
 
 {% endblock %}

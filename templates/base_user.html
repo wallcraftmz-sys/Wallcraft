@@ -24,10 +24,11 @@
   <button class="menu-btn" type="button" onclick="wcMenuOpen()" aria-label="Menu">☰</button>
 
   <div class="logo-center">
-    <a href="{{ url_for('index', lang=lang) }}" class="logo-link">
-      <span class="logo-text">Wallcraft</span>
-    </a>
-  </div>
+  <a href="{{ url_for('index', lang=lang) }}" class="logo-link" aria-label="Wallcraft">
+    <img class="logo-img" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
+    <span class="logo-text">Wallcraft</span>
+  </a>
+</div>
 
   <!-- В ШАПКЕ: ЛОГИН/РЕГИСТРАЦИЯ -->
   <div class="header-auth">

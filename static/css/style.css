@@ -247,3 +247,124 @@
 .menu-fab{
   display:none !important;
 }
+
+/* =========================
+   FIX HEADER (CEILING)
+========================= */
+:root{ --header-h: 56px; --line: rgba(0,0,0,.08); --card:#fff; --text:#111827; --muted:#6b7280; --brand:#e60000; }
+
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  color: var(--text);
+  background: #f5f6f7;
+}
+
+/* fixed top bar */
+.top-header{
+  position: fixed;
+  top:0; left:0; right:0;
+  height: var(--header-h);
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  z-index: 3000;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 0 14px;
+}
+
+/* left menu button */
+.menu-btn{
+  border: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.05);
+  font-size: 22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-btn:active{ transform: scale(.98); }
+
+/* center logo */
+.logo-center{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform: translate(-50%,-50%);
+}
+.logo-link{
+  text-decoration: none !important;
+  color: var(--text) !important;
+}
+.logo-text{
+  font-weight: 900;
+  letter-spacing: .2px;
+  font-size: 18px;
+}
+
+/* right auth */
+.header-auth{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+.header-link{
+  text-decoration: none !important;
+  color: rgba(17,24,39,.82) !important;
+}
+.header-link:hover{ color: var(--brand) !important; }
+.header-sep{ opacity: .35; }
+
+/* page content offset under header */
+.container{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--header-h) + 16px) 16px 32px;
+}
+
+/* =========================
+   HERO (if you want not "dry")
+   Put on index page: <section class="hero">...</section>
+========================= */
+.hero{
+  min-height: calc(100vh - var(--header-h));
+  margin-top: var(--header-h);
+  display:flex;
+  align-items:flex-start;
+  padding: 28px 16px;
+  background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0));
+}
+.hero-inner{
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.hero-title{
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 0 0 12px;
+}
+.hero-sub{
+  margin: 0 0 18px;
+  font-size: 16px;
+  color: rgba(17,24,39,.75);
+  font-weight: 700;
+}
+.hero-cta{
+  display:inline-block;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff !important;
+  text-decoration:none !important;
+  font-weight: 900;
+}
+.hero-cta:active{ transform: scale(.99); }

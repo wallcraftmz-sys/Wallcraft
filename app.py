@@ -40,6 +40,16 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import text, or_
 from PIL import Image
 
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for("login", next=request.path))
+        if getattr(current_user, "role", "") != "admin":
+            flash("Нет доступа", "error")
+            return redirect(url_for("index", lang=session.get("lang", "ru")))
+        return fn(*args, **kwargs)
+    return wrapper
 
 # ======================
 # SECURITY: SAFE REDIRECT + INPUT NORMALIZATION

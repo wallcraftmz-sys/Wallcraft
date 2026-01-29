@@ -1336,6 +1336,7 @@ def edit_product(id):
 
 @app.route("/admin/orders")
 @admin_required
+@login_required
 def admin_orders():
     show = request.args.get("show", "active")
     q = request.args.get("q", "").strip()
@@ -1374,6 +1375,7 @@ def admin_orders():
 
 @app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
 @admin_required
+@login_required
 def update_order_status(order_id):
     order = Order.query.get_or_404(order_id)
     new_status = request.form.get("status")
@@ -1456,6 +1458,7 @@ def hard_delete_order(order_id):
 
 @app.route("/admin/orders/<int:order_id>")
 @admin_required
+@login_required
 def admin_order_view(order_id):
     order = Order.query.get_or_404(order_id)
     history = OrderStatusHistory.query.filter_by(order_id=order.id).order_by(OrderStatusHistory.created_at.desc()).all()
@@ -1470,6 +1473,7 @@ def admin_order_view(order_id):
 
 @app.route("/admin/orders/<int:order_id>/print")
 @admin_required
+@login_required
 def admin_order_print(order_id):
     order = Order.query.get_or_404(order_id)
     history = OrderStatusHistory.query.filter_by(order_id=order.id).order_by(OrderStatusHistory.created_at.desc()).all()
@@ -1486,6 +1490,7 @@ def admin_order_print(order_id):
 
 @app.route("/admin/orders/export")
 @admin_required
+@login_required
 def export_orders_csv():
     show = request.args.get("show", "active")
     q = request.args.get("q", "").strip()
@@ -1539,6 +1544,7 @@ def export_orders_csv():
 
 @app.route("/admin/orders/<int:order_id>/comment", methods=["POST"])
 @admin_required
+@login_required
 def add_order_comment(order_id):
     order = Order.query.get_or_404(order_id)
 
@@ -1564,6 +1570,7 @@ def add_order_comment(order_id):
 # ======================
 @app.route("/admin/steps_manual", methods=["GET", "POST"])
 @admin_required
+@login_required
 def admin_steps_manual():
     if request.method == "POST":
         step_id = request.form.get("step_id", type=int)
@@ -1627,6 +1634,7 @@ def admin_steps_manual():
 # ======================
 @app.route("/admin/links_check")
 @admin_required
+@login_required
 def links_check():
     links = {
         "admin_orders": url_for("admin_orders"),
@@ -1917,6 +1925,7 @@ def build_steps_status_200():
 
 @app.route("/admin/steps")
 @admin_required
+@login_required
 def admin_steps():
     statuses = build_steps_status_200()
 

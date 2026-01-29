@@ -169,3 +169,19 @@ function updateQty(productId, action) {
 
   document.addEventListener("DOMContentLoaded", flashToToasts);
 })();
+
+function refreshCartCount(){
+  fetch("/api/cart_count", { credentials: "include" })
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById("cart-count");
+      if (!el) return;
+      const n = Number(data.cart_total_items || 0);
+      el.textContent = n;
+      el.style.display = n > 0 ? "inline-flex" : "none";
+    })
+    .catch(()=>{});
+}
+
+document.addEventListener("DOMContentLoaded", refreshCartCount);
+})();

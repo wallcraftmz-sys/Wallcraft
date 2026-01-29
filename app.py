@@ -893,7 +893,9 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
+    session.pop("cart", None)     # <-- ВАЖНО: очищаем корзину
+    session.modified = True
+    return redirect(url_for("index", lang=session.get("lang", "ru")))
 
 
 @app.route("/register", methods=["GET", "POST"])

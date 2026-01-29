@@ -268,9 +268,11 @@ body{
   background: var(--card);
   border-bottom: 1px solid var(--line);
   z-index: 3000;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
+
+  display: grid;
+  grid-template-columns: 44px 1fr auto; /* button | center | auth */
+  align-items: center;
+  gap: 10px;
   padding: 0 14px;
 }
 
@@ -292,10 +294,11 @@ body{
 
 /* center logo */
 .logo-center{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform: translate(-50%,-50%);
+  position: static;      /* важно: убрали absolute */
+  transform: none;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
 }
 .logo-link{
   text-decoration: none !important;

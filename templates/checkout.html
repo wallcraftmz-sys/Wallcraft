@@ -1,9 +1,5 @@
 <form method="post" class="checkout-form">
-  {% if checkout_token %}
-    <input type="hidden" name="checkout_token" value="{{ checkout_token }}">
-  {% endif %}
-
-  <h3 class="checkout-subtitle">Контактные данные</h3>
+  <input type="hidden" name="checkout_token" value="{{ checkout_token }}">
 
   <div class="form-group">
     <label>Имя</label>

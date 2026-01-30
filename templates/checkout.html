@@ -1,61 +1,37 @@
-{% extends "base_user.html" %}
-{% block content %}
+<form method="post" class="checkout-form">
+  {% if checkout_token %}
+    <input type="hidden" name="checkout_token" value="{{ checkout_token }}">
+  {% endif %}
 
-<h1 class="checkout-title">Оформление заказа</h1>
+  <h3 class="checkout-subtitle">Контактные данные</h3>
 
-<div class="checkout-wrapper">
+  <div class="form-group">
+    <label>Имя</label>
+    <input
+      type="text"
+      name="name"
+      placeholder="Введите имя"
+      required
+      minlength="2"
+      maxlength="60"
+      autocomplete="name"
+    >
+  </div>
 
-    <!-- ЗАКАЗ -->
-    <div class="checkout-card">
-        <h3 class="checkout-subtitle">Ваш заказ</h3>
+  <div class="form-group">
+    <label>Телефон или Email</label>
+    <input
+      type="text"
+      name="contact"
+      placeholder="+371 / example@email.com"
+      required
+      minlength="7"
+      maxlength="80"
+      autocomplete="email"
+      pattern="(^[^@\s]+@[^@\s]+\.[^@\s]+$)|(^\+?[0-9\s\-]{7,15}$)"
+      title="Введите email или телефон (пример: test@mail.com или +371 20000000)"
+    >
+  </div>
 
-        {% for item in items %}
-<div class="checkout-item">
-    <div class="checkout-item-name">
-        {{ item }}
-    </div>
-</div>
-{% endfor %}
-
-        <div class="checkout-total">
-            <span>Итого:</span>
-            <strong>{{ total }} €</strong>
-        </div>
-    </div>
-
-    <!-- ФОРМА -->
-    <form method="post" class="checkout-form">
-        {% if checkout_token %}
-<input type="hidden" name="checkout_token" value="{{ checkout_token }}">
-{% endif %}
-        <h3 class="checkout-subtitle">Контактные данные</h3>
-
-        <div class="form-group">
-            <label>Имя</label>
-            <input type="text" name="name" placeholder="Введите имя" required>
-            <input name="name" required minlength="2" maxlength="100" autocomplete="name">
-
-<input name="contact"
-       required
-       minlength="7"
-       maxlength="100"
-       autocomplete="email"
-       pattern="(^[^@\s]+@[^@\s]+\.[^@\s]+$)|(^\+?[0-9\s\-]{7,15}$)"
-       title="Введите email или телефон (пример: test@mail.com или +371 20000000)">
-        </div>
-
-        <div class="form-group">
-            <label>Телефон или Email</label>
-            <input type="text" name="contact" placeholder="+371 / example@email.com" required>
-        </div>
-
-        <button type="submit"
-        class="checkout-btn"
-        onclick="this.disabled=true; this.innerText='Отправка…'; this.form.submit();">
-    Подтвердить заказ
-</button>
-    </form>
-
-</div>
-
-{% endblock %}
+  <button type="submit" class="checkout-btn">Подтвердить заказ</button>
+</form>

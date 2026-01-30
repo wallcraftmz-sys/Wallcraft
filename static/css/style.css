@@ -437,3 +437,39 @@ body{
 .checkout-form .row {
   display: block !important;  /* если где-то flex ломает */
 }
+
+.toast-container{
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast{
+  min-width: 220px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(17,17,17,0.92);
+  color: #fff;
+  font-weight: 800;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .18s ease, transform .18s ease;
+  text-align: center;
+}
+
+.toast.show{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-success{ background: rgba(16, 185, 129, 0.92); }
+.toast-error{ background: rgba(239, 68, 68, 0.92); }
+.toast-info{ background: rgba(17,17,17,0.92); }
+.toast-warning{ background: rgba(245, 158, 11, 0.92); }

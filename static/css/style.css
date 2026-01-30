@@ -243,8 +243,7 @@
 
 /* IMPORTANT: if you still have old menu system styles, keep them off */
 .side-menu,
-.menu-overlay,
-.menu-fab{
+.menu-overlay{
   display:none !important;
 }
 

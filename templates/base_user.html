@@ -226,5 +226,17 @@ async function refreshCartCount() {
 document.addEventListener("DOMContentLoaded", refreshCartCount);
 </script>
 
+ <!-- CART ACTION POPUP -->
+<div id="cart-action-popup" class="cart-action-popup">
+  <div class="cart-action-inner">
+    <span class="cart-action-text">Товар добавлен в корзину</span>
+
+    <div class="cart-action-buttons">
+      <button type="button" onclick="closeCartAction()">Продолжить покупки</button>
+      <a href="{{ url_for('cart', lang=lang) }}">Перейти в корзину</a>
+    </div>
+  </div>
+</div>
+  
 </body>
 </html>

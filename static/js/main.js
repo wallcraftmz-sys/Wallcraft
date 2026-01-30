@@ -183,5 +183,25 @@ function refreshCartCount(){
     .catch(()=>{});
 }
 
+function showCartToast() {
+  const toast = document.getElementById("cart-toast");
+  if (!toast) return;
+
+  toast.classList.add("show");
+
+  clearTimeout(window._cartToastTimer);
+  window._cartToastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-add-to-cart]");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  const product
+    
 document.addEventListener("DOMContentLoaded", refreshCartCount);
 })();

@@ -2,68 +2,35 @@
 {% block content %}
 
 <div class="product-grid">
+  {% for product in products %}
+  <div class="product-card">
 
-    {% for product in products %}
-    <div class="product-card">
-
-        <div class="product-image">
-            <img
-                src="{{ url_for('static', filename=product.image or 'images/no-image.png') }}"
-                alt="{{ product.name_ru if lang == 'ru' else product.name_lv }}"
-                loading="lazy"
-            >
-        </div>
-
-        <div class="product-info">
-            <h3 class="product-title">
-                {{ product.name_ru if lang == "ru" else product.name_lv }}
-            </h3>
-
-            <div class="product-price">
-                {{ product.price }} €
-            </div>
-
-        <button class="add-to-cart-btn"
-        onclick="addToCart({{ product.id }})">
-    В корзину
-</button>
-        </div>
-
+    <div class="product-image">
+      <img
+        src="{{ url_for('static', filename=product.image or 'images/no-image.png') }}"
+        alt="{{ product.name_ru if lang == 'ru' else product.name_lv }}"
+        loading="lazy"
+      >
     </div>
-    {% endfor %}
 
+    <div class="product-info">
+      <h3 class="product-title">
+        {{ product.name_ru if lang == "ru" else product.name_lv }}
+      </h3>
+
+      <div class="product-price">{{ product.price }} €</div>
+
+      <button
+        type="button"
+        class="add-to-cart-btn"
+        data-add-to-cart="{{ product.id }}"
+      >
+        В корзину
+      </button>
+    </div>
+
+  </div>
+  {% endfor %}
 </div>
-
-<script>
-async function addToCart(productId) {
-    try {
-        const res = await fetch(`/api/add_to_cart/${productId}`, {
-            method: "POST",
-            credentials: "same-origin", // ВАЖНО: чтобы сессия работала (cookies)
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        // если сервер вернул не JSON (ошибка/редирект) — не ломаем страницу
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            console.error("Expected JSON, got:", contentType);
-            return;
-        }
-
-        const data = await res.json();
-
-        if (data && data.success) {
-            const badge = document.getElementById("cart-count");
-            if (badge) badge.textContent = data.cart_total_items;
-        } else {
-            console.error("Add to cart failed:", data);
-        }
-    } catch (e) {
-        console.error("Add to cart error:", e);
-    }
-}
-</script>
 
 {% endblock %}

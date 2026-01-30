@@ -426,3 +426,15 @@ body{
   background: #e60000;
   color:#fff;
 }
+
+/* Checkout mobile fix */
+.checkout-form input,
+.checkout-form button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.checkout-form .row {
+  display: block !important;  /* если где-то flex ломает */
+}

@@ -59,28 +59,22 @@ async function addToCart(productId) {
     });
 
     const ct = res.headers.get("content-type") || "";
-    if (!ct.includes("application/json")) {
-      showToast("Ошибка: сервер вернул не JSON", "error", 3000);
-      return;
-    }
+    if (!ct.includes("application/json")) return;
 
     const data = await res.json();
+    if (!data.success) return;
 
-    if (data && data.success) {
-      const n = Number(data.cart_total_items || 0);
-
-      const badge = document.getElementById("cart-count");
-      if (badge) {
-        badge.textContent = n;
-        badge.style.display = n > 0 ? "inline-flex" : "none";
-      }
-
-      showToast("Товар добавлен в корзину", "success", 2000);
-    } else {
-      showToast("Не удалось добавить товар", "error", 2500);
+    // обновляем счётчик
+    const badge = document.getElementById("cart-count");
+    if (badge) {
+      badge.textContent = data.cart_total_items;
+      badge.style.display = "inline-flex";
     }
+
+    showCartAction();
+
   } catch (e) {
-    showToast("Ошибка сети при добавлении в корзину", "error", 3000);
+    console.error(e);
   }
 }
 

@@ -1593,6 +1593,21 @@ def admin_categories():
         categories=categories,
         lang=session.get("lang", "ru"),
     )
+
+@app.route("/catalog")
+def catalog():
+    products = (
+        Product.query
+        .filter_by(is_active=True)
+        .order_by(Product.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "catalog.html",
+        products=products,
+        lang=session.get("lang", "ru"),
+    )
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

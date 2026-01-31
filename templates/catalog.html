@@ -20,13 +20,9 @@
 
       <div class="product-price">{{ product.price }} €</div>
 
-      <button
-        type="button"
-        class="add-to-cart-btn"
-        data-add-to-cart="{{ product.id }}"
-      >
-        В корзину
-      </button>
+      <button class="add-to-cart-btn" type="button" onclick="addToCart({{ product.id }})">
+  В корзину
+</button>
     </div>
 
   </div>

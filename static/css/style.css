@@ -474,20 +474,22 @@ body{
 .toast-info{ background: rgba(17,17,17,0.92); }
 .toast-warning{ background: rgba(245, 158, 11, 0.92); }
 
-/* CART ACTION POPUP */
+/* CART ACTION POPUP (fixed, clickable, mobile) */
 .cart-action-popup{
   position: fixed;
   left: 50%;
-  bottom: -120px;
+  bottom: -160px;              /* спрятано */
   transform: translateX(-50%);
   width: calc(100% - 24px);
-  max-width: 420px;
-  z-index: 999999;
+  max-width: 460px;
+  z-index: 1000000;
   transition: bottom .25s ease;
+  pointer-events: none;        /* чтобы не мешало кликам когда скрыто */
 }
 
 .cart-action-popup.show{
-  bottom: 16px;
+  bottom: 16px;                /* показ */
+  pointer-events: auto;        /* кликабельно */
 }
 
 .cart-action-inner{
@@ -512,13 +514,14 @@ body{
 
 .cart-action-buttons button,
 .cart-action-buttons a{
-  flex:1;
-  text-align:center;
+  flex: 1;
+  text-align: center;
   padding: 10px 12px;
   border-radius: 999px;
   font-weight: 900;
   text-decoration: none;
   border: 0;
+  cursor: pointer;
 }
 
 .cart-action-buttons button{

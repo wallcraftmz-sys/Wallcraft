@@ -18,7 +18,7 @@
   <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body>
+<body class="{{ 'is-admin' if request.path.startswith('/admin') else '' }}">
 
 <header class="top-header">
   <button class="menu-btn" type="button" onclick="wcMenuOpen()" aria-label="Menu">☰</button>
@@ -128,12 +128,12 @@
   {% block content %}{% endblock %}
 </main>
 
+{% if not request.path.startswith('/admin') %}
 <a href="{{ url_for('cart', lang=lang) }}" class="cart-fab" aria-label="Корзина">
   <span class="cart-fab-ico">🛒</span>
   <span id="cart-count" class="cart-badge">0</span>
 </a>
 
-<!-- CART ACTION POPUP (появляется только когда JS скажет) -->
 <div id="cart-action-popup" class="cart-action-popup" aria-hidden="true">
   <div class="cart-action-inner">
     <span class="cart-action-text">Товар добавлен в корзину</span>
@@ -144,6 +144,7 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 <script>
 function wcMenuOpen(){

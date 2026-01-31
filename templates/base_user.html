@@ -73,25 +73,10 @@
   <div class="wc-mid" role="navigation" aria-label="Menu">
 
     <!-- КАТАЛОГ (одна кнопка) -->
-    <a class="wc-link wc-catalog" href="#" onclick="wcToggleCatalog(event)">
-      <span class="wc-ico">🛍️</span>
-      <span class="wc-txt">Каталог</span>
-      <span class="wc-chevron" aria-hidden="true">▾</span>
-    </a>
-
-    <!-- Категории ВНУТРИ Каталога -->
-    <div id="wcCatalogList" class="wc-sublist" hidden>
-      {% for c in menu_categories %}
-        <a class="wc-link wc-sub" href="{{ url_for('catalog', cat=c.slug, lang=lang) }}" onclick="wcMenuClose()">
-          <span class="wc-ico">•</span>
-          <span class="wc-txt">
-            {% if lang == 'lv' %}{{ c.title_lv }}
-            {% elif lang == 'en' %}{{ c.title_en }}
-            {% else %}{{ c.title_ru }}{% endif %}
-          </span>
-        </a>
-      {% endfor %}
-    </div>
+    <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
+  <span class="wc-ico">🛍️</span>
+  <span class="wc-txt">Каталог</span>
+</a>
 
     <div class="wc-line"></div>
 
@@ -171,23 +156,6 @@ function wcMenuClose(){
   o.classList.remove("show");
   m.setAttribute("aria-hidden","true");
   document.body.style.overflow = "";
-}
-
-/* Каталог -> показать/скрыть категории */
-function wcToggleCatalog(e){
-  e.preventDefault();
-  const list = document.getElementById("wcCatalogList");
-  const chevron = document.querySelector(".wc-chevron");
-  if(!list) return;
-
-  const isHidden = list.hasAttribute("hidden");
-  if(isHidden){
-    list.removeAttribute("hidden");
-    if(chevron) chevron.textContent = "▴";
-  } else {
-    list.setAttribute("hidden", "");
-    if(chevron) chevron.textContent = "▾";
-  }
 }
 
 document.addEventListener("keydown", (e)=>{

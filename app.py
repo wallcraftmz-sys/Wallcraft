@@ -755,29 +755,14 @@ def faq():
 
 @app.route("/catalog")
 def catalog():
-    slug = request.args.get("cat", "all")
-
-    categories = (
-        Category.query.filter_by(is_active=True)
-        .order_by(Category.sort.asc(), Category.id.asc())
+    products = (
+        Product.query
+        .filter_by(is_active=True)
+        .order_by(Product.id.desc())
         .all()
     )
-
-    q = Product.query.filter_by(is_active=True)
-
-    if slug != "all":
-        cat = Category.query.filter_by(slug=slug, is_active=True).first()
-        if cat:
-            q = q.filter(Product.category_id == cat.id)
-        else:
-            slug = "all"
-
-    products = q.order_by(Product.id.desc()).all()
-
     return render_template(
         "catalog.html",
-        categories=categories,
-        active_cat=slug,
         products=products,
         lang=session.get("lang", "ru"),
     )
@@ -1594,20 +1579,5 @@ def admin_categories():
         lang=session.get("lang", "ru"),
     )
 
-@app.route("/catalog")
-def catalog():
-    products = (
-        Product.query
-        .filter_by(is_active=True)
-        .order_by(Product.id.desc())
-        .all()
-    )
-
-    return render_template(
-        "catalog.html",
-        products=products,
-        lang=session.get("lang", "ru"),
-    )
-    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

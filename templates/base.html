@@ -9,101 +9,122 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
 
   <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+  <meta property="og:title" content="Wallcraft">
+  <meta property="og:description" content="Каталог и оформление заказов.">
+  <meta property="og:image" content="{{ url_for('static', filename='images/IMG_0857.jpeg', _external=True) }}">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="{% if request.path.startswith('/admin') %}is-admin{% endif %}">
-
-{% set T = {
-  "home": {"ru": "Главная", "lv": "Sākums", "en": "Home"},
-  "catalog": {"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"},
-  "about": {"ru": "О компании", "lv": "Par mums", "en": "About"},
-  "profile": {"ru": "Профиль", "lv": "Profils", "en": "Profile"},
-  "admin": {"ru": "Админка", "lv": "Admin", "en": "Admin"},
-  "login": {"ru": "Вход", "lv": "Ienākt", "en": "Login"},
-  "register": {"ru": "Регистрация", "lv": "Reģistrācija", "en": "Register"},
-  "logout": {"ru": "Выйти", "lv": "Iziet", "en": "Logout"},
-  "added": {"ru": "Товар добавлен в корзину", "lv": "Prece pievienota grozam", "en": "Product added to cart"},
-  "continue": {"ru": "Продолжить покупки", "lv": "Turpināt iepirkties", "en": "Continue shopping"},
-  "cart": {"ru": "Перейти в корзину", "lv": "Doties uz grozu", "en": "Go to cart"}
-} %}
+<body class="{{ 'is-admin' if request.path.startswith('/admin') else '' }}">
 
 <header class="top-header">
-  <button class="menu-btn" type="button" onclick="toggleMenu()" aria-label="Menu">☰</button>
+  <button class="menu-btn" type="button" onclick="wcMenuOpen()" aria-label="Menu">☰</button>
 
   <div class="logo-center">
-    <a href="/" class="logo-link">
-      <img src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}"
-           alt="Wallcraft logo"
-           class="logo-img">
+    <a href="{{ url_for('index', lang=lang) }}" class="logo-link" aria-label="Wallcraft">
+      <img class="logo-img" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
       <span class="logo-text">Wallcraft</span>
     </a>
   </div>
 
-  <div class="lang-switch">
-    <a href="{{ request.path }}?lang=ru" class="{{ 'active' if lang == 'ru' }}">RU</a> |
-    <a href="{{ request.path }}?lang=lv" class="{{ 'active' if lang == 'lv' }}">LV</a> |
-    <a href="{{ request.path }}?lang=en" class="{{ 'active' if lang == 'en' }}">EN</a>
+  <div class="header-auth">
+    {% if current_user.is_authenticated %}
+      <a class="header-link" href="{{ url_for('profile', lang=lang) }}">Профиль</a>
+      <span class="header-sep">|</span>
+      <a class="header-link" href="{{ url_for('logout', lang=lang) }}">Выйти</a>
+    {% else %}
+      <a class="header-link" href="{{ url_for('login', lang=lang) }}">Войти</a>
+      <span class="header-sep">|</span>
+      <a class="header-link" href="{{ url_for('register', lang=lang) }}">Регистрация</a>
+    {% endif %}
   </div>
 </header>
 
 <!-- OVERLAY -->
-<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
+<div id="wcMenuOverlay" class="wc-overlay" onclick="wcMenuClose()"></div>
 
-<!-- SIDE MENU -->
-<div id="sideMenu" class="side-menu">
-  <a href="/" onclick="closeMenu()">🏠 {{ T.home[lang] }}</a>
-  <a href="/catalog" onclick="closeMenu()">📦 {{ T.catalog[lang] }}</a>
-  <a href="/about" onclick="closeMenu()">ℹ️ {{ T.about[lang] }}</a>
+<!-- DRAWER -->
+<aside id="wcMenu" class="wc-drawer wc-min" aria-hidden="true">
 
-  <hr>
+  <div class="wc-top">
+    <div class="wc-drawer-head">
+      <div class="wc-brand">
+        <img class="wc-brand-logo" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
+        <div class="wc-brand-title">Wallcraft</div>
+      </div>
+      <button class="wc-close" type="button" onclick="wcMenuClose()" aria-label="Close">✕</button>
+    </div>
 
-  {% if current_user.is_authenticated %}
-    {% if current_user.role == "admin" %}
-      <a href="{{ url_for('admin_panel') }}">{{ T.admin[lang] }}</a>
-    {% else %}
-      <a href="/profile">{{ T.profile[lang] }}</a>
+    <div class="wc-lang">
+      <a href="?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
+      <a href="?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
+      <a href="?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
+    </div>
+
+    <div class="wc-line"></div>
+  </div>
+
+  <div class="wc-mid" role="navigation" aria-label="Menu">
+    <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
+      <span class="wc-ico">🛍️</span>
+      <span class="wc-txt">Каталог</span>
+    </a>
+
+    <div class="wc-line"></div>
+
+    <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
+      <span class="wc-ico">🛒</span>
+      <span class="wc-txt">Корзина</span>
+      <span class="wc-pill">{{ cart_total_items }}</span>
+    </a>
+
+    {% if current_user.is_authenticated %}
+      <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">👤</span>
+        <span class="wc-txt">Профиль</span>
+      </a>
     {% endif %}
-    <a href="/logout">{{ T.logout[lang] }}</a>
-  {% else %}
-    <a href="/login">{{ T.login[lang] }}</a>
-    <a href="/register">{{ T.register[lang] }}</a>
-  {% endif %}
-</div>
+  </div>
 
-<!-- MAIN CONTENT -->
+  <div class="wc-bot">
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+      <div class="wc-line"></div>
+      <div class="wc-subtitle">Админ</div>
+
+      <a class="wc-link" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">➕</span><span class="wc-txt">Товары</span>
+      </a>
+      <a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-ico">🧾</span><span class="wc-txt">Заказы</span>
+      </a>
+    {% endif %}
+  </div>
+
+</aside>
+
 <main class="container">
   {% block content %}{% endblock %}
 </main>
 
-{# ✅ ВСЁ, что связано с корзиной/попапом — НЕ показываем в админке #}
 {% if not request.path.startswith('/admin') %}
+<a href="{{ url_for('cart', lang=lang) }}" class="cart-fab" aria-label="Корзина">
+  <span class="cart-fab-ico">🛒</span>
+  <span id="cart-count" class="cart-badge">0</span>
+</a>
 
-  <!-- CART POPUP (появляется только через JS) -->
-  <div id="cart-popup" class="cart-popup" aria-hidden="true">
-    <div class="cart-popup-content">
-      <p>✅ {{ T.added[lang] }}</p>
-
-      <a href="/catalog" class="popup-btn" onclick="closeCartPopup()">{{ T.continue[lang] }}</a>
-      <a href="/cart" class="popup-btn primary">{{ T.cart[lang] }}</a>
-
-      <button class="close-popup" type="button" onclick="closeCartPopup()">×</button>
+<div id="cart-action-popup" class="cart-action-popup" aria-hidden="true">
+  <div class="cart-action-inner">
+    <span class="cart-action-text">Товар добавлен в корзину</span>
+    <div class="cart-action-buttons">
+      <button type="button" onclick="closeCartAction()">Продолжить покупки</button>
+      <a href="{{ url_for('cart', lang=lang) }}">Перейти в корзину</a>
     </div>
   </div>
-
-  <!-- FLOATING CART -->
-  <a href="{{ url_for('cart') }}" class="cart-btn" aria-label="Корзина">
-    🛒 <span id="cart-count">0</span>
-  </a>
-
+</div>
 {% endif %}
-
-<script>
-  // страховка: если меню "залипло"
-  document.addEventListener("DOMContentLoaded", () => {
-    try { closeMenu(); } catch(e) {}
-    document.body.style.overflow = "";
-  });
-</script>
 
 </body>
 </html>

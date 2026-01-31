@@ -70,17 +70,21 @@
                   <button type="submit" class="admin-btn delete">❌</button>
                 </form>
               {% else %}
-  <form action="{{ url_for('restore_product', id=product.id) }}" method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="admin-btn edit" title="Восстановить">♻️</button>
-  </form>
+                <form action="{{ url_for('restore_product', id=product.id) }}" method="post">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="admin-btn edit" title="Восстановить">♻️</button>
+                </form>
 
-  <form action="{{ url_for('hard_delete_product', id=product.id) }}" method="post"
-        onsubmit="return confirm('Удалить товар НАВСЕГДА? Это действие нельзя отменить.');">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="danger-btn" title="Удалить навсегда">🗑</button>
-  </form>
-{% endif %}
+                <form action="{{ url_for('hard_delete_product', id=product.id) }}" method="post"
+                      onsubmit="return confirm('Удалить товар НАВСЕГДА? Это действие нельзя отменить.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="danger-btn" title="Удалить навсегда">🗑</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
 
     </div>
   </div>

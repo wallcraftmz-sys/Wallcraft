@@ -1,5 +1,39 @@
 // =========================
-// TOAST (всплывашка)
+// HELPERS
+// =========================
+function isAdminPage() {
+  return window.location.pathname.startsWith("/admin");
+}
+
+// =========================
+// WC MENU (ONLY)
+// =========================
+function wcMenuOpen(){
+  const m = document.getElementById("wcMenu");
+  const o = document.getElementById("wcMenuOverlay");
+  if(!m || !o) return;
+  m.classList.add("open");
+  o.classList.add("show");
+  m.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+}
+
+function wcMenuClose(){
+  const m = document.getElementById("wcMenu");
+  const o = document.getElementById("wcMenuOverlay");
+  if(!m || !o) return;
+  m.classList.remove("open");
+  o.classList.remove("show");
+  m.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+}
+
+// делаем функции доступными из HTML onclick="..."
+window.wcMenuOpen = wcMenuOpen;
+window.wcMenuClose = wcMenuClose;
+
+// =========================
+// TOAST (если надо)
 // =========================
 function ensureToastContainer() {
   let c = document.querySelector(".toast-container");
@@ -28,10 +62,15 @@ function showToast(message, type = "info", ms = 2500) {
   }, ms);
 }
 
+window.showToast = showToast;
+
 // =========================
 // CART COUNT
 // =========================
 async function refreshCartCount() {
+  // в админке вообще не трогаем корзину
+  if (isAdminPage()) return;
+
   try {
     const res = await fetch("/api/cart_count", { credentials: "same-origin" });
     const ct = res.headers.get("content-type") || "";
@@ -49,9 +88,35 @@ async function refreshCartCount() {
 }
 
 // =========================
-// ADD TO CART
+// CART ACTION POPUP (только НЕ /admin)
+// =========================
+function showCartAction(){
+  if (isAdminPage()) return;
+
+  const popup = document.getElementById("cart-action-popup");
+  if (!popup) return;
+
+  popup.classList.add("show");
+
+  clearTimeout(window._cartActionTimer);
+  window._cartActionTimer = setTimeout(() => {
+    popup.classList.remove("show");
+  }, 3500);
+}
+
+function closeCartAction(){
+  const popup = document.getElementById("cart-action-popup");
+  if (popup) popup.classList.remove("show");
+}
+
+window.closeCartAction = closeCartAction;
+
+// =========================
+// ADD TO CART (только НЕ /admin)
 // =========================
 async function addToCart(productId) {
+  if (isAdminPage()) return;
+
   try {
     const res = await fetch(`/api/add_to_cart/${productId}`, {
       method: "POST",
@@ -70,34 +135,20 @@ async function addToCart(productId) {
       badge.style.display = data.cart_total_items > 0 ? "inline-flex" : "none";
     }
 
-    showCartAction();   // ✅ вот это делает “всплывашку”
-
+    showCartAction(); // ✅ показываем popup (только на обычных страницах)
   } catch (e) {
     console.error("addToCart error:", e);
   }
 }
 
-function showCartAction(){
-  const popup = document.getElementById("cart-action-popup");
-  if (!popup) return;
-
-  popup.classList.add("show");
-
-  clearTimeout(window._cartActionTimer);
-  window._cartActionTimer = setTimeout(() => {
-    popup.classList.remove("show");
-  }, 3500);
-}
-
-function closeCartAction(){
-  const popup = document.getElementById("cart-action-popup");
-  if (popup) popup.classList.remove("show");
-}
+window.addToCart = addToCart;
 
 // =========================
-// CLICK HANDLER (главное)
+// CLICK HANDLER (только НЕ /admin)
 // =========================
 document.addEventListener("click", (e) => {
+  if (isAdminPage()) return;
+
   const btn = e.target.closest("[data-add-to-cart]");
   if (!btn) return;
 
@@ -111,4 +162,6 @@ document.addEventListener("click", (e) => {
 // =========================
 // INIT
 // =========================
-document.addEventListener("DOMContentLoaded", refreshCartCount);
+document.addEventListener("DOMContentLoaded", () => {
+  refreshCartCount();
+});

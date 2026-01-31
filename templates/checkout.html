@@ -1,33 +1,48 @@
-<form method="post" class="checkout-form">
-  <input type="hidden" name="checkout_token" value="{{ checkout_token }}">
+{% extends "base_user.html" %}
+{% block content %}
 
-  <div class="form-group">
-    <label>Имя</label>
-    <input
-      type="text"
-      name="name"
-      placeholder="Введите имя"
-      required
-      minlength="2"
-      maxlength="60"
-      autocomplete="name"
-    >
+<div class="page-card-wrapper">
+  <div class="page-card">
+
+    <h1 class="page-title">{{ "Оформление заказа" if lang=="ru" else "Checkout" }}</h1>
+
+    <form method="post" class="checkout-form">
+      <input type="hidden" name="checkout_token" value="{{ checkout_token }}">
+
+      <div class="form-group">
+        <label>Имя</label>
+        <input
+          type="text"
+          name="name"
+          placeholder="Введите имя"
+          required
+          minlength="2"
+          maxlength="60"
+          autocomplete="name"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Телефон или Email</label>
+        <input
+          type="text"
+          name="contact"
+          placeholder="+371 / example@email.com"
+          required
+          minlength="7"
+          maxlength="80"
+          autocomplete="email"
+          pattern="(^[^@\s]+@[^@\s]+\.[^@\s]+$)|(^\+?[0-9\s\-]{7,15}$)"
+          title="Введите email или телефон (пример: test@mail.com или +371 20000000)"
+        >
+      </div>
+
+      <button type="submit" class="checkout-btn">
+        Подтвердить заказ
+      </button>
+    </form>
+
   </div>
+</div>
 
-  <div class="form-group">
-    <label>Телефон или Email</label>
-    <input
-      type="text"
-      name="contact"
-      placeholder="+371 / example@email.com"
-      required
-      minlength="7"
-      maxlength="80"
-      autocomplete="email"
-      pattern="(^[^@\s]+@[^@\s]+\.[^@\s]+$)|(^\+?[0-9\s\-]{7,15}$)"
-      title="Введите email или телефон (пример: test@mail.com или +371 20000000)"
-    >
-  </div>
-
-  <button type="submit" class="checkout-btn">Подтвердить заказ</button>
-</form>
+{% endblock %}

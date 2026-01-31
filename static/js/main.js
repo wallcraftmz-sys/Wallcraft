@@ -62,20 +62,36 @@ async function addToCart(productId) {
     if (!ct.includes("application/json")) return;
 
     const data = await res.json();
-    if (!data.success) return;
+    if (!data || !data.success) return;
 
-    // обновляем счётчик
     const badge = document.getElementById("cart-count");
     if (badge) {
       badge.textContent = data.cart_total_items;
-      badge.style.display = "inline-flex";
+      badge.style.display = data.cart_total_items > 0 ? "inline-flex" : "none";
     }
 
-    showCartAction();
+    showCartAction();   // ✅ вот это делает “всплывашку”
 
   } catch (e) {
-    console.error(e);
+    console.error("addToCart error:", e);
   }
+}
+
+function showCartAction(){
+  const popup = document.getElementById("cart-action-popup");
+  if (!popup) return;
+
+  popup.classList.add("show");
+
+  clearTimeout(window._cartActionTimer);
+  window._cartActionTimer = setTimeout(() => {
+    popup.classList.remove("show");
+  }, 3500);
+}
+
+function closeCartAction(){
+  const popup = document.getElementById("cart-action-popup");
+  if (popup) popup.classList.remove("show");
 }
 
 // =========================

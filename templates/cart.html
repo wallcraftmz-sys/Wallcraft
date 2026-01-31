@@ -27,9 +27,9 @@
                     </div>
 
                     <div class="cart-qty">
-                        <button onclick="updateQty({{ item.id }}, 'minus')">−</button>
+                        <button type="button" onclick="updateQty({{ item.id }}, 'minus')">−</button>
                         <span id="qty-{{ item.id }}">{{ item.qty }}</span>
-                        <button onclick="updateQty({{ item.id }}, 'plus')">+</button>
+                        <button type="button" onclick="updateQty({{ item.id }}, 'plus')">+</button>
                     </div>
 
                     <div class="cart-subtotal" id="subtotal-{{ item.id }}">

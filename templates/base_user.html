@@ -74,9 +74,9 @@
 
     <!-- КАТАЛОГ (одна кнопка) -->
     <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
-  <span class="wc-ico">🛍️</span>
-  <span class="wc-txt">Каталог</span>
-</a>
+      <span class="wc-ico">🛍️</span>
+      <span class="wc-txt">Каталог</span>
+    </a>
 
     <div class="wc-line"></div>
 
@@ -92,8 +92,6 @@
         <span class="wc-txt">Профиль</span>
       </a>
     {% endif %}
-
-    <!-- В МЕНЮ НЕТ: Войти/Регистрация/Выйти -->
   </div>
 
   <!-- BOTTOM (фикс) -->
@@ -102,15 +100,12 @@
       <div class="wc-line"></div>
       <div class="wc-subtitle">Админ</div>
 
-      <a class="wc-link" href="{{ url_for('admin_categories', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">🗂️</span><span class="wc-txt">Категории</span>
-      </a>
       <a class="wc-link" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">➕</span><span class="wc-txt">Товары</span>
       </a>
       <a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
         <span class="wc-ico">🧾</span><span class="wc-txt">Заказы</span>
-      </a>  
+      </a>
     {% endif %}
   </div>
 
@@ -137,6 +132,18 @@
   <span class="cart-fab-ico">🛒</span>
   <span id="cart-count" class="cart-badge">0</span>
 </a>
+
+<!-- CART ACTION POPUP (появляется только когда JS скажет) -->
+<div id="cart-action-popup" class="cart-action-popup" aria-hidden="true">
+  <div class="cart-action-inner">
+    <span class="cart-action-text">Товар добавлен в корзину</span>
+
+    <div class="cart-action-buttons">
+      <button type="button" onclick="closeCartAction()">Продолжить покупки</button>
+      <a href="{{ url_for('cart', lang=lang) }}">Перейти в корзину</a>
+    </div>
+  </div>
+</div>
 
 <script>
 function wcMenuOpen(){
@@ -176,19 +183,24 @@ async function refreshCartCount() {
   } catch (e) {}
 }
 document.addEventListener("DOMContentLoaded", refreshCartCount);
+
+/* popup controls */
+function openCartAction(){
+  const p = document.getElementById("cart-action-popup");
+  if(!p) return;
+  p.classList.add("show");
+  p.setAttribute("aria-hidden","false");
+  clearTimeout(window.__cartPopupTimer);
+  window.__cartPopupTimer = setTimeout(closeCartAction, 3000);
+}
+
+function closeCartAction(){
+  const p = document.getElementById("cart-action-popup");
+  if(!p) return;
+  p.classList.remove("show");
+  p.setAttribute("aria-hidden","true");
+}
 </script>
 
- <!-- CART ACTION POPUP -->
-<div id="cart-action-popup" class="cart-action-popup">
-  <div class="cart-action-inner">
-    <span class="cart-action-text">Товар добавлен в корзину</span>
-
-    <div class="cart-action-buttons">
-      <button type="button" onclick="closeCartAction()">Продолжить покупки</button>
-      <a href="{{ url_for('cart', lang=lang) }}">Перейти в корзину</a>
-    </div>
-  </div>
-</div>
-  
 </body>
 </html>

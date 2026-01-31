@@ -55,13 +55,6 @@ UPLOAD_FOLDER = os.path.join("static", "uploads")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# когда сохраняешь файл:
-filename = secure_filename(file.filename)
-save_path = os.path.join(UPLOAD_FOLDER, filename)
-file.save(save_path)
-
-# в БД/в продукт сохраняй так:
-image_path = f"uploads/{filename}"
 # ======================
 # SECURITY: SAFE REDIRECT + INPUT NORMALIZATION
 # ======================

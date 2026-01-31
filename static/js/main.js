@@ -123,3 +123,60 @@ window.addToCart = addToCart;
 document.addEventListener("DOMContentLoaded", () => {
   refreshCartCount();
 });
+
+// =========================
+// UPDATE QTY (+ / -) for CART PAGE
+// =========================
+async function updateQty(productId, action) {
+  try {
+    const res = await fetch(`/api/update_cart/${productId}/${action}`, {
+      method: "POST",
+      credentials: "same-origin"
+    });
+
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) {
+      console.error("updateQty: expected json, got", ct);
+      return;
+    }
+
+    const data = await res.json();
+    if (!data || !data.success) {
+      console.error("updateQty failed:", data);
+      return;
+    }
+
+    // qty row update
+    const qtyEl = document.getElementById(`qty-${productId}`);
+    const subEl = document.getElementById(`subtotal-${productId}`);
+    const rowEl = document.getElementById(`row-${productId}`);
+
+    if (data.qty === 0) {
+      if (rowEl) rowEl.remove();
+    } else {
+      if (qtyEl) qtyEl.textContent = data.qty;
+      if (subEl) subEl.textContent = Number(data.subtotal).toFixed(2) + " €";
+    }
+
+    // total update
+    const totalEl = document.getElementById("cart-total");
+    if (totalEl) totalEl.textContent = Number(data.total).toFixed(2) + " €";
+
+    // header badge update
+    const badge = document.getElementById("cart-count");
+    if (badge) {
+      const n = Number(data.cart_total_items || 0);
+      badge.textContent = n;
+      badge.style.display = n > 0 ? "inline-flex" : "none";
+    }
+
+    // если корзина пустая — обновим страницу (чтобы показать "корзина пуста")
+    if (Number(data.cart_total_items || 0) === 0) {
+      location.reload();
+    }
+  } catch (e) {
+    console.error("updateQty error:", e);
+  }
+}
+
+window.updateQty = updateQty;

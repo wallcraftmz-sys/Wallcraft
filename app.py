@@ -1507,6 +1507,30 @@ def links_check():
     }
     return jsonify(ok=True, links=links)
 
+@app.route("/admin/product/<int:id>/hard_delete", methods=["POST"])
+@login_required
+@admin_required
+def hard_delete_product(id):
+    p = Product.query.get_or_404(id)
+
+    # Разрешаем удалять навсегда только скрытые
+    if p.is_active:
+        flash("Сначала скройте товар, потом удаляйте навсегда", "error")
+        return redirect(url_for("admin_products", show=request.args.get("show", "active")))
+
+    # --- (опционально) удалить файл изображения ---
+    try:
+        if p.image and p.image.startswith("uploads/"):
+            abs_path = os.path.join(app.static_folder, p.image)  # static/uploads/...
+            if os.path.exists(abs_path):
+                os.remove(abs_path)
+    except Exception:
+        pass
+
+    db.session.delete(p)
+    db.session.commit()
+    flash("Товар удалён навсегда", "success")
+    return redirect(url_for("admin_products", show=request.args.get("show", "inactive")))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

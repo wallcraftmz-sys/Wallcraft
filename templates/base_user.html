@@ -70,29 +70,24 @@
   </div>
 
   <!-- MIDDLE (скролл) -->
-  <div class="wc-mid" role="navigation" aria-label="Menu">
+<div class="wc-mid" role="navigation" aria-label="Menu">
 
-    <!-- КАТАЛОГ (одна кнопка) -->
-    <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
-      <span class="wc-ico">🛍️</span>
-      <span class="wc-txt">Каталог</span>
+  {% if current_user.is_authenticated %}
+    <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
+      <span class="wc-txt">Профиль</span>
     </a>
+  {% endif %}
 
-    <div class="wc-line"></div>
+  <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
+    <span class="wc-txt">Каталог</span>
+  </a>
 
-    <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
-      <span class="wc-ico">🛒</span>
-      <span class="wc-txt">Корзина</span>
-      <span class="wc-pill">{{ cart_total_items }}</span>
-    </a>
+  <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
+    <span class="wc-txt">Корзина</span>
+    <span class="wc-pill" id="menu-cart-pill">{{ cart_total_items or 0 }}</span>
+  </a>
 
-    {% if current_user.is_authenticated %}
-      <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">👤</span>
-        <span class="wc-txt">Профиль</span>
-      </a>
-    {% endif %}
-  </div>
+</div>
 
   <!-- BOTTOM (фикс) -->
   <div class="wc-bot">
@@ -101,11 +96,11 @@
       <div class="wc-subtitle">Админ</div>
 
       <a class="wc-link" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">➕</span><span class="wc-txt">Товары</span>
-      </a>
-      <a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">🧾</span><span class="wc-txt">Заказы</span>
-      </a>
+  <span class="wc-txt">Товары</span>
+</a>
+<a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
+  <span class="wc-txt">Заказы</span>
+</a>
     {% endif %}
   </div>
 

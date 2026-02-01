@@ -1019,3 +1019,8 @@ a{ color: inherit; }
   font-size: 14px;
   font-weight: 600;
 }
+
+.wc-link.wc-catalog {
+  background: #f7f7f7 !important;
+  box-shadow: none !important;
+}

@@ -1,9 +1,122 @@
-/* =========================
-   WC MENU — MINIMAL BUT PREMIUM
-   for HTML with: wc-top / wc-mid / wc-bot / wc-link / wc-sublist / wc-sub / wc-line / wc-pill
-========================= */
+/* =========================================================
+   WALLCRAFT — CLEAN UI (NO DUPLICATES)
+   Includes: Header, WC Drawer Menu, Cards, Catalog, Cart, Checkout, Breadcrumbs, Admin
+========================================================= */
 
-/* overlay */
+/* =========================
+   ROOT / BASE
+========================= */
+:root{
+  --header-h: 56px;
+  --line: rgba(0,0,0,.08);
+
+  --card-bg: rgba(255,255,255,.92);
+  --card-brd: rgba(0,0,0,.06);
+  --shadow: 0 14px 34px rgba(0,0,0,.07);
+  --shadow2: 0 10px 24px rgba(0,0,0,.06);
+  --radius: 18px;
+  --radius2: 14px;
+
+  --brand: #e60000;
+  --text: rgba(17,24,39,.92);
+  --muted: rgba(17,24,39,.62);
+}
+
+*{ box-sizing: border-box; }
+a{ color: inherit; }
+
+body{
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: var(--text);
+  background: #f5f6f7;
+}
+
+/* =========================
+   FIXED HEADER
+========================= */
+.top-header{
+  position: fixed;
+  top:0; left:0; right:0;
+  height: var(--header-h);
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  z-index: 3000;
+
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+.menu-btn{
+  border: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.05);
+  font-size: 22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-btn:active{ transform: scale(.98); }
+
+.logo-center{
+  display:flex;
+  justify-content:center;
+  min-width: 0;
+}
+
+.logo-link{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  text-decoration: none !important;
+  color: var(--text) !important;
+}
+
+.logo-img{
+  width:28px;
+  height:28px;
+  border-radius:9px;
+  object-fit:cover;
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+}
+
+.logo-text{
+  font-weight: 900;
+  letter-spacing: .2px;
+  font-size: 18px;
+}
+
+.header-auth{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+.header-link{
+  text-decoration: none !important;
+  color: rgba(17,24,39,.82) !important;
+}
+.header-link:hover{ color: var(--brand) !important; }
+.header-sep{ opacity: .35; }
+
+/* Content under header */
+.container{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--header-h) + 16px) 16px 32px;
+}
+
+/* =========================
+   WC DRAWER MENU
+========================= */
 .wc-overlay{
   position: fixed;
   inset: 0;
@@ -18,7 +131,6 @@
   pointer-events: auto;
 }
 
-/* drawer shell */
 .wc-drawer{
   position: fixed;
   top: 0;
@@ -39,7 +151,6 @@
 }
 .wc-drawer.open{ transform: translateX(0); }
 
-/* fixed top/mid/bot layout */
 .wc-top{ flex: 0 0 auto; }
 .wc-mid{
   flex: 1 1 auto;
@@ -53,7 +164,6 @@
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
 }
 
-/* header inside drawer */
 .wc-drawer-head{
   display:flex;
   align-items:center;
@@ -84,21 +194,30 @@
   text-overflow: ellipsis;
 }
 
-.wc-close {
+/* Centered X (perfect on iOS) */
+.wc-close{
+  border: 0;
   width: 44px;
   height: 44px;
   border-radius: 14px;
   background: #f2f2f2;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 22px;
-  line-height: 1;
+  cursor: pointer;
+  position: relative;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
 }
+.wc-close span{ display:none; } /* if inside was text */
+.wc-close::before{
+  content: "×";
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(-1px);
+  color: #0b6bd3;
+}
+.wc-close:active{ transform: scale(.98); }
 
-/* language pills (nice minimal) */
 .wc-lang{
   display:flex;
   gap: 8px;
@@ -107,7 +226,7 @@
 .wc-lang a{
   text-decoration: none;
   color: rgba(17,24,39,.9);
-  font-weight: 800;
+  font-weight: 900;
   font-size: 13px;
   padding: 8px 12px;
   border-radius: 999px;
@@ -120,45 +239,34 @@
   border-color: rgba(230,0,0,.14);
 }
 
-/* lines / separators */
 .wc-line{
   height: 1px;
   background: rgba(0,0,0,.07);
   margin: 8px 4px;
 }
 
-/* MENU LINKS (this fixes blue/underline) */
+/* MENU LINKS — UNIFIED (catalog same as others) */
 .wc-link{
   display:flex;
   align-items:center;
-  gap: 12px;
-
-  text-decoration: none !important;
-  color: rgba(17,24,39,.92) !important;
-
-  padding: 12px 10px;
+  justify-content: space-between;
+  padding: 14px 16px;
   border-radius: 14px;
-
-  font-weight: 850;
-  letter-spacing: .1px;
-
+  background: #f7f7f7;
+  color: #111827 !important;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none !important;
+  border: 1px solid rgba(0,0,0,.06);
   transition: background .15s ease, transform .15s ease;
 }
 .wc-link:hover{ background: rgba(0,0,0,.03); }
 .wc-link:active{ background: rgba(0,0,0,.05); transform: scale(.995); }
+.wc-link + .wc-link{ margin-top: 10px; }
 
-/* icon box (subtle) */
-.wc-ico{
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: rgba(0,0,0,.045);
-  font-size: 16px;
-  flex: 0 0 auto;
-}
+/* hide icons everywhere in menu */
+.wc-ico{ display:none !important; }
+
 .wc-txt{
   min-width: 0;
   overflow: hidden;
@@ -166,60 +274,22 @@
   white-space: nowrap;
 }
 
-/* chevron for Catalog */
-.wc-chevron{
-  margin-left: auto;
-  opacity: .5;
-  font-size: 14px;
-}
-
-/* pill counter */
 .wc-pill{
-  margin-left: auto;
-  height: 22px;
-  min-width: 22px;
+  min-width: 26px;
+  height: 26px;
   padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-size: 12px;
+  background: #f5caca;
+  color: #b00000;
+  font-size: 14px;
   font-weight: 900;
-  background: rgba(230,0,0,.10);
-  color: #b40000;
   border: 1px solid rgba(230,0,0,.12);
 }
 
-/* Catalog item special (slightly stronger) */
-.wc-catalog{
-  background: rgba(0,0,0,.02);
-  border: 1px solid rgba(0,0,0,.06);
-}
-
-/* SUBLIST: categories inside Catalog */
-.wc-sublist{
-  margin: 6px 0 10px 0;
-  padding-left: 10px; /* indent */
-}
-
-/* sub links */
-.wc-sub{
-  padding: 10px 10px;
-  border-radius: 12px;
-  font-weight: 800;
-  color: rgba(31,41,55,.92) !important;
-}
-
-/* hide the "•" icon box for categories OR make it tiny */
-.wc-sub .wc-ico{
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(230,0,0,.20);
-  font-size: 0; /* hide bullet character */
-}
-
-/* subtitle in bottom admin block */
+/* admin subtitle */
 .wc-subtitle{
   font-weight: 900;
   font-size: 12px;
@@ -229,219 +299,9 @@
   padding: 6px 10px 2px;
 }
 
-/* header auth (right side in top header) */
-.header-auth{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size: 13px;
-  font-weight: 900;
-}
-.header-link{
-  text-decoration:none;
-  color: rgba(31,41,55,.85);
-}
-.header-link:hover{ color: #e60000; }
-.header-sep{ opacity: .35; }
-
 /* =========================
-   SIDE MENU (old system) — ENABLED
+   FLOATING CART FAB
 ========================= */
-.menu-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(15,23,42,.35);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease;
-  z-index: 4999;
-}
-.menu-overlay.show{
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.side-menu{
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100dvh;
-  width: min(86vw, 360px);
-  background: rgba(255,255,255,.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-right: 1px solid rgba(0,0,0,.06);
-  box-shadow: 22px 0 60px rgba(0,0,0,.18);
-  transform: translateX(-105%);
-  transition: transform .22s ease;
-  z-index: 5000;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.side-menu.open{ transform: translateX(0); }
-
-.side-menu a{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  padding: 12px 10px;
-  border-radius: 14px;
-  text-decoration: none !important;
-  color: rgba(17,24,39,.92) !important;
-  font-weight: 850;
-}
-.side-menu a:hover{ background: rgba(0,0,0,.03); }
-
-.side-menu hr{
-  border: 0;
-  height: 1px;
-  background: rgba(0,0,0,.07);
-  margin: 10px 4px;
-}
-
-/* =========================
-   FIX HEADER (CEILING)
-========================= */
-:root{ --header-h: 56px; --line: rgba(0,0,0,.08); --card:#fff; --text:#111827; --muted:#6b7280; --brand:#e60000; }
-
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  color: var(--text);
-  background: #f5f6f7;
-}
-
-/* fixed top bar */
-.top-header{
-  position: fixed;
-  top:0; left:0; right:0;
-  height: var(--header-h);
-  background: var(--card);
-  border-bottom: 1px solid var(--line);
-  z-index: 3000;
-
-  display: grid;
-  grid-template-columns: 44px 1fr auto; /* button | center | auth */
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-}
-
-/* left menu button */
-.menu-btn{
-  border: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.05);
-  font-size: 22px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.menu-btn:active{ transform: scale(.98); }
-
-/* center logo */
-.logo-center{
-  position: static;      /* важно: убрали absolute */
-  transform: none;
-  display: flex;
-  justify-content: center;
-  min-width: 0;
-}
-.logo-link{
-  text-decoration: none !important;
-  color: var(--text) !important;
-}
-.logo-text{
-  font-weight: 900;
-  letter-spacing: .2px;
-  font-size: 18px;
-}
-
-/* right auth */
-.header-auth{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 900;
-}
-.header-link{
-  text-decoration: none !important;
-  color: rgba(17,24,39,.82) !important;
-}
-.header-link:hover{ color: var(--brand) !important; }
-.header-sep{ opacity: .35; }
-
-/* page content offset under header */
-.container{
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: calc(var(--header-h) + 16px) 16px 32px;
-}
-
-/* =========================
-   HERO (if you want not "dry")
-   Put on index page: <section class="hero">...</section>
-========================= */
-.hero{
-  min-height: calc(100vh - var(--header-h));
-  margin-top: var(--header-h);
-  display:flex;
-  align-items:flex-start;
-  padding: 28px 16px;
-  background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0));
-}
-.hero-inner{
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.hero-title{
-  font-size: 38px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  margin: 0 0 12px;
-}
-.hero-sub{
-  margin: 0 0 18px;
-  font-size: 16px;
-  color: rgba(17,24,39,.75);
-  font-weight: 700;
-}
-.hero-cta{
-  display:inline-block;
-  padding: 12px 18px;
-  border-radius: 999px;
-  background: var(--brand);
-  color: #fff !important;
-  text-decoration:none !important;
-  font-weight: 900;
-}
-.hero-cta:active{ transform: scale(.99); }
-
-/* ===== FIX: logo in header ===== */
-.logo-link{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  text-decoration:none;
-  color: inherit;
-}
-.logo-img{
-  width:28px;
-  height:28px;
-  border-radius:9px;
-  object-fit:cover;
-  box-shadow: 0 10px 22px rgba(0,0,0,.12);
-}
-
-/* ===== FIX: floating cart always visible ===== */
 .cart-fab{
   position: fixed !important;
   right: 16px;
@@ -469,29 +329,18 @@ body{
   height: 22px;
   padding: 0 7px;
   border-radius: 999px;
-
   display: inline-flex;
   align-items:center;
   justify-content:center;
-
   font-size: 12px;
   font-weight: 900;
   background: #e60000;
   color:#fff;
 }
 
-/* Checkout mobile fix */
-.checkout-form input,
-.checkout-form button {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.checkout-form .row {
-  display: block !important;  /* если где-то flex ломает */
-}
-
+/* =========================
+   TOASTS
+========================= */
 .toast-container{
   position: fixed;
   left: 50%;
@@ -528,22 +377,24 @@ body{
 .toast-info{ background: rgba(17,17,17,0.92); }
 .toast-warning{ background: rgba(245, 158, 11, 0.92); }
 
-/* CART ACTION POPUP (fixed, clickable, mobile) */
+/* =========================
+   CART ACTION POPUP
+========================= */
 .cart-action-popup{
   position: fixed;
   left: 50%;
-  bottom: -160px;              /* спрятано */
+  bottom: -160px;
   transform: translateX(-50%);
   width: calc(100% - 24px);
   max-width: 460px;
   z-index: 1000000;
   transition: bottom .25s ease;
-  pointer-events: none;        /* чтобы не мешало кликам когда скрыто */
+  pointer-events: none;
 }
 
 .cart-action-popup.show{
-  bottom: 16px;                /* показ */
-  pointer-events: auto;        /* кликабельно */
+  bottom: 16px;
+  pointer-events: auto;
 }
 
 .cart-action-inner{
@@ -582,29 +433,14 @@ body{
   background: #374151;
   color:#fff;
 }
-
 .cart-action-buttons a{
   background: #e60000;
   color:#fff;
 }
 
 /* =========================
-   BASE UI / CARDS / BUTTONS
+   PAGE CARDS / BUTTONS
 ========================= */
-:root{
-  --card-bg: rgba(255,255,255,.92);
-  --card-brd: rgba(0,0,0,.06);
-  --shadow: 0 14px 34px rgba(0,0,0,.07);
-  --shadow2: 0 10px 24px rgba(0,0,0,.06);
-  --radius: 18px;
-  --radius2: 14px;
-  --brand: #e60000;
-  --text: rgba(17,24,39,.92);
-  --muted: rgba(17,24,39,.62);
-}
-
-a{ color: inherit; }
-
 .page-title{
   font-size: 34px;
   font-weight: 900;
@@ -634,7 +470,6 @@ a{ color: inherit; }
   flex-wrap: wrap;
 }
 
-/* shared button styles */
 .popup-btn,
 .page-btn,
 .add-to-cart-btn{
@@ -672,7 +507,7 @@ a{ color: inherit; }
 }
 
 /* =========================
-   CATALOG (product grid)
+   CATALOG (GRID)
 ========================= */
 .product-grid{
   display:grid;
@@ -719,10 +554,9 @@ a{ color: inherit; }
   color: #fff !important;
   border: 0;
 }
-.add-to-cart-btn:hover{ filter: brightness(1.02); }
 
 /* =========================
-   CART (your cart.html uses these classes)
+   CART
 ========================= */
 .cart-list{
   display:flex;
@@ -761,9 +595,11 @@ a{ color: inherit; }
   margin-bottom: 8px;
 }
 
+/* qty: centered + and - */
 .cart-qty{
   display:flex;
   align-items:center;
+  justify-content:center;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -774,15 +610,22 @@ a{ color: inherit; }
   border-radius: 12px;
   border: 0;
   background: rgba(0,0,0,.06);
+  font-size: 20px;
   font-weight: 900;
-  font-size: 18px;
+  line-height: 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
 }
+.cart-qty button:active{ transform: scale(.95); }
 
 .cart-qty span{
   min-width: 22px;
   text-align:center;
   font-weight: 900;
+  font-size: 16px;
+  line-height: 1;
 }
 
 .cart-subtotal{
@@ -815,7 +658,7 @@ a{ color: inherit; }
 }
 
 /* =========================
-   CHECKOUT (your checkout-form)
+   CHECKOUT
 ========================= */
 .checkout-form{
   width: 100%;
@@ -826,12 +669,6 @@ a{ color: inherit; }
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px;
-}
-
-.checkout-subtitle{
-  margin: 0 0 14px;
-  font-size: 20px;
-  font-weight: 900;
 }
 
 .form-group{
@@ -846,6 +683,13 @@ a{ color: inherit; }
   color: var(--text);
   font-size: 13px;
   letter-spacing: .2px;
+}
+
+.checkout-form input,
+.checkout-form button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .checkout-form input{
@@ -872,11 +716,10 @@ a{ color: inherit; }
   font-weight: 900;
   cursor:pointer;
 }
-
 .checkout-btn:active{ transform: scale(.99); }
 
 /* =========================
-   BREADCRUMBS (nice)
+   BREADCRUMBS
 ========================= */
 .breadcrumbs{
   display:flex;
@@ -911,18 +754,8 @@ a{ color: inherit; }
 }
 
 /* =========================
-   ADMIN polish (if admin_base extends base_user)
+   ADMIN POLISH (optional)
 ========================= */
-.is-admin .admin-wrap{
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.is-admin h1, .is-admin h2{
-  letter-spacing: .2px;
-}
-
 .is-admin input[type="text"],
 .is-admin input[type="number"],
 .is-admin input[type="file"],
@@ -934,93 +767,4 @@ a{ color: inherit; }
   font-weight: 800;
 }
 
-.is-admin select{
-  cursor: pointer;
-}
-
-/* ===== CART QTY FIX ===== */
-.cart-qty{
-  display: flex;
-  align-items: center;        /* вертикальное центрирование */
-  justify-content: center;    /* горизонтальное */
-  gap: 10px;
-  margin-top: 6px;
-}
-
-/* кнопки + / - */
-.cart-qty button{
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  border: 0;
-  background: rgba(0,0,0,.06);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1;             /* КЛЮЧЕВО — убирает съезд */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.cart-qty button:active{
-  transform: scale(.95);
-}
-
-/* цифра */
-.cart-qty span{
-  min-width: 22px;
-  text-align: center;
-  font-weight: 900;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.wc-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 14px 16px;
-  border-radius: 14px;
-
-  background: #f7f7f7;
-  color: #111;
-
-  font-size: 16px;
-  font-weight: 500;
-
-  text-decoration: none;
-}
-
-.wc-link + .wc-link {
-  margin-top: 10px;
-}
-
-/* убираем особый стиль у каталога */
-.wc-link.wc-catalog {
-  background: #f7f7f7;
-}
-
-/* счетчик корзины */
-.wc-pill {
-  min-width: 26px;
-  height: 26px;
-  padding: 0 8px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 999px;
-  background: #f5caca;
-  color: #b00000;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.wc-link.wc-catalog {
-  background: #f7f7f7 !important;
-  box-shadow: none !important;
-}
+.is-admin select{ cursor: pointer; }

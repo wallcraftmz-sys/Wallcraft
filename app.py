@@ -506,9 +506,47 @@ def set_lang():
         session["lang"] = "ru"
 
 
+# ======================
+# LANGUAGE / I18N
+# ======================
+
+TRANSLATIONS = {
+    # MENU
+    "profile":  {"ru": "Профиль", "en": "Profile", "lv": "Profils"},
+    "catalog":  {"ru": "Каталог", "en": "Catalog", "lv": "Katalogs"},
+    "cart":     {"ru": "Корзина", "en": "Cart",    "lv": "Grozs"},
+
+    # AUTH
+    "login":    {"ru": "Войти",   "en": "Login",   "lv": "Ieiet"},
+    "logout":   {"ru": "Выйти",   "en": "Logout",  "lv": "Iziet"},
+
+    # ADMIN
+    "admin":    {"ru": "Админ",   "en": "Admin",   "lv": "Administrācija"},
+    "products": {"ru": "Товары",  "en": "Products","lv": "Preces"},
+    "orders":   {"ru": "Заказы",  "en": "Orders",  "lv": "Pasūtījumi"},
+
+    # CART / SHOP
+    "checkout": {"ru": "Оформить заказ", "en": "Checkout", "lv": "Noformēt pasūtījumu"},
+    "continue": {"ru": "Продолжить покупки", "en": "Continue shopping", "lv": "Turpināt iepirkties"},
+    "empty_cart": {"ru": "Корзина пуста", "en": "Cart is empty", "lv": "Grozs ir tukšs"},
+}
+
+
+def t(key: str, lang: str) -> str:
+    lang = (lang or "ru").lower()
+    if lang not in ("ru", "en", "lv"):
+        lang = "ru"
+
+    data = TRANSLATIONS.get(key, {})
+    return data.get(lang) or data.get("ru") or data.get("en") or key
+
+
 @app.context_processor
-def inject_lang():
-    return dict(lang=session.get("lang", "ru"))
+def inject_i18n():
+    return {
+        "lang": session.get("lang", "ru"),
+        "t": t
+    }
 
 
 # ======================

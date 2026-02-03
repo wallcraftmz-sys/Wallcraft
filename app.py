@@ -513,53 +513,104 @@ def set_lang():
 
 TRANSLATIONS = {
     # MENU
-    "profile":  {"ru": "Профиль", "lv": "Profils", "en": "Profile"},
-    "catalog":  {"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"},
-    "cart":     {"ru": "Корзина", "lv": "Grozs", "en": "Cart"},
+    "profile":  {"ru": "Профиль", "en": "Profile", "lv": "Profils"},
+    "catalog":  {"ru": "Каталог", "en": "Catalog", "lv": "Katalogs"},
+    "cart":     {"ru": "Корзина", "en": "Cart", "lv": "Grozs"},
+    "admin":    {"ru": "Админ", "en": "Admin", "lv": "Administrācija"},
 
     # AUTH
-    "login":    {"ru": "Войти", "lv": "Ienākt", "en": "Login"},
-    "logout":   {"ru": "Выйти", "lv": "Iziet", "en": "Logout"},
-    "register": {"ru": "Регистрация", "lv": "Reģistrācija", "en": "Register"},
+    "login":    {"ru": "Войти", "en": "Login", "lv": "Ieiet"},
+    "logout":   {"ru": "Выйти", "en": "Logout", "lv": "Iziet"},
+    "register": {"ru": "Регистрация", "en": "Register", "lv": "Reģistrācija"},
 
-    # CART
-    "add_to_cart": {"ru": "Добавить в корзину", "lv": "Pievienot grozam", "en": "Add to cart"},
-    "added": {"ru": "Товар добавлен в корзину", "lv": "Prece pievienota grozam", "en": "Product added to cart"},
-    "continue": {"ru": "Продолжить покупки", "lv": "Turpināt iepirkties", "en": "Continue shopping"},
-    "go_to_cart": {"ru": "Перейти в корзину", "lv": "Doties uz grozu", "en": "Go to cart"},
-    "empty_cart": {"ru": "Корзина пуста", "lv": "Grozs ir tukšs", "en": "Cart is empty"},
-    "total": {"ru": "Итого", "lv": "Kopā", "en": "Total"},
-    "checkout": {"ru": "Оформить заказ", "lv": "Noformēt pasūtījumu", "en": "Checkout"},
+    # SHOP / CART
+    "add_to_cart": {"ru": "В корзину", "en": "Add to cart", "lv": "Pievienot grozam"},
+    "added":       {"ru": "Товар добавлен в корзину", "en": "Product added to cart", "lv": "Prece pievienota grozam"},
+    "continue":    {"ru": "Продолжить покупки", "en": "Continue shopping", "lv": "Turpināt iepirkties"},
+    "go_to_cart":  {"ru": "Перейти в корзину", "en": "Go to cart", "lv": "Doties uz grozu"},
+    "empty_cart":  {"ru": "Корзина пуста", "en": "Cart is empty", "lv": "Grozs ir tukšs"},
+    "total":       {"ru": "Итого", "en": "Total", "lv": "Kopā"},
+    "checkout":    {"ru": "Оформить заказ", "en": "Checkout", "lv": "Noformēt pasūtījumu"},
+    "checkout_title": {"ru": "Оформление заказа", "en": "Checkout", "lv": "Pasūtījuma noformēšana"},
 
-    # CHECKOUT
-    "name": {"ru": "Имя", "lv": "Vārds", "en": "Name"},
-    "contact": {"ru": "Телефон или Email", "lv": "Telefons vai e-pasts", "en": "Phone or Email"},
-    "confirm": {"ru": "Подтвердить заказ", "lv": "Apstiprināt pasūtījumu", "en": "Confirm order"},
+    # CHECKOUT FORM
+    "name": {"ru": "Имя", "en": "Name", "lv": "Vārds"},
+    "name_placeholder": {"ru": "Введите имя", "en": "Enter your name", "lv": "Ievadiet vārdu"},
+    "contact": {"ru": "Телефон или Email", "en": "Phone or Email", "lv": "Tālrunis vai e-pasts"},
+    "contact_hint": {
+        "ru": "Введите email или телефон (пример: test@mail.com или +371 20000000)",
+        "en": "Enter email or phone (example: test@mail.com or +371 20000000)",
+        "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)"
+    },
+    "confirm_order": {"ru": "Подтвердить заказ", "en": "Confirm order", "lv": "Apstiprināt pasūtījumu"},
 
-    # ADMIN
-    "admin": {"ru": "Админ", "lv": "Admin", "en": "Admin"},
-    "products": {"ru": "Товары", "lv": "Preces", "en": "Products"},
-    "orders": {"ru": "Заказы", "lv": "Pasūtījumi", "en": "Orders"},
-    "price": {"ru": "Цена", "lv": "Cena", "en": "Price"},
-    "restore": {"ru": "Восстановить", "lv": "Atjaunot", "en": "Restore"},
-    "delete_forever": {"ru": "Удалить навсегда", "lv": "Dzēst neatgriezeniski", "en": "Delete forever"},
+    # ADMIN PAGES
+    "products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
+    "orders":   {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},
+    "admin_products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
+    "admin_orders": {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},
+
+    "add_product": {"ru": "Добавить товар", "en": "Add product", "lv": "Pievienot preci"},
+    "active": {"ru": "Активные", "en": "Active", "lv": "Aktīvie"},
+    "inactive": {"ru": "Скрытые", "en": "Hidden", "lv": "Slēptie"},
+    "all": {"ru": "Все", "en": "All", "lv": "Visi"},
+    "restore": {"ru": "Восстановить", "en": "Restore", "lv": "Atjaunot"},
+    "delete_forever": {"ru": "Удалить навсегда", "en": "Delete forever", "lv": "Dzēst uz visiem laikiem"},
+    "price": {"ru": "Цена", "en": "Price", "lv": "Cena"},
+
+    # CONFIRMS
+    "confirm_hide_product": {
+        "ru": "Скрыть товар из каталога?",
+        "en": "Hide this product from the catalog?",
+        "lv": "Paslēpt preci no kataloga?"
+    },
+    "confirm_hard_delete_product": {
+        "ru": "Удалить товар НАВСЕГДА? Это действие нельзя отменить.",
+        "en": "Delete this product FOREVER? This action cannot be undone.",
+        "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt."
+    },
+
+    # ADMIN ORDERS UI
+    "archive": {"ru": "Архив", "en": "Archive", "lv": "Arhīvs"},
+    "search": {"ru": "Найти", "en": "Search", "lv": "Meklēt"},
+    "reset": {"ru": "Сброс", "en": "Reset", "lv": "Atiestatīt"},
+    "search_placeholder": {"ru": "Поиск: ID, имя, контакт", "en": "Search: ID, name, contact", "lv": "Meklēšana: ID, vārds, kontakts"},
+    "export_csv": {"ru": "Экспорт заказов (CSV)", "en": "Export orders (CSV)", "lv": "Eksportēt pasūtījumus (CSV)"},
+    "buyer": {"ru": "Покупатель", "en": "Customer", "lv": "Pircējs"},
+    "items": {"ru": "Состав", "en": "Items", "lv": "Saturs"},
+    "sum": {"ru": "Сумма", "en": "Amount", "lv": "Summa"},
+    "status": {"ru": "Статус", "en": "Status", "lv": "Statuss"},
+    "history": {"ru": "История", "en": "History", "lv": "Vēsture"},
+    "date": {"ru": "Дата", "en": "Date", "lv": "Datums"},
+    "actions": {"ru": "Действия", "en": "Actions", "lv": "Darbības"},
+    "print": {"ru": "Печать", "en": "Print", "lv": "Drukāt"},
+    "no_orders": {"ru": "Нет заказов", "en": "No orders", "lv": "Nav pasūtījumu"},
+    "to_archive": {"ru": "В архив", "en": "To archive", "lv": "Uz arhīvu"},
+
+    "confirm_restore_order": {
+        "ru": "Восстановить заказ из архива?",
+        "en": "Restore the order from archive?",
+        "lv": "Atjaunot pasūtījumu no arhīva?"
+    },
+    "confirm_hard_delete_order": {
+        "ru": "Удалить заказ НАВСЕГДА? Это действие нельзя отменить.",
+        "en": "Delete the order FOREVER? This action cannot be undone.",
+        "lv": "Dzēst pasūtījumu UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt."
+    },
+    "confirm_archive_order": {
+        "ru": "Переместить заказ в архив?",
+        "en": "Move the order to archive?",
+        "lv": "Pārvietot pasūtījumu uz arhīvu?"
+    },
 }
 
 
 def t(key: str) -> str:
-    lang = session.get("lang", "ru")
-    pack = TRANSLATIONS.get(key)
-
-    if not pack:
-        return key  # сразу видно, что забыли перевод
-
-    return (
-        pack.get(lang)
-        or pack.get("ru")
-        or pack.get("lv")
-        or pack.get("en")
-        or key
-    )
+    lang = (session.get("lang") or "ru").lower()
+    if lang not in ("ru", "en", "lv"):
+        lang = "ru"
+    data = TRANSLATIONS.get(key, {})
+    return data.get(lang) or data.get("ru") or data.get("en") or key
 
 
 @app.context_processor

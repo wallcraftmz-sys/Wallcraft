@@ -2,81 +2,75 @@
 {% block content %}
 
 <div class="page-card-wrapper">
-    <div class="page-card">
+  <div class="page-card">
 
-        <h1 class="page-title">
-            {{ "Корзина" if lang == "ru" else "Cart" }}
-        </h1>
+    <h1 class="page-title">{{ t("cart") }}</h1>
 
-        {% if items %}
+    {% if items %}
 
-        <div class="cart-list">
-            {% for item in items %}
-            <div class="cart-row" id="row-{{ item.id }}">
+      <div class="cart-list">
+        {% for item in items %}
+        <div class="cart-row" id="row-{{ item.id }}">
 
-                <img
-                    src="{{ url_for('static', filename=item['image'] if item['image'] else 'images/no-image.png') }}"
-                    class="cart-img"
-                    loading="lazy"
-                    onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
-                >
+          <img
+            src="{{ url_for('static', filename=item['image'] if item['image'] else 'images/no-image.png') }}"
+            class="cart-img"
+            loading="lazy"
+            onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
+          >
 
-                <div class="cart-info">
-                    <div class="cart-name">
-                        {{ item.name }}
-                    </div>
+          <div class="cart-info">
+            <div class="cart-name">{{ item.name }}</div>
 
-                    <div class="cart-qty">
-                        <button type="button" onclick="updateQty({{ item.id }}, 'minus')">−</button>
-                        <span id="qty-{{ item.id }}">{{ item.qty }}</span>
-                        <button type="button" onclick="updateQty({{ item.id }}, 'plus')">+</button>
-                    </div>
-
-                    <div class="cart-subtotal" id="subtotal-{{ item.id }}">
-                        {{ "%.2f"|format(item.total) }} €
-                    </div>
-                </div>
-
+            <div class="cart-qty">
+              <button type="button" onclick="updateQty({{ item.id }}, 'minus')">−</button>
+              <span id="qty-{{ item.id }}">{{ item.qty }}</span>
+              <button type="button" onclick="updateQty({{ item.id }}, 'plus')">+</button>
             </div>
-            {% endfor %}
-        </div>
 
-        <div class="cart-total">
-            <strong>{{ "Итого" if lang == "ru" else "Total" }}:</strong>
-            <span id="cart-total">{{ "%.2f"|format(total) }} €</span>
-        </div>
+            <div class="cart-subtotal" id="subtotal-{{ item.id }}">
+              {{ "%.2f"|format(item.total) }} €
+            </div>
+          </div>
 
-        <div class="cart-actions">
-            <a href="/catalog" class="popup-btn">
-                ← {{ "Продолжить покупки" if lang == "ru" else "Continue shopping" }}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="cart-total">
+        <strong>{{ t("total") }}:</strong>
+        <span id="cart-total">{{ "%.2f"|format(total) }} €</span>
+      </div>
+
+      <div class="cart-actions">
+        <a href="{{ url_for('catalog', lang=lang) }}" class="popup-btn">
+          ← {{ t("continue") }}
+        </a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('checkout', lang=lang) }}" class="popup-btn primary">
+            {{ t("checkout") }}
+          </a>
+        {% else %}
+          <div class="page-card-actions">
+            <a href="{{ url_for('login', lang=lang) }}" class="page-btn gray">
+              {{ t("login") }}
             </a>
 
-            {% if current_user.is_authenticated %}
-    <a href="/checkout" class="popup-btn primary">
-        {{ "Оформить заказ" if lang == "ru" else "Checkout" }}
-    </a>
-{% else %}
-    <div class="page-card-actions">
-        <a href="/login" class="page-btn gray">
-            {{ "Войти" if lang == "ru" else "Login" }}
-        </a>
-
-        <a href="/register" class="page-btn green">
-            {{ "Зарегистрироваться" if lang == "ru" else "Sign up" }}
-        </a>
-    </div>
-{% endif %}
-        </div>
-
-        {% else %}
-
-        <p class="empty-cart">
-            {{ "Корзина пуста" if lang == "ru" else "Cart is empty" }}
-        </p>
-
+            <a href="{{ url_for('register', lang=lang) }}" class="page-btn green">
+              {{ t("register") }}
+            </a>
+          </div>
         {% endif %}
+      </div>
 
-    </div>
+    {% else %}
+
+      <p class="empty-cart">{{ t("empty_cart") }}</p>
+
+    {% endif %}
+
+  </div>
 </div>
 
 {% endblock %}

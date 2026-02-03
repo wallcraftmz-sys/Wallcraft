@@ -1,196 +1,153 @@
 {% extends "admin/admin_base.html" %}
 {% block admin_content %}
 
-<h1>Заказы</h1>
+<h1>{{ t("admin_orders") }}</h1>
 
-<!-- ФИЛЬТР -->
 <div style="margin-bottom:20px; display:flex; gap:10px;">
-    <a href="{{ url_for('admin_orders', show='active') }}"
-       class="admin-link {% if show == 'active' %}primary{% endif %}">
-        Активные
-    </a>
+  <a href="{{ url_for('admin_orders', show='active') }}"
+     class="admin-link {% if show == 'active' %}primary{% endif %}">
+    {{ t("active") }}
+  </a>
 
-    <a href="{{ url_for('admin_orders', show='archive') }}"
-       class="admin-link {% if show == 'archive' %}primary{% endif %}">
-        Архив
-    </a>
+  <a href="{{ url_for('admin_orders', show='archive') }}"
+     class="admin-link {% if show == 'archive' %}primary{% endif %}">
+    {{ t("archive") }}
+  </a>
 </div>
 
-<!-- ПОИСК -->
-<form method="get"
-      style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
-    <input type="hidden" name="show" value="{{ show }}">
+<form method="get" style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
+  <input type="hidden" name="show" value="{{ show }}">
 
-    <input
-        type="text"
-        name="q"
-        placeholder="Поиск: ID, имя, контакт"
-        value="{{ request.args.get('q', '') }}"
-        style="padding:6px 10px; min-width:260px;"
-    >
+  <input
+    type="text"
+    name="q"
+    placeholder="{{ t('search_placeholder') }}"
+    value="{{ request.args.get('q', '') }}"
+    style="padding:6px 10px; min-width:260px;"
+  >
 
-    <button type="submit" class="admin-link">🔍 Найти</button>
+  <button type="submit" class="admin-link">🔍 {{ t("search") }}</button>
 
-    {% if request.args.get('q') %}
-        <a href="{{ url_for('admin_orders', show=show) }}"
-           class="admin-link danger">
-            ✖ Сброс
-        </a>
-    {% endif %}
+  {% if request.args.get('q') %}
+    <a href="{{ url_for('admin_orders', show=show) }}" class="admin-link danger">
+      ✖ {{ t("reset") }}
+    </a>
+  {% endif %}
 </form>
 
-<!-- ЭКСПОРТ -->
 <a href="{{ url_for('export_orders_csv', show=show, q=request.args.get('q','')) }}"
    class="admin-link"
    style="margin-bottom:15px; display:inline-block;">
-    ⬇ Экспорт заказов (CSV)
+  ⬇ {{ t("export_csv") }}
 </a>
 
 {% if orders %}
 
 <table class="admin-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Покупатель</th>
-            <th>Состав</th>
-            <th>Сумма</th>
-            <th>Статус</th>
-            <th>История</th>
-            <th>Дата</th>
-            <th>Действия</th>
-        </tr>
-    </thead>
-    <tbody>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>{{ t("buyer") }}</th>
+      <th>{{ t("items") }}</th>
+      <th>{{ t("sum") }}</th>
+      <th>{{ t("status") }}</th>
+      <th>{{ t("history") }}</th>
+      <th>{{ t("date") }}</th>
+      <th>{{ t("actions") }}</th>
+    </tr>
+  </thead>
+  <tbody>
 
-    {% for order in orders %}
-        <tr class="status-row status-{{ order.status }}">
+  {% for order in orders %}
+    <tr class="status-row status-{{ order.status }}">
 
-            <td>
-                <a href="{{ url_for('admin_order_view', order_id=order.id) }}">
-                    #{{ order.id }}
-                </a>
-            </td>
+      <td>
+        <a href="{{ url_for('admin_order_view', order_id=order.id) }}">#{{ order.id }}</a>
+      </td>
 
-            <td>
-                {{ order.name }}<br>
-                <small>{{ order.contact }}</small>
-            </td>
+      <td>
+        {{ order.name }}<br>
+        <small>{{ order.contact }}</small>
+      </td>
 
-            <td style="white-space: pre-line;">{{ order.items }}</td>
+      <td style="white-space: pre-line;">{{ order.items }}</td>
 
-            <td><strong>{{ order.total }} €</strong></td>
+      <td><strong>{{ order.total }} €</strong></td>
 
-            <!-- СТАТУС -->
-            <td>
-                <form method="post"
-                      action="{{ url_for('update_order_status', order_id=order.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <select name="status" onchange="this.form.submit()">
-                        {% for key, labels in ORDER_STATUSES.items() %}
-                            {% if key == order.status
-                                  or key in ALLOWED_STATUS_TRANSITIONS.get(order.status, []) %}
-                                <option value="{{ key }}"
-                                    {% if order.status == key %}selected{% endif %}>
-                                    {{ labels[lang] }}
-                                </option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                </form>
-            </td>
+      <td>
+        <form method="post" action="{{ url_for('update_order_status', order_id=order.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <select name="status" onchange="this.form.submit()">
+            {% for key, labels in ORDER_STATUSES.items() %}
+              {% if key == order.status or key in ALLOWED_STATUS_TRANSITIONS.get(order.status, []) %}
+                <option value="{{ key }}" {% if order.status == key %}selected{% endif %}>
+                  {{ labels[lang] }}
+                </option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </form>
+      </td>
 
-            <!-- ИСТОРИЯ -->
-            <td>
-                {% for h in order.status_history %}
-                    <div style="font-size:12px; opacity:0.7;">
-                        {{ h.created_at.strftime("%d.%m.%Y %H:%M") }} —
-                        {{ ORDER_STATUSES[h.old_status][lang] if h.old_status else "—" }}
-                        →
-                        {{ ORDER_STATUSES[h.new_status][lang] }}
-                        ({{ h.changed_by }})
-                    </div>
-                {% else %}
-                    <span style="opacity:0.5;">—</span>
-                {% endfor %}
-            </td>
+      <td>
+        {% for h in order.status_history %}
+          <div style="font-size:12px; opacity:0.7;">
+            {{ h.created_at.strftime("%d.%m.%Y %H:%M") }} —
+            {{ ORDER_STATUSES[h.old_status][lang] if h.old_status else "—" }}
+            →
+            {{ ORDER_STATUSES[h.new_status][lang] }}
+            ({{ h.changed_by }})
+          </div>
+        {% else %}
+          <span style="opacity:0.5;">—</span>
+        {% endfor %}
+      </td>
 
-            <td>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+      <td>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
 
-            <!-- ДЕЙСТВИЯ -->
-            <td style="display:flex; gap:8px; align-items:center;">
+      <td style="display:flex; gap:8px; align-items:center;">
+        <a class="admin-link"
+           href="{{ url_for('admin_order_print', order_id=order.id) }}"
+           target="_blank"
+           title="{{ t('print') }}">
+          🖨
+        </a>
 
-                <!-- 27: ПЕЧАТЬ -->
-                <a class="admin-link"
-                   href="{{ url_for('admin_order_print', order_id=order.id) }}"
-                   target="_blank"
-                   title="Печать">
-                    🖨
-                </a>
+        {% if show == 'archive' %}
 
-                {% if show == 'archive' %}
+          {% if order.status != 'completed' %}
+            <form method="post" action="{{ url_for('restore_order', order_id=order.id) }}"
+                  onsubmit="return confirm('{{ t('confirm_restore_order') }}');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="admin-btn edit" title="{{ t('restore') }}">♻️</button>
+            </form>
+          {% endif %}
 
-                    <!-- 24: RESTORE (только если не completed) -->
-                    {% if order.status != 'completed' %}
-                    <form method="post"
-                          action="{{ url_for('restore_order', order_id=order.id) }}"
-                          onsubmit="return confirm('Восстановить заказ из архива?');">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        <button type="submit" class="admin-btn edit" title="Восстановить">♻️</button>
-                    </form>
-                    {% endif %}
+          <form method="post" action="{{ url_for('hard_delete_order', order_id=order.id) }}"
+                onsubmit="return confirm('{{ t('confirm_hard_delete_order') }}');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="danger-btn" title="{{ t('delete_forever') }}">🗑</button>
+          </form>
 
-                    <!-- 25: HARD DELETE -->
-                    <form method="post"
-                          action="{{ url_for('hard_delete_order', order_id=order.id) }}"
-                          onsubmit="return confirm('Удалить заказ НАВСЕГДА? Это действие нельзя отменить.');">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        <button type="submit" class="danger-btn" title="Удалить навсегда">🗑</button>
-                    </form>
+        {% else %}
 
-                {% else %}
+          <form method="post" action="{{ url_for('delete_order', order_id=order.id) }}"
+                onsubmit="return confirm('{{ t('confirm_archive_order') }}');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="danger-btn" title="{{ t('to_archive') }}">🗑</button>
+          </form>
 
-                    <!-- Архив (soft) -->
-                    <form method="post"
-                          action="{{ url_for('delete_order', order_id=order.id) }}"
-                          onsubmit="return confirm('Переместить заказ в архив?');">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        <button type="submit" class="danger-btn" title="В архив">🗑</button>
-                    </form>
+        {% endif %}
+      </td>
 
-                {% endif %}
+    </tr>
+  {% endfor %}
 
-            </td>
-
-        </tr>
-    {% endfor %}
-
-    </tbody>
+  </tbody>
 </table>
 
-<!-- ПАГИНАЦИЯ -->
-{% if pagination and pagination.pages > 1 %}
-<div class="pagination">
-    {% if pagination.has_prev %}
-        <a href="{{ url_for('admin_orders', show=show, page=pagination.prev_num, q=request.args.get('q','')) }}">←</a>
-    {% endif %}
-
-    {% for p in range(1, pagination.pages + 1) %}
-        {% if p == pagination.page %}
-            <span class="current">{{ p }}</span>
-        {% else %}
-            <a href="{{ url_for('admin_orders', show=show, page=p, q=request.args.get('q','')) }}">{{ p }}</a>
-        {% endif %}
-    {% endfor %}
-
-    {% if pagination.has_next %}
-        <a href="{{ url_for('admin_orders', show=show, page=pagination.next_num, q=request.args.get('q','')) }}">→</a>
-    {% endif %}
-</div>
-{% endif %}
-
 {% else %}
-    <p>Нет заказов</p>
+  <p>{{ t("no_orders") }}</p>
 {% endif %}
 
 {% endblock %}

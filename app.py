@@ -496,49 +496,70 @@ ALLOWED_STATUS_TRANSITIONS = {
 }
 
 # ======================
-# LANGUAGE
+# LANGUAGE / I18N (FINAL)
 # ======================
+
+SUPPORTED_LANGS = ("ru", "lv", "en")
+
 @app.before_request
 def set_lang():
-    if "lang" in request.args:
-        session["lang"] = request.args.get("lang")
-    if session.get("lang") not in ["ru", "lv", "en"]:
+    q_lang = request.args.get("lang", "").lower()
+    if q_lang in SUPPORTED_LANGS:
+        session["lang"] = q_lang
+
+    if session.get("lang") not in SUPPORTED_LANGS:
         session["lang"] = "ru"
 
 
-# ======================
-# LANGUAGE / I18N
-# ======================
-
 TRANSLATIONS = {
     # MENU
-    "profile":  {"ru": "Профиль", "en": "Profile", "lv": "Profils"},
-    "catalog":  {"ru": "Каталог", "en": "Catalog", "lv": "Katalogs"},
-    "cart":     {"ru": "Корзина", "en": "Cart",    "lv": "Grozs"},
+    "profile":  {"ru": "Профиль", "lv": "Profils", "en": "Profile"},
+    "catalog":  {"ru": "Каталог", "lv": "Katalogs", "en": "Catalog"},
+    "cart":     {"ru": "Корзина", "lv": "Grozs", "en": "Cart"},
 
     # AUTH
-    "login":    {"ru": "Войти",   "en": "Login",   "lv": "Ieiet"},
-    "logout":   {"ru": "Выйти",   "en": "Logout",  "lv": "Iziet"},
+    "login":    {"ru": "Войти", "lv": "Ienākt", "en": "Login"},
+    "logout":   {"ru": "Выйти", "lv": "Iziet", "en": "Logout"},
+    "register": {"ru": "Регистрация", "lv": "Reģistrācija", "en": "Register"},
+
+    # CART
+    "add_to_cart": {"ru": "Добавить в корзину", "lv": "Pievienot grozam", "en": "Add to cart"},
+    "added": {"ru": "Товар добавлен в корзину", "lv": "Prece pievienota grozam", "en": "Product added to cart"},
+    "continue": {"ru": "Продолжить покупки", "lv": "Turpināt iepirkties", "en": "Continue shopping"},
+    "go_to_cart": {"ru": "Перейти в корзину", "lv": "Doties uz grozu", "en": "Go to cart"},
+    "empty_cart": {"ru": "Корзина пуста", "lv": "Grozs ir tukšs", "en": "Cart is empty"},
+    "total": {"ru": "Итого", "lv": "Kopā", "en": "Total"},
+    "checkout": {"ru": "Оформить заказ", "lv": "Noformēt pasūtījumu", "en": "Checkout"},
+
+    # CHECKOUT
+    "name": {"ru": "Имя", "lv": "Vārds", "en": "Name"},
+    "contact": {"ru": "Телефон или Email", "lv": "Telefons vai e-pasts", "en": "Phone or Email"},
+    "confirm": {"ru": "Подтвердить заказ", "lv": "Apstiprināt pasūtījumu", "en": "Confirm order"},
 
     # ADMIN
-    "admin":    {"ru": "Админ",   "en": "Admin",   "lv": "Administrācija"},
-    "products": {"ru": "Товары",  "en": "Products","lv": "Preces"},
-    "orders":   {"ru": "Заказы",  "en": "Orders",  "lv": "Pasūtījumi"},
-
-    # CART / SHOP
-    "checkout": {"ru": "Оформить заказ", "en": "Checkout", "lv": "Noformēt pasūtījumu"},
-    "continue": {"ru": "Продолжить покупки", "en": "Continue shopping", "lv": "Turpināt iepirkties"},
-    "empty_cart": {"ru": "Корзина пуста", "en": "Cart is empty", "lv": "Grozs ir tukšs"},
+    "admin": {"ru": "Админ", "lv": "Admin", "en": "Admin"},
+    "products": {"ru": "Товары", "lv": "Preces", "en": "Products"},
+    "orders": {"ru": "Заказы", "lv": "Pasūtījumi", "en": "Orders"},
+    "price": {"ru": "Цена", "lv": "Cena", "en": "Price"},
+    "restore": {"ru": "Восстановить", "lv": "Atjaunot", "en": "Restore"},
+    "delete_forever": {"ru": "Удалить навсегда", "lv": "Dzēst neatgriezeniski", "en": "Delete forever"},
 }
 
 
-def t(key: str, lang: str) -> str:
-    lang = (lang or "ru").lower()
-    if lang not in ("ru", "en", "lv"):
-        lang = "ru"
+def t(key: str) -> str:
+    lang = session.get("lang", "ru")
+    pack = TRANSLATIONS.get(key)
 
-    data = TRANSLATIONS.get(key, {})
-    return data.get(lang) or data.get("ru") or data.get("en") or key
+    if not pack:
+        return key  # сразу видно, что забыли перевод
+
+    return (
+        pack.get(lang)
+        or pack.get("ru")
+        or pack.get("lv")
+        or pack.get("en")
+        or key
+    )
 
 
 @app.context_processor

@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
 
-  <script defer src="{{ url_for('static', filename='js/main.js') }}?=9999"></script>
+  <!-- ✅ правильный cache busting -->
+  <script defer src="{{ url_for('static', filename='js/main.js', v=9999) }}"></script>
+
   <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
   <meta property="og:title" content="Wallcraft">
@@ -32,13 +34,13 @@
 
   <div class="header-auth">
     {% if current_user.is_authenticated %}
-      <a class="header-link" href="{{ url_for('profile', lang=lang) }}">Профиль</a>
+      <a class="header-link" href="{{ url_for('profile', lang=lang) }}">{{ t("profile", lang) }}</a>
       <span class="header-sep">|</span>
-      <a class="header-link" href="{{ url_for('logout', lang=lang) }}">Выйти</a>
+      <a class="header-link" href="{{ url_for('logout', lang=lang) }}">{{ t("logout", lang) }}</a>
     {% else %}
-      <a class="header-link" href="{{ url_for('login', lang=lang) }}">Войти</a>
+      <a class="header-link" href="{{ url_for('login', lang=lang) }}">{{ t("login", lang) }}</a>
       <span class="header-sep">|</span>
-      <a class="header-link" href="{{ url_for('register', lang=lang) }}">Регистрация</a>
+      <a class="header-link" href="{{ url_for('register', lang=lang) }}">{{ t("register", lang) }}</a>
     {% endif %}
   </div>
 </header>
@@ -49,7 +51,7 @@
 <!-- DRAWER -->
 <aside id="wcMenu" class="wc-drawer wc-min" aria-hidden="true">
 
-  <!-- TOP (фикс) -->
+  <!-- TOP -->
   <div class="wc-top">
     <div class="wc-drawer-head">
       <div class="wc-brand">
@@ -59,7 +61,7 @@
       <button class="wc-close" type="button" onclick="wcMenuClose()" aria-label="Close">✕</button>
     </div>
 
-    <!-- LANG (в меню) -->
+    <!-- LANG -->
     <div class="wc-lang">
       <a href="?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
       <a href="?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
@@ -69,38 +71,40 @@
     <div class="wc-line"></div>
   </div>
 
-  <!-- MIDDLE (скролл) -->
-<div class="wc-mid" role="navigation" aria-label="Menu">
+  <!-- MIDDLE -->
+  <div class="wc-mid" role="navigation" aria-label="Menu">
 
-  {% if current_user.is_authenticated %}
-    <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
-      <span class="wc-txt">Профиль</span>
+    <!-- ✅ порядок как ты сказал: Профиль → Каталог → Корзина -->
+    {% if current_user.is_authenticated %}
+      <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-txt">{{ t("profile", lang) }}</span>
+      </a>
+    {% endif %}
+
+    <a class="wc-link" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
+      <span class="wc-txt">{{ t("catalog", lang) }}</span>
     </a>
-  {% endif %}
 
-  <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
-    <span class="wc-txt">Каталог</span>
-  </a>
+    <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
+      <span class="wc-txt">{{ t("cart", lang) }}</span>
+      <span class="wc-pill" id="menu-cart-pill">{{ cart_total_items or 0 }}</span>
+    </a>
 
-  <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
-    <span class="wc-txt">Корзина</span>
-    <span class="wc-pill" id="menu-cart-pill">{{ cart_total_items or 0 }}</span>
-  </a>
+  </div>
 
-</div>
-
-  <!-- BOTTOM (фикс) -->
+  <!-- BOTTOM -->
   <div class="wc-bot">
     {% if current_user.is_authenticated and current_user.role == 'admin' %}
       <div class="wc-line"></div>
-      <div class="wc-subtitle">Админ</div>
+      <div class="wc-subtitle">{{ t("admin", lang) }}</div>
 
       <a class="wc-link" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
-  <span class="wc-txt">Товары</span>
-</a>
-<a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
-  <span class="wc-txt">Заказы</span>
-</a>
+        <span class="wc-txt">{{ t("products", lang) }}</span>
+      </a>
+
+      <a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
+        <span class="wc-txt">{{ t("orders", lang) }}</span>
+      </a>
     {% endif %}
   </div>
 
@@ -131,11 +135,11 @@
 
 <div id="cart-action-popup" class="cart-action-popup" aria-hidden="true">
   <div class="cart-action-inner">
-    <span class="cart-action-text">Товар добавлен в корзину</span>
+    <span class="cart-action-text">{{ t("added", lang) }}</span>
 
     <div class="cart-action-buttons">
-      <button type="button" onclick="closeCartAction()">Продолжить покупки</button>
-      <a href="{{ url_for('cart', lang=lang) }}">Перейти в корзину</a>
+      <button type="button" onclick="closeCartAction()">{{ t("continue", lang) }}</button>
+      <a href="{{ url_for('cart', lang=lang) }}">{{ t("cart", lang) }}</a>
     </div>
   </div>
 </div>
@@ -170,12 +174,20 @@ async function refreshCartCount() {
     const res = await fetch("/api/cart_count", { credentials: "same-origin" });
     const ct = res.headers.get("content-type") || "";
     if (!ct.includes("application/json")) return;
+
     const data = await res.json();
+    const n = (data && typeof data.cart_total_items === "number") ? data.cart_total_items : 0;
+
     const badge = document.getElementById("cart-count");
-    if (badge && data && typeof data.cart_total_items === "number") {
-      badge.textContent = data.cart_total_items;
-      badge.style.display = data.cart_total_items > 0 ? "inline-flex" : "none";
+    if (badge) {
+      badge.textContent = n;
+      badge.style.display = n > 0 ? "inline-flex" : "none";
     }
+
+    // ✅ обновляем и pill в меню
+    const menuPill = document.getElementById("menu-cart-pill");
+    if (menuPill) menuPill.textContent = n;
+
   } catch (e) {}
 }
 document.addEventListener("DOMContentLoaded", refreshCartCount);

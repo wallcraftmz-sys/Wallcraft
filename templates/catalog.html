@@ -8,21 +8,21 @@
     <div class="product-image">
       <img
         src="{{ url_for('static', filename=product.image or 'images/no-image.png') }}"
-        alt="{{ product.name_ru if lang == 'ru' else product.name_lv }}"
+        alt="{{ product.name_ru if lang == 'ru' else (product.name_lv if lang == 'lv' else product.name_en) }}"
         loading="lazy"
       >
     </div>
 
     <div class="product-info">
       <h3 class="product-title">
-        {{ product.name_ru if lang == "ru" else product.name_lv }}
+        {{ product.name_ru if lang == "ru" else (product.name_lv if lang == "lv" else product.name_en) }}
       </h3>
 
       <div class="product-price">{{ product.price }} €</div>
 
       <button class="add-to-cart-btn" type="button" onclick="addToCart({{ product.id }})">
-  В корзину
-</button>
+        {{ t("add_to_cart") }}
+      </button>
     </div>
 
   </div>

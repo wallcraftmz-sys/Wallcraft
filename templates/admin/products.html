@@ -1,17 +1,17 @@
 {% extends "admin/admin_base.html" %}
 {% block admin_content %}
 
-<h1 class="page-title">Товары</h1>
+<h1 class="page-title">{{ t("admin_products") }}</h1>
 
 <div style="margin-bottom:20px; display:flex; gap:10px;">
   <a href="{{ url_for('admin_products', show='active') }}"
-     class="admin-link {% if show == 'active' %}primary{% endif %}">Активные</a>
+     class="admin-link {% if show == 'active' %}primary{% endif %}">{{ t("active") }}</a>
 
   <a href="{{ url_for('admin_products', show='inactive') }}"
-     class="admin-link {% if show == 'inactive' %}primary{% endif %}">Скрытые</a>
+     class="admin-link {% if show == 'inactive' %}primary{% endif %}">{{ t("inactive") }}</a>
 
   <a href="{{ url_for('admin_products', show='all') }}"
-     class="admin-link {% if show == 'all' %}primary{% endif %}">Все</a>
+     class="admin-link {% if show == 'all' %}primary{% endif %}">{{ t("all") }}</a>
 </div>
 
 {% for cat_key, cat in grouped.items() %}
@@ -26,7 +26,6 @@
 
     <div class="product-grid admin-products">
 
-      {# ADD PRODUCT (только если это реальная категория) #}
       {% if cat_key != 'other' %}
         <form method="post" enctype="multipart/form-data" class="product-card add-product-card">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -40,16 +39,15 @@
           <div class="product-info">
             <input name="name_ru" placeholder="Название RU" required>
             <input name="name_lv" placeholder="Название LV" required>
-            <input name="price" type="number" step="0.01" placeholder="Цена €" required>
+            <input name="price" type="number" step="0.01" placeholder="{{ t('price') }} €" required>
 
             <input type="file" name="image" accept="image/*" required onchange="previewImage(event, this)">
 
-            <button class="add-to-cart-btn" type="submit">Добавить товар</button>
+            <button class="add-to-cart-btn" type="submit">{{ t("add_product") }}</button>
           </div>
         </form>
       {% endif %}
 
-      {# PRODUCTS #}
       {% for product in cat["items"] %}
         <div class="product-card {% if not product.is_active %}inactive{% endif %}">
           <div class="product-image">
@@ -65,20 +63,20 @@
 
               {% if product.is_active %}
                 <form action="{{ url_for('delete_product', id=product.id) }}" method="post"
-                      onsubmit="return confirm('Скрыть товар из каталога?');">
+                      onsubmit="return confirm('{{ t('confirm_hide_product') }}');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                   <button type="submit" class="admin-btn delete">❌</button>
                 </form>
               {% else %}
                 <form action="{{ url_for('restore_product', id=product.id) }}" method="post">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                  <button type="submit" class="admin-btn edit" title="Восстановить">♻️</button>
+                  <button type="submit" class="admin-btn edit" title="{{ t('restore') }}">♻️</button>
                 </form>
 
                 <form action="{{ url_for('hard_delete_product', id=product.id) }}" method="post"
-                      onsubmit="return confirm('Удалить товар НАВСЕГДА? Это действие нельзя отменить.');">
+                      onsubmit="return confirm('{{ t('confirm_hard_delete_product') }}');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                  <button type="submit" class="danger-btn" title="Удалить навсегда">🗑</button>
+                  <button type="submit" class="danger-btn" title="{{ t('delete_forever') }}">🗑</button>
                 </form>
               {% endif %}
             </div>

@@ -771,20 +771,15 @@ body{
 
 /* ===== HERO (главная страница) ===== */
 .hero.hero-bg{
-  /* выходим из ограничений .container */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 
-  /* НЕ нужно margin-top — контейнер уже отступает от header */
-  margin-top: 0;
-  padding-top: 0;
-
   min-height: calc(100vh - 56px);
 
   background-image:
-  linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
-  url("../images/jidkie-oboi-4.jpg");
+    linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
+    url("../images/jidkie-oboi-4.jpg");
 
   background-size: cover;
   background-position: center;

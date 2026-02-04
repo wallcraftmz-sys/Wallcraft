@@ -61,12 +61,10 @@
       <button class="wc-close" type="button" onclick="wcMenuClose()" aria-label="Close">✕</button>
     </div>
 
-    <!-- LANG -->
-    {% set q = request.args.to_dict(flat=True) %}
-<div class="wc-lang">
-  <a href="{{ request.path }}?{{ (q | combine({'lang':'lv'})) | urlencode }}" class="{{ 'active' if lang=='lv' }}">LV</a>
-  <a href="{{ request.path }}?{{ (q | combine({'lang':'ru'})) | urlencode }}" class="{{ 'active' if lang=='ru' }}">RU</a>
-  <a href="{{ request.path }}?{{ (q | combine({'lang':'en'})) | urlencode }}" class="{{ 'active' if lang=='en' }}">EN</a>
+    <div class="wc-lang">
+  <a href="{{ request.path }}?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
+  <a href="{{ request.path }}?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
+  <a href="{{ request.path }}?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
 </div>
 
   <!-- MIDDLE -->

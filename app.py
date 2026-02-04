@@ -636,7 +636,7 @@ TRANSLATIONS = {
         "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
         "en": "Delete this product FOREVER? This action cannot be undone."
     },
-
+}
 
 def t(key: str) -> str:
     lang = (session.get("lang") or "ru").lower()

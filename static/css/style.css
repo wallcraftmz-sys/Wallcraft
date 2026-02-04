@@ -769,13 +769,16 @@ body{
 
 .is-admin select{ cursor: pointer; }
 
-/* ===== HERO ===== */
-..hero-bg{
-  min-height: calc(100vh - var(--header-h, 56px));
-  margin-top: var(--header-h, 56px);
+/* ===== HERO (главная страница) ===== */
+.hero-bg{
+  min-height: calc(100vh - 56px);
+  margin-top: 56px;
 
   background-image:
-    linear-gradient(rgba(255,255,255,.82), rgba(255,255,255,.82)),
+    linear-gradient(
+      rgba(255,255,255,0.78),
+      rgba(255,255,255,0.78)
+    ),
     url("/static/images/jidkie-oboi-4.jpg");
 
   background-size: cover;
@@ -785,10 +788,26 @@ body{
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 28px 16px;
+  padding: 32px 16px;
 }
 
 .hero-inner{
   text-align: center;
   max-width: 520px;
+}
+
+.hero-title{
+  font-size: 36px;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.hero-sub{
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.hero-cta{
+  font-size: 18px;
+  text-decoration: underline;
 }

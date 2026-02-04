@@ -540,34 +540,31 @@ TRANSLATIONS = {
     "contact_hint": {
         "ru": "Введите email или телефон (пример: test@mail.com или +371 20000000)",
         "en": "Enter email or phone (example: test@mail.com or +371 20000000)",
-        "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)"
+        "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)",
     },
     "confirm_order": {"ru": "Подтвердить заказ", "en": "Confirm order", "lv": "Apstiprināt pasūtījumu"},
 
     # ADMIN PAGES
     "products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
     "orders":   {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},
-    "admin_products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
-    "admin_orders": {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},
-
     "add_product": {"ru": "Добавить товар", "en": "Add product", "lv": "Pievienot preci"},
     "active": {"ru": "Активные", "en": "Active", "lv": "Aktīvie"},
     "inactive": {"ru": "Скрытые", "en": "Hidden", "lv": "Slēptie"},
     "all": {"ru": "Все", "en": "All", "lv": "Visi"},
     "restore": {"ru": "Восстановить", "en": "Restore", "lv": "Atjaunot"},
-    "delete_forever": {"ru": "Удалить навсегда", "en": "Delete forever", "lv": "Dzēst uz visiem laikiem"},
+    "delete_forever": {"ru": "Удалить навсегда", "en": "Delete forever", "lv": "Dzēst neatgriezeniski"},
     "price": {"ru": "Цена", "en": "Price", "lv": "Cena"},
 
-    # CONFIRMS
+    # CONFIRMS (PRODUCTS)
     "confirm_hide_product": {
         "ru": "Скрыть товар из каталога?",
         "en": "Hide this product from the catalog?",
-        "lv": "Paslēpt preci no kataloga?"
+        "lv": "Paslēpt preci no kataloga?",
     },
     "confirm_hard_delete_product": {
         "ru": "Удалить товар НАВСЕГДА? Это действие нельзя отменить.",
         "en": "Delete this product FOREVER? This action cannot be undone.",
-        "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt."
+        "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
     },
 
     # ADMIN ORDERS UI
@@ -590,56 +587,22 @@ TRANSLATIONS = {
     "confirm_restore_order": {
         "ru": "Восстановить заказ из архива?",
         "en": "Restore the order from archive?",
-        "lv": "Atjaunot pasūtījumu no arhīva?"
+        "lv": "Atjaunot pasūtījumu no arhīva?",
     },
     "confirm_hard_delete_order": {
         "ru": "Удалить заказ НАВСЕГДА? Это действие нельзя отменить.",
         "en": "Delete the order FOREVER? This action cannot be undone.",
-        "lv": "Dzēst pasūtījumu UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt."
+        "lv": "Dzēst pasūtījumu UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
     },
     "confirm_archive_order": {
         "ru": "Переместить заказ в архив?",
         "en": "Move the order to archive?",
-        "lv": "Pārvietot pasūtījumu uz arhīvu?"
-    },
-        # CHECKOUT EXTRA
-    "checkout_title": {
-        "ru": "Оформление заказа",
-        "lv": "Pasūtījuma noformēšana",
-        "en": "Checkout"
-    },
-    "name_placeholder": {
-        "ru": "Введите имя",
-        "lv": "Ievadiet vārdu",
-        "en": "Enter your name"
-    },
-    "contact_hint": {
-        "ru": "Введите email или телефон (пример: test@mail.com или +371 20000000)",
-        "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)",
-        "en": "Enter email or phone (example: test@mail.com or +371 20000000)"
-    },
-
-    # ADMIN FILTERS
-    "active": {"ru": "Активные", "lv": "Aktīvie", "en": "Active"},
-    "inactive": {"ru": "Скрытые", "lv": "Slēptie", "en": "Hidden"},
-    "all": {"ru": "Все", "lv": "Visi", "en": "All"},
-    "add_product": {"ru": "Добавить товар", "lv": "Pievienot preci", "en": "Add product"},
-
-    # CONFIRMS
-    "confirm_hide_product": {
-        "ru": "Скрыть товар из каталога?",
-        "lv": "Paslēpt preci no kataloga?",
-        "en": "Hide this product from the catalog?"
-    },
-    "confirm_hard_delete_product": {
-        "ru": "Удалить товар НАВСЕГДА? Это действие нельзя отменить.",
-        "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
-        "en": "Delete this product FOREVER? This action cannot be undone."
+        "lv": "Pārvietot pasūtījumu uz arhīvu?",
     },
 }
 
-def t(key: str) -> str:
-    lang = (session.get("lang") or "ru").lower()
+def t(key: str, lang: str = None) -> str:
+    lang = (lang or session.get("lang", "ru")).lower()
     if lang not in SUPPORTED_LANGS:
         lang = "ru"
 

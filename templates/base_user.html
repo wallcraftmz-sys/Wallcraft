@@ -63,10 +63,15 @@
 
     <!-- LANG -->
     <div class="wc-lang">
-      <a href="?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
-      <a href="?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
-      <a href="?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
-    </div>
+  <a href="{{ url_for(request.endpoint, **(request.view_args or {}), lang='lv', **request.args.to_dict(flat=True)) }}"
+     class="{{ 'active' if lang=='lv' }}">LV</a>
+
+  <a href="{{ url_for(request.endpoint, **(request.view_args or {}), lang='ru', **request.args.to_dict(flat=True)) }}"
+     class="{{ 'active' if lang=='ru' }}">RU</a>
+
+  <a href="{{ url_for(request.endpoint, **(request.view_args or {}), lang='en', **request.args.to_dict(flat=True)) }}"
+     class="{{ 'active' if lang=='en' }}">EN</a>
+</div>
 
     <div class="wc-line"></div>
   </div>

@@ -770,15 +770,20 @@ body{
 .is-admin select{ cursor: pointer; }
 
 /* ===== HERO (главная страница) ===== */
-.hero-bg{
+.hero.hero-bg{
+  /* выходим из ограничений .container */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
+  /* НЕ нужно margin-top — контейнер уже отступает от header */
+  margin-top: 0;
+  padding-top: 0;
+
   min-height: calc(100vh - 56px);
-  margin-top: 56px;
 
   background-image:
-    linear-gradient(
-      rgba(255,255,255,0.78),
-      rgba(255,255,255,0.78)
-    ),
+    linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
     url("/static/images/jidkie-oboi-4.jpg");
 
   background-size: cover;

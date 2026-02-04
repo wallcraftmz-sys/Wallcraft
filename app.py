@@ -602,15 +602,52 @@ TRANSLATIONS = {
         "en": "Move the order to archive?",
         "lv": "Pārvietot pasūtījumu uz arhīvu?"
     },
-}
+        # CHECKOUT EXTRA
+    "checkout_title": {
+        "ru": "Оформление заказа",
+        "lv": "Pasūtījuma noformēšana",
+        "en": "Checkout"
+    },
+    "name_placeholder": {
+        "ru": "Введите имя",
+        "lv": "Ievadiet vārdu",
+        "en": "Enter your name"
+    },
+    "contact_hint": {
+        "ru": "Введите email или телефон (пример: test@mail.com или +371 20000000)",
+        "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)",
+        "en": "Enter email or phone (example: test@mail.com or +371 20000000)"
+    },
+
+    # ADMIN FILTERS
+    "active": {"ru": "Активные", "lv": "Aktīvie", "en": "Active"},
+    "inactive": {"ru": "Скрытые", "lv": "Slēptie", "en": "Hidden"},
+    "all": {"ru": "Все", "lv": "Visi", "en": "All"},
+    "add_product": {"ru": "Добавить товар", "lv": "Pievienot preci", "en": "Add product"},
+
+    # CONFIRMS
+    "confirm_hide_product": {
+        "ru": "Скрыть товар из каталога?",
+        "lv": "Paslēpt preci no kataloga?",
+        "en": "Hide this product from the catalog?"
+    },
+    "confirm_hard_delete_product": {
+        "ru": "Удалить товар НАВСЕГДА? Это действие нельзя отменить.",
+        "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
+        "en": "Delete this product FOREVER? This action cannot be undone."
+    },
 
 
 def t(key: str) -> str:
     lang = (session.get("lang") or "ru").lower()
-    if lang not in ("ru", "en", "lv"):
+    if lang not in SUPPORTED_LANGS:
         lang = "ru"
-    data = TRANSLATIONS.get(key, {})
-    return data.get(lang) or data.get("ru") or data.get("en") or key
+
+    pack = TRANSLATIONS.get(key)
+    if not pack:
+        return key
+
+    return pack.get(lang) or pack.get("ru") or pack.get("lv") or pack.get("en") or key
 
 
 @app.context_processor

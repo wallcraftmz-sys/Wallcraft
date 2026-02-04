@@ -1,10 +1,8 @@
 {% extends "base_user.html" %}
-
 {% block content %}
 
-<section class="hero">
+<section class="hero hero-bg">
   <div class="hero-inner">
-
     <h1 class="hero-title">WALLCRAFT</h1>
 
     <p class="hero-sub">
@@ -13,18 +11,9 @@
          else "Premium klases šķidrās tapetes" }}
     </p>
 
-    <!-- КАРТИНКА ПО ЦЕНТРУ -->
-    <img
-      src="{{ url_for('static', filename='images/jidkie-oboi-4.jpg') }}"
-      alt="Жидкие обои"
-      class="hero-image"
-    >
-
-    <!-- КНОПКА -->
     <a class="hero-cta" href="{{ url_for('catalog', cat='all', lang=lang) }}">
       {{ t("catalog") }}
     </a>
-
   </div>
 </section>
 

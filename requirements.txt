@@ -9,3 +9,4 @@ Flask-Session
 werkzeug
 psycopg2-binary
 Pillow==10.4.0
+python 3.13.11

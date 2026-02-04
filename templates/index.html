@@ -1,20 +1,10 @@
-{% extends "base_user.html" %}
-{% block content %}
-
-<section class="hero hero-bg">
+<section class="hero hero-bg"
+  style="background-image:
+    linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
+    url('{{ url_for('static', filename='images/jidkie-oboi-4.jpg') }}');">
   <div class="hero-inner">
     <h1 class="hero-title">WALLCRAFT</h1>
-
-    <p class="hero-sub">
-      {{ "Жидкие обои премиум-класса" if lang=="ru"
-         else "Premium liquid wallpaper" if lang=="en"
-         else "Premium klases šķidrās tapetes" }}
-    </p>
-
-    <a class="hero-cta" href="{{ url_for('catalog', cat='all', lang=lang) }}">
-      {{ t("catalog") }}
-    </a>
+    <p class="hero-sub">{{ t("hero_subtitle") if t else "Жидкие обои премиум-класса" }}</p>
+    <a class="hero-cta" href="{{ url_for('catalog', cat='all', lang=lang) }}">{{ t("catalog") }}</a>
   </div>
 </section>
-
-{% endblock %}

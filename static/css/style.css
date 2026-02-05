@@ -770,20 +770,17 @@ body{
 .is-admin select{ cursor: pointer; }
 
 /* ===== HERO (главная страница) ===== */
-
-/* на главной убираем ограничения контейнера */
 body.home .container{
   max-width: none;
   padding: 0;
 }
 
-/* сам hero с фоном */
 .hero.hero-bg{
-  min-height: calc(100dvh - 56px);
+  min-height: calc(100dvh - var(--header-h));
 
   background-image:
     linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
-    url("/static/images/jidkie-oboi-4.jpg"); /* ✅ лучше абсолютный путь */
+    url("/static/images/jidkie-oboi-4.jpg");
 
   background-size: cover;
   background-position: center;

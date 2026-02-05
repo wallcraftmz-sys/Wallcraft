@@ -770,16 +770,20 @@ body{
 .is-admin select{ cursor: pointer; }
 
 /* ===== HERO (главная страница) ===== */
-.hero.hero-bg{
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
 
-  min-height: calc(100vh - 56px);
+/* на главной убираем ограничения контейнера */
+body.home .container{
+  max-width: none;
+  padding: 0;
+}
+
+/* сам hero с фоном */
+.hero.hero-bg{
+  min-height: calc(100dvh - 56px);
 
   background-image:
-  linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
-  url("/static/images/jidkie-oboi-4.jpg");
+    linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
+    url("../images/jidkie-oboi-4.jpg");
 
   background-size: cover;
   background-position: center;
@@ -788,6 +792,7 @@ body{
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 32px 16px;
 }
 

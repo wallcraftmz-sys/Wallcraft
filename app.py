@@ -599,6 +599,11 @@ TRANSLATIONS = {
         "en": "Move the order to archive?",
         "lv": "Pārvietot pasūtījumu uz arhīvu?",
     },
+    "hero_subtitle": {
+  "ru": "Жидкие обои премиум-класса",
+  "lv": "Premium klases šķidrās tapetes",
+  "en": "Premium liquid wallpaper"
+    },
 }
 
 def t(key: str, lang: str = None) -> str:

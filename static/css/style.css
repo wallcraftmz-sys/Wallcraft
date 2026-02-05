@@ -783,7 +783,7 @@ body.home .container{
 
   background-image:
     linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
-    url("../images/jidkie-oboi-4.jpg");
+    url("/static/images/jidkie-oboi-4.jpg"); /* ✅ лучше абсолютный путь */
 
   background-size: cover;
   background-position: center;

@@ -20,7 +20,7 @@
   <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="{{ 'is-admin' if request.path.startswith('/admin') else '' }}">
+<body class="{{ 'home' if request.endpoint=='index' else '' }} {{ 'is-admin' if request.path.startswith('/admin') else '' }}">
 
 <header class="top-header">
   <button class="menu-btn" type="button" onclick="wcMenuOpen()" aria-label="Menu">☰</button>

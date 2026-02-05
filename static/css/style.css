@@ -779,7 +779,7 @@ body.home .container{
   min-height: calc(100dvh - var(--header-h));
 
   background-image:
-    linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.78)),
+    linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)),
     url("/static/images/jidkie-oboi-4.jpg");
 
   background-size: cover;

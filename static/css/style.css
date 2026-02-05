@@ -813,3 +813,111 @@ body.home .container{
   font-size: 18px;
   text-decoration: underline;
 }
+/* =========================
+   DESKTOP / TABLET (RESPONSIVE)
+   add to END of style.css
+========================= */
+
+/* tablets */
+@media (min-width: 768px){
+
+  .container{
+    padding: calc(var(--header-h) + 24px) 24px 48px;
+  }
+
+  .page-title{
+    font-size: 44px;
+  }
+
+  /* catalog grid on bigger screens */
+  .product-grid{
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .product-image img{
+    height: 200px;
+  }
+
+  /* cart rows look nicer on tablet */
+  .cart-row{
+    padding: 14px;
+  }
+
+  /* hero typography */
+  .hero-title{
+    font-size: 56px;
+  }
+  .hero-sub{
+    font-size: 20px;
+  }
+}
+
+/* desktop */
+@media (min-width: 1024px){
+
+  /* keep content readable */
+  .container{
+    max-width: 1200px;
+    padding: calc(var(--header-h) + 28px) 28px 56px;
+  }
+
+  /* make header breathe */
+  .top-header{
+    padding: 0 18px;
+    grid-template-columns: 56px 1fr auto;
+  }
+
+  .menu-btn{
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .logo-text{
+    font-size: 20px;
+  }
+
+  .header-auth{
+    font-size: 14px;
+  }
+
+  /* drawer behaves like a proper sidebar on desktop */
+  .wc-drawer{
+    width: 360px;
+  }
+
+  /* catalog = more columns */
+  .product-grid{
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .product-image img{
+    height: 220px;
+  }
+
+  /* hero: limit text width so it doesn't look lost on wide screens */
+  .hero-inner{
+    max-width: 720px;
+  }
+
+  .hero-title{
+    font-size: 64px;
+    letter-spacing: 0.10em;
+  }
+
+  .hero-sub{
+    font-size: 22px;
+  }
+
+  .hero-cta{
+    font-size: 20px;
+  }
+}
+
+/* very wide screens */
+@media (min-width: 1440px){
+  .container{ max-width: 1320px; }
+  .hero-title{ font-size: 72px; }
+}

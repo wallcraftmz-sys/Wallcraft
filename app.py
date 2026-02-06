@@ -641,6 +641,7 @@ TRANSLATIONS = {
   "ru": "Email: wallcraftmz@gmail.com\Город: Рига\По вопросам заказа напишите нам на email — мы ответим как можно быстрее.",
   "lv": "E-pasts: wallcraftmz@gmail.com\Pilsēta: Rīga\Par pasūtījumiem rakstiet uz e-pastu — atbildēsim pēc iespējas ātrāk.",
   "en": "Email: wallcraftmz@gmail.com\City: Riga\For order questions, email us — we will reply as soon as possible."
+  }
 
 }
 

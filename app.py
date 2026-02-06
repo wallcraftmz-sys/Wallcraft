@@ -39,17 +39,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import text, or_
 from PIL import Image
-import json
-
-def load_products():
-    try:
-        with open("data/products.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return []
-
-def get_active_products():
-    return [p for p in load_products() if p.get("active")]
 
 def admin_required(fn):
     @wraps(fn)
@@ -883,13 +872,8 @@ def faq():
     return render_template("pages/faq.html", lang=session.get("lang", "ru"))
 
 
-@app.route("/catalog")
-def catalog():
-    products = get_active_products()
-    return render_template(
-        "catalog.html",
-        products=products
-    )
+
+
 
 
 # ======================

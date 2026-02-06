@@ -1,2 +1,23 @@
-<h1>Terms & Conditions</h1>
-<p>Veicot pasūtījumu, jūs piekrītat pārdošanas noteikumiem un pasūtījuma apstrādes nosacījumiem.</p>
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-card-wrapper">
+  <div class="page-card">
+
+    <h1 class="page-title">Terms & Conditions</h1>
+
+    <p>
+      Veicot pasūtījumu, jūs piekrītat pārdošanas noteikumiem
+      un pasūtījuma apstrādes nosacījumiem.
+    </p>
+
+    <div style="margin-top:20px">
+      <a href="{{ url_for('index', lang=lang) }}" class="page-btn">
+        ← На главную
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

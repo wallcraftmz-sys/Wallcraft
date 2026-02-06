@@ -880,12 +880,10 @@ def catalog():
         .order_by(Product.id.desc())
         .all()
     )
-    products = get_active_products()
     return render_template(
         "catalog.html",
         products=products,
         lang=session.get("lang", "ru"),
-        
     )
 
 

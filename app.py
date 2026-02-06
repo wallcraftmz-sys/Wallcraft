@@ -608,6 +608,24 @@ TRANSLATIONS = {
     "terms_title": {"ru":"Условия","lv":"Noteikumi","en":"Terms & Conditions"},
     "contacts_title": {"ru":"Контакты","lv":"Kontakti","en":"Contacts"},
     "back_home": {"ru":"На главную","lv":"Uz sākumlapu","en":"Back to home"},
+
+    "privacy_link": {
+  "ru": "Политика конфиденциальности",
+  "lv": "Privātuma politika",
+  "en": "Privacy Policy"
+},
+
+"terms_link": {
+  "ru": "Условия использования",
+  "lv": "Lietošanas noteikumi",
+  "en": "Terms & Conditions"
+},
+
+"contacts_link": {
+  "ru": "Контакты",
+  "lv": "Kontakti",
+  "en": "Contacts"
+},
     
 }
 

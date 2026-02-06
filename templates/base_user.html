@@ -123,12 +123,12 @@
   {% block content %}{% endblock %}
 </main>
 
- <footer class="site-footer">
-  <a href="{{ url_for('privacy') }}">Privacy</a>
+<footer class="site-footer">
+  <a href="{{ url_for('privacy', lang=lang) }}">{{ t("privacy") }}</a>
   <span>·</span>
-  <a href="{{ url_for('terms') }}">Terms</a>
+  <a href="{{ url_for('terms', lang=lang) }}">{{ t("terms") }}</a>
   <span>·</span>
-  <a href="{{ url_for('contacts') }}">Contacts</a>
+  <a href="{{ url_for('contacts', lang=lang) }}">{{ t("contacts") }}</a>
 </footer>
   
 {% if not request.path.startswith('/admin') %}

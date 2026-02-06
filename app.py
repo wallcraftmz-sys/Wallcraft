@@ -1655,15 +1655,18 @@ def hard_delete_product(id):
 
 @app.route("/privacy")
 def privacy():
-    return render_template("privacy.html")
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    return render_template("privacy.html", lang=lang, t=t)
 
 @app.route("/terms")
 def terms():
-    return render_template("terms.html")
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    return render_template("terms.html", lang=lang, t=t)
 
 @app.route("/contacts")
 def contacts():
-    return render_template("contacts.html")
+    lang = request.args.get("lang", session.get("lang", "ru"))
+    return render_template("contacts.html", lang=lang, t=t)
 
 
 if __name__ == "__main__":

@@ -921,3 +921,16 @@ body.home .container{
   .container{ max-width: 1320px; }
   .hero-title{ font-size: 72px; }
 }
+.site-footer{
+  padding: 18px 16px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+  opacity: .75;
+}
+.site-footer a{
+  text-decoration: none;
+}
+.site-footer a:hover{
+  text-decoration: underline;
+}

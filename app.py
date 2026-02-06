@@ -885,7 +885,7 @@ def catalog():
         "catalog.html",
         products=products,
         lang=session.get("lang", "ru"),
-          products=products
+        
     )
 
 

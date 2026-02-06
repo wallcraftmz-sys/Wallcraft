@@ -1,19 +1,18 @@
-{% extends "base.html" %}
+{% extends "base_user.html" %}
 {% block content %}
 
 <div class="page-card-wrapper">
   <div class="page-card">
 
-    <h1 class="page-title">Contacts</h1>
+    <h1 class="page-title">{{ t("contacts_title") }}</h1>
 
-    <p><strong>Email:</strong> wallcraftmz@gmail.com</p>
-    <p><strong>City:</strong> Riga</p>
+    <p>
+      {{ t("contacts_text") | replace('\n', '<br>') | safe }}
+    </p>
 
-    <div style="margin-top:20px">
-      <a href="{{ url_for('index', lang=lang) }}" class="page-btn gray">
-        ← {{ t("back_home") }}
-      </a>
-    </div>
+    <a href="{{ url_for('index', lang=lang) }}" class="page-btn gray">
+      ← {{ t("back_home") }}
+    </a>
 
   </div>
 </div>

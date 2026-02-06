@@ -1,3 +1,21 @@
-<h1>Contacts</h1>
-<p>Email: wallcraftmz@gmail.com</p>
-<p>Pilseta: Rīga</p>
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-card-wrapper">
+  <div class="page-card">
+
+    <h1 class="page-title">Contacts</h1>
+
+    <p><strong>Email:</strong> wallcraftmz@gmail.com</p>
+    <p><strong>City:</strong> Riga</p>
+
+    <div style="margin-top:20px">
+      <a href="{{ url_for('index', lang=lang) }}" class="page-btn">
+        ← На главную
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

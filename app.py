@@ -604,6 +604,11 @@ TRANSLATIONS = {
   "lv": "Premium klases šķidrās tapetes",
   "en": "Premium liquid wallpaper"
     },
+    "privacy_title": {"ru":"Политика конфиденциальности","lv":"Privātuma politika","en":"Privacy Policy"},
+    "terms_title": {"ru":"Условия","lv":"Noteikumi","en":"Terms & Conditions"},
+    "contacts_title": {"ru":"Контакты","lv":"Kontakti","en":"Contacts"},
+    "back_home": {"ru":"На главную","lv":"Uz sākumlapu","en":"Back to home"},
+    
 }
 
 def t(key: str, lang: str = None) -> str:

@@ -885,16 +885,10 @@ def faq():
 
 @app.route("/catalog")
 def catalog():
-    products = (
-        Product.query
-        .filter_by(is_active=True)
-        .order_by(Product.id.desc())
-        .all()
-    )
+    products = get_active_products()
     return render_template(
         "catalog.html",
-        products=products,
-        lang=session.get("lang", "ru"),
+        products=products
     )
 
 

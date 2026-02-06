@@ -626,7 +626,22 @@ TRANSLATIONS = {
   "lv": "Kontakti",
   "en": "Contacts"
 },
-    
+"privacy_text": {
+  "ru": "Мы обрабатываем только те данные, которые необходимы для обработки заказа: имя и контактную информацию. Данные не передаются третьим лицам.",
+  "lv": "Mēs apstrādājam tikai tos datus, kas nepieciešami pasūtījuma apstrādei: vārdu un kontaktinformāciju. Dati netiek nodoti trešajām personām.",
+  "en": "We process only the data necessary to fulfill the order: name and contact information. Data is not shared with third parties."
+},
+"terms_text": {
+  "ru": "Оформляя заказ на сайте, вы подтверждаете, что указанные вами данные верны, и соглашаетесь с условиями обработки заказа. Оплата и способ доставки согласуются отдельно после оформления заказа. Мы оставляем за собой право уточнить детали заказа по телефону или email.",
+  "lv": "Veicot pasūtījumu vietnē, jūs apstiprināt, ka sniegtā informācija ir pareiza, un piekrītat pasūtījuma apstrādes noteikumiem. Apmaksa un piegādes veids tiek saskaņoti atsevišķi pēc pasūtījuma noformēšanas. Mēs varam sazināties ar jums pa tālruni vai e-pastu, lai precizētu pasūtījuma detaļas.",
+  "en": "By placing an order on the website, you confirm that the information you provide is accurate and agree to the order processing terms. Payment and delivery method are arranged separately after the order is placed. We may contact you by phone or email to уточнить order details."
+},
+
+"contacts_text": {
+  "ru": "Email: wallcraftmz@gmail.com\Город: Рига\По вопросам заказа напишите нам на email — мы ответим как можно быстрее.",
+  "lv": "E-pasts: wallcraftmz@gmail.com\Pilsēta: Rīga\Par pasūtījumiem rakstiet uz e-pastu — atbildēsim pēc iespējas ātrāk.",
+  "en": "Email: wallcraftmz@gmail.com\City: Riga\For order questions, email us — we will reply as soon as possible."
+
 }
 
 def t(key: str, lang: str = None) -> str:

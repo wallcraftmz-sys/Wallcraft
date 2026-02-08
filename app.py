@@ -477,23 +477,45 @@ def send_telegram(message: str):
 
 
 # ======================
-# CONSTANTS
+# CONSTANTS (ORDERS)
 # ======================
-ORDER_STATUSES = {
-    "new": {"ru": "Новый", "lv": "Jauns", "en": "New"},
-    "confirmed": {"ru": "В работе", "lv": "Darbā", "en": "In progress"},
-    "in_progress": {"ru": "В работе", "lv": "Darbā", "en": "In progress"},
-    "shipped": {"ru": "Отправлен", "lv": "Nosūtīts", "en": "Shipped"},
-    "completed": {"ru": "Завершён", "lv": "Pabeigts", "en": "Completed"},
+
+# Заголовки таблицы заказов
+ORDER_TABLE_LABELS = {
+    "order":   {"ru": "Заказ",   "lv": "Pasūtījums", "en": "Order"},
+    "address": {"ru": "Адрес",   "lv": "Adrese",     "en": "Address"},
+    "time":    {"ru": "Время",   "lv": "Laiks",      "en": "Time"},
+    "courier": {"ru": "Курьер",  "lv": "Kurjers",    "en": "Courier"},
+    "status":  {"ru": "Статус",  "lv": "Statuss",    "en": "Status"},
 }
 
-ALLOWED_STATUS_TRANSITIONS = {
-    "new": ["in_progress"],
-    "confirmed": ["in_progress"],
-    "in_progress": ["shipped", "completed"],
-    "shipped": ["completed"],
-    "completed": [],
+# Каноничные статусы (ТОЛЬКО ОНИ)
+ORDER_STATUSES = {
+    "new":         {"ru": "Новый",       "lv": "Jauns",        "en": "New"},
+    "in_progress": {"ru": "В работе",    "lv": "Darbā",        "en": "In progress"},
+    "shipped":     {"ru": "Отправлен",   "lv": "Nosūtīts",     "en": "Shipped"},
+    "completed":   {"ru": "Завершён",    "lv": "Pabeigts",     "en": "Completed"},
+    "canceled":    {"ru": "Отменён",     "lv": "Atcelts",      "en": "Canceled"},
 }
+
+# Разрешённые переходы
+ALLOWED_STATUS_TRANSITIONS = {
+    "new":         ["in_progress", "canceled"],
+    "in_progress": ["shipped", "completed", "canceled"],
+    "shipped":     ["completed"],
+    "completed":   [],
+    "canceled":    [],
+}
+
+# Алиасы старых статусов (чтобы ничего не сломалось)
+STATUS_ALIASES = {
+    "confirmed": "in_progress",
+}
+
+def normalize_order_status(status: str) -> str:
+    s = (status or "new").strip().lower()
+    s = STATUS_ALIASES.get(s, s)
+    return s if s in ORDER_STATUSES else "new"
 
 # ======================
 # LANGUAGE / I18N (FINAL)
@@ -661,7 +683,11 @@ def t(key: str, lang: str = None) -> str:
 def inject_i18n():
     return {
         "lang": session.get("lang", "ru"),
-        "t": t
+        "t": t,
+        "ORDER_STATUSES": ORDER_STATUSES,
+        "ORDER_TABLE_LABELS": ORDER_TABLE_LABELS,
+        "ALLOWED_STATUS_TRANSITIONS": ALLOWED_STATUS_TRANSITIONS,
+        "normalize_order_status": normalize_order_status,
     }
 
 

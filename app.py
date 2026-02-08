@@ -1237,14 +1237,16 @@ def checkout():
                 lang=session.get("lang", "ru"),
             )
 
-        order = Order(
+            order = Order(
             user_id=current_user.id,
             name=name,
             contact=contact,
+            address=address,
+            delivery_time=delivery_time,
+            courier="",   # пока пусто, назначит админ
             items=items_text,
             total=total,
             status="new",
-            is_deleted=False,
         )
 
         db.session.add(order)

@@ -364,7 +364,28 @@ class Product(db.Model):
     # (опционально) оставь старое поле, чтобы ничего не ломать при миграции
     legacy_category = db.Column(db.String(50), nullable=True)
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user = db.relationship("User", backref="orders")
+
+    name = db.Column(db.String(100), nullable=False)
+    contact = db.Column(db.String(100), nullable=False)
+
+    # ✅ НОВОЕ
+    address = db.Column(db.String(200), default="")
+    delivery_time = db.Column(db.String(60), default="")
+    courier = db.Column(db.String(80), default="")
+
+    items = db.Column(db.Text, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+
+    status = db.Column(db.String(30), default="new")
+    is_deleted = db.Column(db.Boolean, default=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
 # ======================
 # USER LOADER
 # ======================
@@ -434,6 +455,15 @@ with app.app_context():
             slug = (p.legacy_category or "").strip() or "doors"
             p.category_id = mapping.get(slug, default_id)
 
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+       # ✅ order.address / order.delivery_time / order.courier
+    try:
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN IF NOT EXISTS address VARCHAR(200) DEFAULT \'\''))
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN IF NOT EXISTS delivery_time VARCHAR(60) DEFAULT \'\''))
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN IF NOT EXISTS courier VARCHAR(80) DEFAULT \'\''))
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -663,7 +693,13 @@ TRANSLATIONS = {
   "ru": "Email: wallcraftmz@gmail.com\Город: Рига\По вопросам заказа напишите нам на email — мы ответим как можно быстрее.",
   "lv": "E-pasts: wallcraftmz@gmail.com\Pilsēta: Rīga\Par pasūtījumiem rakstiet uz e-pastu — atbildēsim pēc iespējas ātrāk.",
   "en": "Email: wallcraftmz@gmail.com\City: Riga\For order questions, email us — we will reply as soon as possible."
-  }
+  },
+    # ✅ Orders table headers
+    "th_order":   {"ru":"Заказ",   "lv":"Pasūtījums", "en":"Order"},
+    "th_address": {"ru":"Адрес",   "lv":"Adrese",     "en":"Address"},
+    "th_time":    {"ru":"Время",   "lv":"Laiks",      "en":"Time"},
+    "th_courier": {"ru":"Курьер",  "lv":"Kurjers",    "en":"Courier"},
+    "th_status":  {"ru":"Статус",  "lv":"Statuss",    "en":"Status"},
 
 }
 

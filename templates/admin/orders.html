@@ -48,6 +48,12 @@
     <tr>
       <th>ID</th>
       <th>{{ t("buyer") }}</th>
+
+      <!-- ✅ НОВОЕ -->
+      <th>{{ t("th_address") }}</th>
+      <th>{{ t("th_time") }}</th>
+      <th>{{ t("th_courier") }}</th>
+
       <th>{{ t("items") }}</th>
       <th>{{ t("sum") }}</th>
       <th>{{ t("status") }}</th>
@@ -56,8 +62,8 @@
       <th>{{ t("actions") }}</th>
     </tr>
   </thead>
-  <tbody>
 
+  <tbody>
   {% for order in orders %}
     <tr class="status-row status-{{ order.status }}">
 
@@ -68,6 +74,21 @@
       <td>
         {{ order.name }}<br>
         <small>{{ order.contact }}</small>
+      </td>
+
+      <!-- ✅ НОВОЕ: Адрес -->
+      <td style="white-space: pre-line;">
+        {{ order.address if order.address else "—" }}
+      </td>
+
+      <!-- ✅ НОВОЕ: Время -->
+      <td>
+        {{ order.delivery_time if order.delivery_time else "—" }}
+      </td>
+
+      <!-- ✅ НОВОЕ: Курьер -->
+      <td>
+        {{ order.courier if order.courier else "—" }}
       </td>
 
       <td style="white-space: pre-line;">{{ order.items }}</td>
@@ -142,7 +163,6 @@
 
     </tr>
   {% endfor %}
-
   </tbody>
 </table>
 

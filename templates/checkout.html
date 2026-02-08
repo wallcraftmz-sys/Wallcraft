@@ -37,6 +37,25 @@
         >
       </div>
 
+      <div class="form-group">
+  <label>{{ t("address") }}</label>
+  <input
+    type="text"
+    name="address"
+    placeholder="{{ t('address_placeholder') }}"
+    required
+  >
+</div>
+
+<div class="form-group">
+  <label>{{ t("delivery_time") }}</label>
+  <input
+    type="text"
+    name="delivery_time"
+    placeholder="{{ t('delivery_time_placeholder') }}"
+    required
+  >
+</div>
       <button type="submit" class="checkout-btn">
         {{ t("confirm_order") }}
       </button>

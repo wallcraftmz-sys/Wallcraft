@@ -1535,8 +1535,24 @@ def admin_orders():
     page = request.args.get("page", 1, type=int)
     PER_PAGE = 20
 
-    ACTIVE_STATUSES = ["new", "in_progress", "shipped"]
-    ARCHIVE_STATUSES = ["completed"]
+    # ✅ СТАТУСЫ, которые считаем "активные" (в работе)
+    ACTIVE_STATUSES = [
+        "new",
+        "confirmed",
+        "courier_picked",
+        "courier_on_way",
+        "courier_arrived",
+
+        # ✅ поддержка старых статусов из базы (чтобы не ломалось)
+        "in_progress",
+        "shipped",
+    ]
+
+    # ✅ СТАТУСЫ "архив"
+    ARCHIVE_STATUSES = [
+        "completed",
+        "canceled",
+    ]
 
     query = Order.query
 

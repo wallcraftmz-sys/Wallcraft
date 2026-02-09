@@ -91,6 +91,19 @@
         {{ order.courier if order.courier else "—" }}
       </td>
 
+      <td>
+  <form method="post" action="{{ url_for('update_order_courier', order_id=order.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input
+      type="text"
+      name="courier"
+      value="{{ order.courier or '' }}"
+      placeholder="{{ t('courier_placeholder') }}"
+      style="width:140px; padding:6px 10px;"
+      onchange="this.form.submit()"
+    >
+  </form>
+</td>
       <td style="white-space: pre-line;">{{ order.items }}</td>
 
       <td><strong>{{ order.total }} €</strong></td>

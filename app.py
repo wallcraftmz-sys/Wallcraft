@@ -1275,7 +1275,7 @@ def checkout():
 
         delivery_provider = request.form.get("delivery_provider")
         if delivery_provider not in ("manual", "bolt", "wolt"):
-        delivery_provider = "manual"
+            delivery_provider = "manual"
 
         # validations
         if len(name) < 2:
@@ -1328,18 +1328,18 @@ def checkout():
 
         # ✅ CREATE ORDER (ВАЖНО: вне if last_order_ts)
         order = Order(
-        user_id=current_user.id,
-        name=name,
-        contact=contact,
-        address=address,
-        delivery_time=delivery_time,
-        delivery_provider=delivery_provider,
-        tracking_code="",
-        courier="",   # назначит админ
-        items=items_text,
-        total=total,
-        status="new",
-      )
+            user_id=current_user.id,
+            name=name,
+            contact=contact,
+            address=address,
+            delivery_time=delivery_time,
+            delivery_provider=delivery_provider,
+            tracking_code="",
+            courier="",   # назначит админ
+            items=items_text,
+            total=total,
+            status="new",
+           )
 
         db.session.add(order)
         db.session.commit()

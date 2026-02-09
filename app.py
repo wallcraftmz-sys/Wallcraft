@@ -723,7 +723,11 @@ TRANSLATIONS = {
 
     "courier": {"ru": "Курьер", "lv": "Kurjers", "en": "Courier"},
     "courier_placeholder": {"ru": "Имя курьера", "lv": "Kurjera vārds", "en": "Courier name"},
-}
+
+    # ADMIN TITLES (fix admin_orders text)
+    "admin_orders":   {"ru": "Заказы",   "lv": "Pasūtījumi", "en": "Orders"},
+    "admin_products": {"ru": "Товары",   "lv": "Preces",     "en": "Products"},
+  }
 
 def t(key: str, lang: str = None) -> str:
     lang = (lang or session.get("lang", "ru")).lower()

@@ -61,6 +61,13 @@
   <strong>{{ t("status") }}:</strong>
   {{ ORDER_STATUSES.get(order.status, {}).get(lang, order.status) }}
 </div>
+<div class="order-delivery">
+  <strong>{{ t("delivery_provider") }}:</strong>
+  {{ t("delivery_" ~ order.delivery_provider) }}
+  {% if order.tracking_code %}
+    <br><small>{{ t("tracking_code") }}: {{ order.tracking_code }}</small>
+  {% endif %}
+</div>
     </div>
     {% endfor %}
 </div>

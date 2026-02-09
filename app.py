@@ -856,7 +856,9 @@ def build_breadcrumbs():
 def inject_breadcrumbs():
     return dict(breadcrumbs=build_breadcrumbs())
 
-
+@app.context_processor
+def inject_order_statuses():
+    return dict(ORDER_STATUSES=ORDER_STATUSES)
 # ======================
 # SECURITY-35: ADMIN AUDIT LOG
 # ======================

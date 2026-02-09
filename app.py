@@ -504,20 +504,59 @@ ORDER_TABLE_LABELS = {
 
 # Каноничные статусы (ТОЛЬКО ОНИ)
 ORDER_STATUSES = {
-    "new":         {"ru": "Новый",       "lv": "Jauns",        "en": "New"},
-    "in_progress": {"ru": "В работе",    "lv": "Darbā",        "en": "In progress"},
-    "shipped":     {"ru": "Отправлен",   "lv": "Nosūtīts",     "en": "Shipped"},
-    "completed":   {"ru": "Завершён",    "lv": "Pabeigts",     "en": "Completed"},
-    "canceled":    {"ru": "Отменён",     "lv": "Atcelts",      "en": "Canceled"},
+    "new": {
+        "ru": "Новый",
+        "lv": "Jauns",
+        "en": "New"
+    },
+
+    "confirmed": {
+        "ru": "Подтверждён",
+        "lv": "Apstiprināts",
+        "en": "Confirmed"
+    },
+
+    # 👇 ДОСТАВКА
+    "courier_assigned": {
+        "ru": "Курьер назначен",
+        "lv": "Kurjers piešķirts",
+        "en": "Courier assigned"
+    },
+
+    "courier_pickup": {
+        "ru": "Курьер забирает товар",
+        "lv": "Kurjers paņem preci",
+        "en": "Courier picking up"
+    },
+
+    "courier_on_way": {
+        "ru": "Курьер в пути",
+        "lv": "Kurjers ceļā",
+        "en": "Courier on the way"
+    },
+
+    "courier_arrived": {
+        "ru": "Курьер на месте",
+        "lv": "Kurjers ieradies",
+        "en": "Courier arrived"
+    },
+
+    "completed": {
+        "ru": "Завершён",
+        "lv": "Pabeigts",
+        "en": "Completed"
+    },
 }
 
 # Разрешённые переходы
 ALLOWED_STATUS_TRANSITIONS = {
-    "new":         ["in_progress", "canceled"],
-    "in_progress": ["shipped", "completed", "canceled"],
-    "shipped":     ["completed"],
-    "completed":   [],
-    "canceled":    [],
+    "new": ["confirmed"],
+    "confirmed": ["courier_assigned"],
+    "courier_assigned": ["courier_pickup"],
+    "courier_pickup": ["courier_on_way"],
+    "courier_on_way": ["courier_arrived"],
+    "courier_arrived": ["completed"],
+    "completed": [],
 }
 
 # Алиасы старых статусов (чтобы ничего не сломалось)

@@ -369,6 +369,9 @@ class Order(db.Model):
     is_deleted = db.Column(db.Boolean, default=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    delivery_provider = db.Column(db.String(30), default="manual")  # manual / bolt / wolt
+    tracking_code = db.Column(db.String(80), default="")            # номер/код доставки
 # ======================
 # USER LOADER
 # ======================

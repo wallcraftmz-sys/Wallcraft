@@ -627,7 +627,11 @@ TRANSLATIONS = {
         "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)",
     },
     "confirm_order": {"ru": "Подтвердить заказ", "en": "Confirm order", "lv": "Apstiprināt pasūtījumu"},
-
+    "delivery_provider": {"ru":"Доставка","lv":"Piegāde","en":"Delivery"},
+    "delivery_manual": {"ru":"Курьер (вручную)","lv":"Kurjers (manuāli)","en":"Courier (manual)"},
+    "delivery_bolt": {"ru":"Bolt (в будущем)","lv":"Bolt (nākotnē)","en":"Bolt (future)"},
+    "delivery_wolt": {"ru":"Wolt (в будущем)","lv":"Wolt (nākotnē)","en":"Wolt (future)"},
+    "tracking_code": {"ru":"Номер доставки","lv":"Piegādes numurs","en":"Delivery ID"},
     # ADMIN PAGES
     "products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
     "orders":   {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},

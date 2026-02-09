@@ -24,7 +24,7 @@
   <button class="menu-btn" type="button" onclick="wcMenuOpen()" aria-label="Menu">☰</button>
 
   <div class="logo-center">
-    <a href="{{ url_for('index', lang=lang) }}" class="logo-link" aria-label="Wallcraft">
+    <a href="{{ url_for('index', lang=lang) }}" class="logo-link">
       <img class="logo-img" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
       <span class="logo-text">Wallcraft</span>
     </a>
@@ -32,13 +32,13 @@
 
   <div class="header-auth">
     {% if current_user.is_authenticated %}
-      <a class="header-link" href="{{ url_for('profile', lang=lang) }}">Профиль</a>
+      <a class="header-link" href="{{ url_for('profile', lang=lang) }}">{{ t("profile") }}</a>
       <span class="header-sep">|</span>
-      <a class="header-link" href="{{ url_for('logout', lang=lang) }}">Выйти</a>
+      <a class="header-link" href="{{ url_for('logout', lang=lang) }}">{{ t("logout") }}</a>
     {% else %}
-      <a class="header-link" href="{{ url_for('login', lang=lang) }}">Войти</a>
+      <a class="header-link" href="{{ url_for('login', lang=lang) }}">{{ t("login") }}</a>
       <span class="header-sep">|</span>
-      <a class="header-link" href="{{ url_for('register', lang=lang) }}">Регистрация</a>
+      <a class="header-link" href="{{ url_for('register', lang=lang) }}">{{ t("register") }}</a>
     {% endif %}
   </div>
 </header>
@@ -46,45 +46,41 @@
 <!-- OVERLAY -->
 <div id="wcMenuOverlay" class="wc-overlay" onclick="wcMenuClose()"></div>
 
-<!-- DRAWER -->
-<aside id="wcMenu" class="wc-drawer wc-min" aria-hidden="true">
+<!-- DRAWER MENU -->
+<aside id="wcMenu" class="wc-drawer" aria-hidden="true">
 
   <div class="wc-top">
     <div class="wc-drawer-head">
       <div class="wc-brand">
-        <img class="wc-brand-logo" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}" alt="Wallcraft">
+        <img class="wc-brand-logo" src="{{ url_for('static', filename='images/IMG_0857.jpeg') }}">
         <div class="wc-brand-title">Wallcraft</div>
       </div>
-      <button class="wc-close" type="button" onclick="wcMenuClose()" aria-label="Close">✕</button>
+      <button class="wc-close" onclick="wcMenuClose()">✕</button>
     </div>
 
+    <!-- LANG SWITCH -->
     <div class="wc-lang">
-      <a href="?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
-      <a href="?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
-      <a href="?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
+      <a href="{{ request.path }}?lang=lv" class="{{ 'active' if lang=='lv' }}">LV</a>
+      <a href="{{ request.path }}?lang=ru" class="{{ 'active' if lang=='ru' }}">RU</a>
+      <a href="{{ request.path }}?lang=en" class="{{ 'active' if lang=='en' }}">EN</a>
     </div>
 
     <div class="wc-line"></div>
   </div>
 
-  <div class="wc-mid" role="navigation" aria-label="Menu">
-    <a class="wc-link wc-catalog" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
-      <span class="wc-ico">🛍️</span>
-      <span class="wc-txt">Каталог</span>
+  <div class="wc-mid">
+    <a class="wc-link" href="{{ url_for('catalog', lang=lang) }}" onclick="wcMenuClose()">
+      <span class="wc-txt">{{ t("catalog") }}</span>
     </a>
 
-    <div class="wc-line"></div>
-
     <a class="wc-link" href="{{ url_for('cart', lang=lang) }}" onclick="wcMenuClose()">
-      <span class="wc-ico">🛒</span>
-      <span class="wc-txt">Корзина</span>
+      <span class="wc-txt">{{ t("cart") }}</span>
       <span class="wc-pill">{{ cart_total_items }}</span>
     </a>
 
     {% if current_user.is_authenticated %}
       <a class="wc-link" href="{{ url_for('profile', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">👤</span>
-        <span class="wc-txt">Профиль</span>
+        <span class="wc-txt">{{ t("profile") }}</span>
       </a>
     {% endif %}
   </div>
@@ -92,13 +88,14 @@
   <div class="wc-bot">
     {% if current_user.is_authenticated and current_user.role == 'admin' %}
       <div class="wc-line"></div>
-      <div class="wc-subtitle">Админ</div>
+      <div class="wc-subtitle">{{ t("admin") }}</div>
 
       <a class="wc-link" href="{{ url_for('admin_products', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">➕</span><span class="wc-txt">Товары</span>
+        <span class="wc-txt">{{ t("products") }}</span>
       </a>
+
       <a class="wc-link" href="{{ url_for('admin_orders', lang=lang) }}" onclick="wcMenuClose()">
-        <span class="wc-ico">🧾</span><span class="wc-txt">Заказы</span>
+        <span class="wc-txt">{{ t("orders") }}</span>
       </a>
     {% endif %}
   </div>
@@ -110,17 +107,17 @@
 </main>
 
 {% if not request.path.startswith('/admin') %}
-<a href="{{ url_for('cart', lang=lang) }}" class="cart-fab" aria-label="Корзина">
-  <span class="cart-fab-ico">🛒</span>
-  <span id="cart-count" class="cart-badge">0</span>
+<a href="{{ url_for('cart', lang=lang) }}" class="cart-fab">
+  <span>🛒</span>
+  <span id="cart-count" class="cart-badge">{{ cart_total_items }}</span>
 </a>
 
-<div id="cart-action-popup" class="cart-action-popup" aria-hidden="true">
+<div id="cart-action-popup" class="cart-action-popup">
   <div class="cart-action-inner">
-    <span class="cart-action-text">Товар добавлен в корзину</span>
+    <span class="cart-action-text">{{ t("added") }}</span>
     <div class="cart-action-buttons">
-      <button type="button" onclick="closeCartAction()">Продолжить покупки</button>
-      <a href="{{ url_for('cart', lang=lang) }}">Перейти в корзину</a>
+      <button onclick="closeCartAction()">{{ t("continue") }}</button>
+      <a href="{{ url_for('cart', lang=lang) }}">{{ t("go_to_cart") }}</a>
     </div>
   </div>
 </div>

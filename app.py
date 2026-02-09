@@ -1745,6 +1745,20 @@ def contacts():
     lang = request.args.get("lang", session.get("lang", "ru"))
     return render_template("contacts.html", lang=lang, t=t)
 
+@app.post("/admin/orders/<int:order_id>/courier")
+@login_required
+@admin_required
+def update_order_courier(order_id):
+    if request.form.get("csrf_token") != session.get("csrf_token"):
+        return "CSRF", 400
+
+    order = Order.query.get_or_404(order_id)
+    courier = norm_text(request.form.get("courier", ""), max_len=80)
+    order.courier = courier
+    db.session.commit()
+
+    return redirect(url_for("admin_orders", show=request.args.get("show", "active"), lang=session.get("lang","ru")))
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

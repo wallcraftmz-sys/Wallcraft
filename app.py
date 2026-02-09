@@ -537,7 +537,12 @@ ALLOWED_STATUS_TRANSITIONS = {
 
 # Алиасы старых статусов (чтобы ничего не сломалось)
 STATUS_ALIASES = {
-    "confirmed": "in_progress",
+    # старые -> новые
+    "in_progress": "confirmed",
+    "shipped": "courier_on_way",
+    "completed": "completed",
+    "new": "new",
+    "confirmed": "confirmed",
 }
 
 def normalize_order_status(status: str) -> str:

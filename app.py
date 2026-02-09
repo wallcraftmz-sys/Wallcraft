@@ -689,6 +689,8 @@ TRANSLATIONS = {
   "courier_placeholder": {"ru": "Имя курьера", "lv": "Kurjera vārds", "en": "Courier name"},
 }
 
+}
+
 def t(key: str, lang: str = None) -> str:
     lang = (lang or session.get("lang", "ru")).lower()
     if lang not in SUPPORTED_LANGS:

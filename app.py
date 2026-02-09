@@ -1171,7 +1171,7 @@ def update_cart(product_id, action):
 def checkout():
     cart = session.get("cart", {})
     if not cart or sum(cart.values()) == 0:
-        return redirect(url_for("cart"))
+        return redirect(url_for("cart", lang=session.get("lang", "ru")))
 
     items = []
     total = 0.0
@@ -1188,12 +1188,13 @@ def checkout():
 
     if not items or total <= 0:
         session.pop("cart", None)
-        return redirect(url_for("cart"))
+        return redirect(url_for("cart", lang=session.get("lang", "ru")))
 
     if request.method == "GET":
         session["checkout_token"] = str(uuid.uuid4())
 
     if request.method == "POST":
+        # rate limit
         if not _rl_allow("checkout:POST", limit=5, window_sec=60):
             return render_template(
                 "checkout.html",
@@ -1204,14 +1205,20 @@ def checkout():
                 lang=session.get("lang", "ru"),
             ), 429
 
+        # token check
         form_token = request.form.get("checkout_token")
         session_token = session.get("checkout_token")
         if not form_token or form_token != session_token:
-            return redirect(url_for("cart"))
+            return redirect(url_for("cart", lang=session.get("lang", "ru")))
 
+        # fields
         name = norm_text(request.form.get("name", ""), max_len=60)
         contact = norm_contact(request.form.get("contact", ""), max_len=80)
 
+        address = norm_text(request.form.get("address", ""), max_len=200)
+        delivery_time = norm_text(request.form.get("delivery_time", ""), max_len=60)
+
+        # validations
         if len(name) < 2:
             return render_template(
                 "checkout.html",
@@ -1234,9 +1241,20 @@ def checkout():
                 lang=session.get("lang", "ru"),
             )
 
-        if not session.get("cart"):
-            return redirect(url_for("cart"))
+        if not address or len(address) < 3:
+            return render_template(
+                "checkout.html",
+                items=items,
+                total=total,
+                error="Введите адрес доставки",
+                checkout_token=session.get("checkout_token"),
+                lang=session.get("lang", "ru"),
+            )
 
+        if not session.get("cart"):
+            return redirect(url_for("cart", lang=session.get("lang", "ru")))
+
+        # anti spam (1 order / 60 sec)
         last_order_ts = session.get("last_order_ts")
         now_ts = datetime.utcnow().timestamp()
         if last_order_ts and now_ts - last_order_ts < 60:
@@ -1249,13 +1267,14 @@ def checkout():
                 lang=session.get("lang", "ru"),
             )
 
-            order = Order(
+        # ✅ CREATE ORDER (ВАЖНО: вне if last_order_ts)
+        order = Order(
             user_id=current_user.id,
             name=name,
             contact=contact,
             address=address,
             delivery_time=delivery_time,
-            courier="",   # пока пусто, назначит админ
+            courier="",   # назначит админ
             items=items_text,
             total=total,
             status="new",
@@ -1264,7 +1283,7 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
-        # токен “одноразовый” — удаляем только после успешного оформления
+        # одноразовый токен — удаляем после успеха
         session.pop("checkout_token", None)
 
         session["last_order_ts"] = datetime.utcnow().timestamp()
@@ -1275,12 +1294,14 @@ def checkout():
             "🛒 НОВЫЙ ЗАКАЗ\n"
             f"Пользователь: {current_user.username}\n"
             f"Имя: {name}\n"
-            f"Контакт: {contact}\n\n"
+            f"Контакт: {contact}\n"
+            f"Адрес: {address}\n"
+            f"Время: {delivery_time}\n\n"
             f"{items_text}\n"
             f"Итого: {total:.2f} €"
         )
 
-        return redirect(url_for("profile"))
+        return redirect(url_for("profile", lang=session.get("lang", "ru")))
 
     return render_template(
         "checkout.html",

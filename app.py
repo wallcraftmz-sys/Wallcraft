@@ -596,46 +596,146 @@ def set_lang():
 
 
 TRANSLATIONS = {
-    # ======================
     # MENU
-    # ======================
     "profile":  {"ru": "Профиль", "en": "Profile", "lv": "Profils"},
     "catalog":  {"ru": "Каталог", "en": "Catalog", "lv": "Katalogs"},
     "cart":     {"ru": "Корзина", "en": "Cart", "lv": "Grozs"},
     "admin":    {"ru": "Админ", "en": "Admin", "lv": "Administrācija"},
 
-    # ======================
     # AUTH
-    # ======================
     "login":    {"ru": "Войти", "en": "Login", "lv": "Ieiet"},
     "logout":   {"ru": "Выйти", "en": "Logout", "lv": "Iziet"},
     "register": {"ru": "Регистрация", "en": "Register", "lv": "Reģistrācija"},
 
-    # ======================
     # SHOP / CART
-    # ======================
     "add_to_cart": {"ru": "В корзину", "en": "Add to cart", "lv": "Pievienot grozam"},
-    "added": {"ru": "Товар добавлен в корзину", "en": "Product added to cart", "lv": "Prece pievienota grozam"},
-    "continue": {"ru": "Продолжить покупки", "en": "Continue shopping", "lv": "Turpināt iepirkties"},
-    "go_to_cart": {"ru": "Перейти в корзину", "en": "Go to cart", "lv": "Doties uz grozu"},
-    "empty_cart": {"ru": "Корзина пуста", "en": "Cart is empty", "lv": "Grozs ir tukšs"},
-    "total": {"ru": "Итого", "en": "Total", "lv": "Kopā"},
-    "checkout": {"ru": "Оформить заказ", "en": "Checkout", "lv": "Noformēt pasūtījumu"},
+    "added":       {"ru": "Товар добавлен в корзину", "en": "Product added to cart", "lv": "Prece pievienota grozam"},
+    "continue":    {"ru": "Продолжить покупки", "en": "Continue shopping", "lv": "Turpināt iepirkties"},
+    "go_to_cart":  {"ru": "Перейти в корзину", "en": "Go to cart", "lv": "Doties uz grozu"},
+    "empty_cart":  {"ru": "Корзина пуста", "en": "Cart is empty", "lv": "Grozs ir tukšs"},
+    "total":       {"ru": "Итого", "en": "Total", "lv": "Kopā"},
+    "checkout":    {"ru": "Оформить заказ", "en": "Checkout", "lv": "Noformēt pasūtījumu"},
     "checkout_title": {"ru": "Оформление заказа", "en": "Checkout", "lv": "Pasūtījuma noformēšana"},
 
-    # ======================
     # CHECKOUT FORM
-    # ======================
     "name": {"ru": "Имя", "en": "Name", "lv": "Vārds"},
     "name_placeholder": {"ru": "Введите имя", "en": "Enter your name", "lv": "Ievadiet vārdu"},
-
     "contact": {"ru": "Телефон или Email", "en": "Phone or Email", "lv": "Tālrunis vai e-pasts"},
     "contact_hint": {
         "ru": "Введите email или телефон (пример: test@mail.com или +371 20000000)",
         "en": "Enter email or phone (example: test@mail.com or +371 20000000)",
         "lv": "Ievadiet e-pastu vai tālruni (piemērs: test@mail.com vai +371 20000000)",
     },
+    "confirm_order": {"ru": "Подтвердить заказ", "en": "Confirm order", "lv": "Apstiprināt pasūtījumu"},
 
+    # ✅ DELIVERY (вставлено правильно)
+    "delivery_provider": {"ru": "Доставка", "lv": "Piegāde", "en": "Delivery"},
+    "delivery_manual": {"ru": "Курьер (вручную)", "lv": "Kurjers (manuāli)", "en": "Courier (manual)"},
+    "delivery_bolt": {"ru": "Bolt (в будущем)", "lv": "Bolt (nākotnē)", "en": "Bolt (future)"},
+    "delivery_wolt": {"ru": "Wolt (в будущем)", "lv": "Wolt (nākotnē)", "en": "Wolt (future)"},
+    "tracking_code": {"ru": "Номер доставки", "lv": "Piegādes numurs", "en": "Delivery ID"},
+
+    # ADMIN PAGES
+    "products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
+    "orders":   {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},
+    "add_product": {"ru": "Добавить товар", "en": "Add product", "lv": "Pievienot preci"},
+    "active": {"ru": "Активные", "en": "Active", "lv": "Aktīvie"},
+    "inactive": {"ru": "Скрытые", "en": "Hidden", "lv": "Slēptie"},
+    "all": {"ru": "Все", "en": "All", "lv": "Visi"},
+    "restore": {"ru": "Восстановить", "en": "Restore", "lv": "Atjaunot"},
+    "delete_forever": {"ru": "Удалить навсегда", "en": "Delete forever", "lv": "Dzēst neatgriezeniski"},
+    "price": {"ru": "Цена", "en": "Price", "lv": "Cena"},
+
+    # CONFIRMS (PRODUCTS)
+    "confirm_hide_product": {
+        "ru": "Скрыть товар из каталога?",
+        "en": "Hide this product from the catalog?",
+        "lv": "Paslēpt preci no kataloga?",
+    },
+    "confirm_hard_delete_product": {
+        "ru": "Удалить товар НАВСЕГДА? Это действие нельзя отменить.",
+        "en": "Delete this product FOREVER? This action cannot be undone.",
+        "lv": "Dzēst preci UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
+    },
+
+    # ADMIN ORDERS UI
+    "archive": {"ru": "Архив", "en": "Archive", "lv": "Arhīvs"},
+    "search": {"ru": "Найти", "en": "Search", "lv": "Meklēt"},
+    "reset": {"ru": "Сброс", "en": "Reset", "lv": "Atiestatīt"},
+    "search_placeholder": {"ru": "Поиск: ID, имя, контакт", "en": "Search: ID, name, contact", "lv": "Meklēšana: ID, vārds, kontakts"},
+    "export_csv": {"ru": "Экспорт заказов (CSV)", "en": "Export orders (CSV)", "lv": "Eksportēt pasūtījumus (CSV)"},
+    "buyer": {"ru": "Покупатель", "en": "Customer", "lv": "Pircējs"},
+    "items": {"ru": "Состав", "en": "Items", "lv": "Saturs"},
+    "sum": {"ru": "Сумма", "en": "Amount", "lv": "Summa"},
+    "status": {"ru": "Статус", "en": "Status", "lv": "Statuss"},
+    "history": {"ru": "История", "en": "History", "lv": "Vēsture"},
+    "date": {"ru": "Дата", "en": "Date", "lv": "Datums"},
+    "actions": {"ru": "Действия", "en": "Actions", "lv": "Darbības"},
+    "print": {"ru": "Печать", "en": "Print", "lv": "Drukāt"},
+    "no_orders": {"ru": "Нет заказов", "en": "No orders", "lv": "Nav pasūtījumu"},
+    "to_archive": {"ru": "В архив", "en": "To archive", "lv": "Uz arhīvu"},
+
+    "confirm_restore_order": {
+        "ru": "Восстановить заказ из архива?",
+        "en": "Restore the order from archive?",
+        "lv": "Atjaunot pasūtījumu no arhīva?",
+    },
+    "confirm_hard_delete_order": {
+        "ru": "Удалить заказ НАВСЕГДА? Это действие нельзя отменить.",
+        "en": "Delete the order FOREVER? This action cannot be undone.",
+        "lv": "Dzēst pasūtījumu UZ VISIEM LAIKIEM? Šo darbību nevar atsaukt.",
+    },
+    "confirm_archive_order": {
+        "ru": "Переместить заказ в архив?",
+        "en": "Move the order to archive?",
+        "lv": "Pārvietot pasūtījumu uz arhīvu?",
+    },
+
+    # HERO
+    "hero_subtitle": {
+        "ru": "Жидкие обои премиум-класса",
+        "lv": "Premium klases šķidrās tapetes",
+        "en": "Premium liquid wallpaper",
+    },
+
+    # LEGAL PAGES
+    "privacy_title": {"ru": "Политика конфиденциальности", "lv": "Privātuma politika", "en": "Privacy Policy"},
+    "terms_title": {"ru": "Условия", "lv": "Noteikumi", "en": "Terms & Conditions"},
+    "contacts_title": {"ru": "Контакты", "lv": "Kontakti", "en": "Contacts"},
+    "back_home": {"ru": "На главную", "lv": "Uz sākumlapu", "en": "Back to home"},
+
+    # Footer link texts
+    "privacy_link": {"ru": "Политика конфиденциальности", "lv": "Privātuma politika", "en": "Privacy Policy"},
+    "terms_link": {"ru": "Условия использования", "lv": "Lietošanas noteikumi", "en": "Terms & Conditions"},
+    "contacts_link": {"ru": "Контакты", "lv": "Kontakti", "en": "Contacts"},
+
+    "privacy_text": {
+        "ru": "Мы обрабатываем только те данные, которые необходимы для обработки заказа: имя и контактную информацию. Данные не передаются третьим лицам.",
+        "lv": "Mēs apstrādājam tikai tos datus, kas nepieciešami pasūtījuma apstrādei: vārdu un kontaktinformāciju. Dati netiek nodoti trešajām personām.",
+        "en": "We process only the data necessary to fulfill the order: name and contact information. Data is not shared with third parties.",
+    },
+
+    "terms_text": {
+        "ru": "Оформляя заказ на сайте, вы подтверждаете, что указанные вами данные верны, и соглашаетесь с условиями обработки заказа. Оплата и способ доставки согласуются отдельно после оформления заказа. Мы оставляем за собой право уточнить детали заказа по телефону или email.",
+        "lv": "Veicot pasūtījumu vietnē, jūs apstiprināt, ka sniegtā informācija ir pareiza, un piekrītat pasūtījuma apstrādes noteikumiem. Apmaksa un piegādes veids tiek saskaņoti atsevišķi pēc pasūtījuma noformēšanas. Mēs varam sazināties ar jums pa tālruni vai e-pastu, lai precizētu pasūtījuma detaļas.",
+        "en": "By placing an order on the website, you confirm that the information you provide is accurate and agree to the order processing terms. Payment and delivery method are arranged separately after the order is placed. We may contact you by phone or email to clarify order details.",
+    },
+
+    # ВАЖНО: в строках используем \n
+    "contacts_text": {
+        "ru": "Email: wallcraftmz@gmail.com\nГород: Рига\nПо вопросам заказа напишите нам на email — мы ответим как можно быстрее.",
+        "lv": "E-pasts: wallcraftmz@gmail.com\nPilsēta: Rīga\nPar pasūtījumiem rakstiet uz e-pastu — atbildēsim pēc iespējas ātrāk.",
+        "en": "Email: wallcraftmz@gmail.com\nCity: Riga\nFor order questions, email us — we will reply as soon as possible.",
+    },
+
+    # ✅ Orders table headers
+    "th_order":   {"ru": "Заказ",  "lv": "Pasūtījums", "en": "Order"},
+    "th_address": {"ru": "Адрес",  "lv": "Adrese",     "en": "Address"},
+    "th_time":    {"ru": "Время",  "lv": "Laiks",      "en": "Time"},
+    "th_courier": {"ru": "Курьер", "lv": "Kurjers",    "en": "Courier"},
+    "th_status":  {"ru": "Статус", "lv": "Statuss",    "en": "Status"},
+
+    # ✅ Field labels / placeholders
     "address": {"ru": "Адрес", "lv": "Adrese", "en": "Address"},
     "address_placeholder": {
         "ru": "Например: Riga, Brīvības iela 10-5",
@@ -650,50 +750,8 @@ TRANSLATIONS = {
         "en": "Example: today 18:00–20:00",
     },
 
-    "confirm_order": {"ru": "Подтвердить заказ", "en": "Confirm order", "lv": "Apstiprināt pasūtījumu"},
-
-    # ======================
-    # DELIVERY
-    # ======================
-    "delivery_provider": {"ru": "Доставка", "lv": "Piegāde", "en": "Delivery"},
-    "delivery_manual": {"ru": "Курьер (вручную)", "lv": "Kurjers (manuāli)", "en": "Courier (manual)"},
-    "delivery_bolt": {"ru": "Bolt (в будущем)", "lv": "Bolt (nākotnē)", "en": "Bolt (future)"},
-    "delivery_wolt": {"ru": "Wolt (в будущем)", "lv": "Wolt (nākotnē)", "en": "Wolt (future)"},
-    "tracking_code": {"ru": "Номер доставки", "lv": "Piegādes numurs", "en": "Delivery ID"},
-
-    # ======================
-    # ADMIN
-    # ======================
-    "products": {"ru": "Товары", "en": "Products", "lv": "Preces"},
-    "orders": {"ru": "Заказы", "en": "Orders", "lv": "Pasūtījumi"},
-    "price": {"ru": "Цена", "en": "Price", "lv": "Cena"},
     "courier": {"ru": "Курьер", "lv": "Kurjers", "en": "Courier"},
     "courier_placeholder": {"ru": "Имя курьера", "lv": "Kurjera vārds", "en": "Courier name"},
-
-    # ======================
-    # LEGAL
-    # ======================
-    "privacy_title": {"ru": "Политика конфиденциальности", "lv": "Privātuma politika", "en": "Privacy Policy"},
-    "terms_title": {"ru": "Условия", "lv": "Noteikumi", "en": "Terms & Conditions"},
-    "contacts_title": {"ru": "Контакты", "lv": "Kontakti", "en": "Contacts"},
-
-    "privacy_text": {
-        "ru": "Мы обрабатываем только те данные, которые необходимы для обработки заказа: имя и контактную информацию. Данные не передаются третьим лицам.",
-        "lv": "Mēs apstrādājam tikai tos datus, kas nepieciešami pasūtījuma apstrādei: vārdu un kontaktinformāciju. Dati netiek nodoti trešajām personām.",
-        "en": "We process only the data necessary to fulfill the order: name and contact information. Data is not shared with third parties.",
-    },
-
-    "terms_text": {
-        "ru": "Оформляя заказ на сайте, вы соглашаетесь с условиями обработки заказа. Оплата и доставка согласуются отдельно.",
-        "lv": "Veicot pasūtījumu vietnē, jūs piekrītat pasūtījuma apstrādes noteikumiem.",
-        "en": "By placing an order, you agree to the order processing terms.",
-    },
-
-    "contacts_text": {
-        "ru": "Email: wallcraftmz@gmail.com\nГород: Рига",
-        "lv": "E-pasts: wallcraftmz@gmail.com\nPilsēta: Rīga",
-        "en": "Email: wallcraftmz@gmail.com\nCity: Riga",
-    },
 }
 
 def t(key: str, lang: str = None) -> str:

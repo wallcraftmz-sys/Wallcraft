@@ -57,6 +57,10 @@
         <div class="order-footer">
             {{ order.created_at.strftime("%d.%m.%Y %H:%M") }}
         </div>
+        <div class="order-status">
+  <strong>{{ t("status") }}:</strong>
+  {{ ORDER_STATUSES.get(order.status, {}).get(lang, order.status) }}
+</div>
     </div>
     {% endfor %}
 </div>

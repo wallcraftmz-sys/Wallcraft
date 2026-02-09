@@ -950,3 +950,12 @@ body.home .container{
   background: rgba(255,255,255,.95);
   font-weight: 800;
 }
+
+.order-delivery{
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.03);
+  font-weight: 900;
+}
+.order-delivery small{ opacity: .7; font-weight: 800; }

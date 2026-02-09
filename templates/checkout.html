@@ -56,6 +56,14 @@
     required
   >
 </div>
+      <div class="form-group">
+  <label>{{ t("delivery_provider") }}</label>
+  <select name="delivery_provider" required>
+    <option value="manual">{{ t("delivery_manual") }}</option>
+    <option value="bolt">{{ t("delivery_bolt") }}</option>
+    <option value="wolt">{{ t("delivery_wolt") }}</option>
+  </select>
+</div>
       <button type="submit" class="checkout-btn">
         {{ t("confirm_order") }}
       </button>

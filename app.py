@@ -630,65 +630,68 @@ TRANSLATIONS = {
         "en": "Move the order to archive?",
         "lv": "Pārvietot pasūtījumu uz arhīvu?",
     },
+
+    # HERO
     "hero_subtitle": {
-  "ru": "Жидкие обои премиум-класса",
-  "lv": "Premium klases šķidrās tapetes",
-  "en": "Premium liquid wallpaper"
+        "ru": "Жидкие обои премиум-класса",
+        "lv": "Premium klases šķidrās tapetes",
+        "en": "Premium liquid wallpaper",
     },
-    "privacy_title": {"ru":"Политика конфиденциальности","lv":"Privātuma politika","en":"Privacy Policy"},
-    "terms_title": {"ru":"Условия","lv":"Noteikumi","en":"Terms & Conditions"},
-    "contacts_title": {"ru":"Контакты","lv":"Kontakti","en":"Contacts"},
-    "back_home": {"ru":"На главную","lv":"Uz sākumlapu","en":"Back to home"},
 
-    "privacy_link": {
-  "ru": "Политика конфиденциальности",
-  "lv": "Privātuma politika",
-  "en": "Privacy Policy"
-},
+    # LEGAL PAGES
+    "privacy_title": {"ru": "Политика конфиденциальности", "lv": "Privātuma politika", "en": "Privacy Policy"},
+    "terms_title": {"ru": "Условия", "lv": "Noteikumi", "en": "Terms & Conditions"},
+    "contacts_title": {"ru": "Контакты", "lv": "Kontakti", "en": "Contacts"},
+    "back_home": {"ru": "На главную", "lv": "Uz sākumlapu", "en": "Back to home"},
 
-"terms_link": {
-  "ru": "Условия использования",
-  "lv": "Lietošanas noteikumi",
-  "en": "Terms & Conditions"
-},
+    # Footer link texts (то, что ты обвёл)
+    "privacy_link": {"ru": "Политика конфиденциальности", "lv": "Privātuma politika", "en": "Privacy Policy"},
+    "terms_link": {"ru": "Условия использования", "lv": "Lietošanas noteikumi", "en": "Terms & Conditions"},
+    "contacts_link": {"ru": "Контакты", "lv": "Kontakti", "en": "Contacts"},
 
-"contacts_link": {
-  "ru": "Контакты",
-  "lv": "Kontakti",
-  "en": "Contacts"
-},
-"privacy_text": {
-  "ru": "Мы обрабатываем только те данные, которые необходимы для обработки заказа: имя и контактную информацию. Данные не передаются третьим лицам.",
-  "lv": "Mēs apstrādājam tikai tos datus, kas nepieciešami pasūtījuma apstrādei: vārdu un kontaktinformāciju. Dati netiek nodoti trešajām personām.",
-  "en": "We process only the data necessary to fulfill the order: name and contact information. Data is not shared with third parties."
-},
-"terms_text": {
-  "ru": "Оформляя заказ на сайте, вы подтверждаете, что указанные вами данные верны, и соглашаетесь с условиями обработки заказа. Оплата и способ доставки согласуются отдельно после оформления заказа. Мы оставляем за собой право уточнить детали заказа по телефону или email.",
-  "lv": "Veicot pasūtījumu vietnē, jūs apstiprināt, ka sniegtā informācija ir pareiza, un piekrītat pasūtījuma apstrādes noteikumiem. Apmaksa un piegādes veids tiek saskaņoti atsevišķi pēc pasūtījuma noformēšanas. Mēs varam sazināties ar jums pa tālruni vai e-pastu, lai precizētu pasūtījuma detaļas.",
-  "en": "By placing an order on the website, you confirm that the information you provide is accurate and agree to the order processing terms. Payment and delivery method are arranged separately after the order is placed. We may contact you by phone or email to уточнить order details."
-},
+    "privacy_text": {
+        "ru": "Мы обрабатываем только те данные, которые необходимы для обработки заказа: имя и контактную информацию. Данные не передаются третьим лицам.",
+        "lv": "Mēs apstrādājam tikai tos datus, kas nepieciešami pasūtījuma apstrādei: vārdu un kontaktinformāciju. Dati netiek nodoti trešajām personām.",
+        "en": "We process only the data necessary to fulfill the order: name and contact information. Data is not shared with third parties.",
+    },
 
-"contacts_text": {
-  "ru": "Email: wallcraftmz@gmail.com\Город: Рига\По вопросам заказа напишите нам на email — мы ответим как можно быстрее.",
-  "lv": "E-pasts: wallcraftmz@gmail.com\Pilsēta: Rīga\Par pasūtījumiem rakstiet uz e-pastu — atbildēsim pēc iespējas ātrāk.",
-  "en": "Email: wallcraftmz@gmail.com\City: Riga\For order questions, email us — we will reply as soon as possible."
-  },
+    "terms_text": {
+        "ru": "Оформляя заказ на сайте, вы подтверждаете, что указанные вами данные верны, и соглашаетесь с условиями обработки заказа. Оплата и способ доставки согласуются отдельно после оформления заказа. Мы оставляем за собой право уточнить детали заказа по телефону или email.",
+        "lv": "Veicot pasūtījumu vietnē, jūs apstiprināt, ka sniegtā informācija ir pareiza, un piekrītat pasūtījuma apstrādes noteikumiem. Apmaksa un piegādes veids tiek saskaņoti atsevišķi pēc pasūtījuma noformēšanas. Mēs varam sazināties ar jums pa tālruni vai e-pastu, lai precizētu pasūtījuma detaļas.",
+        "en": "By placing an order on the website, you confirm that the information you provide is accurate and agree to the order processing terms. Payment and delivery method are arranged separately after the order is placed. We may contact you by phone or email to clarify order details.",
+    },
+
+    # ВАЖНО: в строках используем \n (а не одиночный \)
+    "contacts_text": {
+        "ru": "Email: wallcraftmz@gmail.com\nГород: Рига\nПо вопросам заказа напишите нам на email — мы ответим как можно быстрее.",
+        "lv": "E-pasts: wallcraftmz@gmail.com\nPilsēta: Rīga\nPar pasūtījumiem rakstiet uz e-pastu — atbildēsim pēc iespējas ātrāk.",
+        "en": "Email: wallcraftmz@gmail.com\nCity: Riga\nFor order questions, email us — we will reply as soon as possible.",
+    },
+
     # ✅ Orders table headers
-    "th_order":   {"ru":"Заказ",   "lv":"Pasūtījums", "en":"Order"},
-    "th_address": {"ru":"Адрес",   "lv":"Adrese",     "en":"Address"},
-    "th_time":    {"ru":"Время",   "lv":"Laiks",      "en":"Time"},
-    "th_courier": {"ru":"Курьер",  "lv":"Kurjers",    "en":"Courier"},
-    "th_status":  {"ru":"Статус",  "lv":"Statuss",    "en":"Status"},
-  },
-  "address": {"ru": "Адрес", "lv": "Adrese", "en": "Address"},
-  "address_placeholder": {"ru": "Например: Riga, Brīvības iela 10-5", "lv": "Piem.: Rīga, Brīvības iela 10-5", "en": "Example: Riga, Brivibas street 10-5"},
+    "th_order":   {"ru": "Заказ",  "lv": "Pasūtījums", "en": "Order"},
+    "th_address": {"ru": "Адрес",  "lv": "Adrese",     "en": "Address"},
+    "th_time":    {"ru": "Время",  "lv": "Laiks",      "en": "Time"},
+    "th_courier": {"ru": "Курьер", "lv": "Kurjers",    "en": "Courier"},
+    "th_status":  {"ru": "Статус", "lv": "Statuss",    "en": "Status"},
 
-  "delivery_time": {"ru": "Время", "lv": "Laiks", "en": "Time"},
-  "delivery_time_placeholder": {"ru": "Например: сегодня 18:00–20:00", "lv": "Piem.: šodien 18:00–20:00", "en": "Example: today 18:00–20:00"},
+    # ✅ Field labels / placeholders
+    "address": {"ru": "Адрес", "lv": "Adrese", "en": "Address"},
+    "address_placeholder": {
+        "ru": "Например: Riga, Brīvības iela 10-5",
+        "lv": "Piem.: Rīga, Brīvības iela 10-5",
+        "en": "Example: Riga, Brivibas street 10-5",
+    },
 
-  "courier_placeholder": {"ru": "Имя курьера", "lv": "Kurjera vārds", "en": "Courier name"},
-}
+    "delivery_time": {"ru": "Время", "lv": "Laiks", "en": "Time"},
+    "delivery_time_placeholder": {
+        "ru": "Например: сегодня 18:00–20:00",
+        "lv": "Piem.: šodien 18:00–20:00",
+        "en": "Example: today 18:00–20:00",
+    },
 
+    "courier": {"ru": "Курьер", "lv": "Kurjers", "en": "Courier"},
+    "courier_placeholder": {"ru": "Имя курьера", "lv": "Kurjera vārds", "en": "Courier name"},
 }
 
 def t(key: str, lang: str = None) -> str:

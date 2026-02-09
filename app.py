@@ -278,24 +278,6 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="admin")
 
 
-class Order(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    user = db.relationship("User", backref="orders")
-
-    name = db.Column(db.String(100), nullable=False)
-    contact = db.Column(db.String(100), nullable=False)
-
-    items = db.Column(db.Text, nullable=False)
-    total = db.Column(db.Float, nullable=False)
-
-    status = db.Column(db.String(30), default="new")
-    is_deleted = db.Column(db.Boolean, default=False)
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-
 class OrderStatusHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 

@@ -934,3 +934,11 @@ body.home .container{
 .site-footer a:hover{
   text-decoration: underline;
 }
+
+.order-status{
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.04);
+  font-weight: 900;
+}

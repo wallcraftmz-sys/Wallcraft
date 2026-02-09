@@ -454,6 +454,13 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
+     try:
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN IF NOT EXISTS delivery_provider VARCHAR(30) DEFAULT \'manual\''))
+        db.session.execute(text('ALTER TABLE "order" ADD COLUMN IF NOT EXISTS tracking_code VARCHAR(80) DEFAULT \'\''))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
 # ======================
 # ADMIN ACCESS CONTROL
 # ======================

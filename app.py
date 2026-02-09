@@ -364,7 +364,29 @@ class Product(db.Model):
     # (опционально) оставь старое поле, чтобы ничего не ломать при миграции
     legacy_category = db.Column(db.String(50), nullable=True)
 
+class Order(db.Model):
+    __tablename__ = "order"
 
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user = db.relationship("User", backref="orders")
+
+    name = db.Column(db.String(100), nullable=False)
+    contact = db.Column(db.String(100), nullable=False)
+
+    # ✅ НОВОЕ
+    address = db.Column(db.String(200), default="")
+    delivery_time = db.Column(db.String(60), default="")
+    courier = db.Column(db.String(80), default="")
+
+    items = db.Column(db.Text, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+
+    status = db.Column(db.String(30), default="new")
+    is_deleted = db.Column(db.Boolean, default=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 # ======================
 # USER LOADER
 # ======================

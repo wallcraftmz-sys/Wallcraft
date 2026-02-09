@@ -679,7 +679,14 @@ TRANSLATIONS = {
     "th_time":    {"ru":"Время",   "lv":"Laiks",      "en":"Time"},
     "th_courier": {"ru":"Курьер",  "lv":"Kurjers",    "en":"Courier"},
     "th_status":  {"ru":"Статус",  "lv":"Statuss",    "en":"Status"},
+  },
+  "address": {"ru": "Адрес", "lv": "Adrese", "en": "Address"},
+  "address_placeholder": {"ru": "Например: Riga, Brīvības iela 10-5", "lv": "Piem.: Rīga, Brīvības iela 10-5", "en": "Example: Riga, Brivibas street 10-5"},
 
+  "delivery_time": {"ru": "Время", "lv": "Laiks", "en": "Time"},
+  "delivery_time_placeholder": {"ru": "Например: сегодня 18:00–20:00", "lv": "Piem.: šodien 18:00–20:00", "en": "Example: today 18:00–20:00"},
+
+  "courier_placeholder": {"ru": "Имя курьера", "lv": "Kurjera vārds", "en": "Courier name"},
 }
 
 def t(key: str, lang: str = None) -> str:

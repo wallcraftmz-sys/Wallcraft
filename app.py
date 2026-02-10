@@ -479,17 +479,21 @@ def admin_required(f):
 # ======================
 # TELEGRAM
 # ======================
-def send_telegram(message: str):
+def send_telegram(message: str, reply_markup: dict | None = None):
     token = os.getenv("TG_BOT_TOKEN")
     chat_id = os.getenv("TG_CHAT_ID")
     if not token or not chat_id:
         logger.warning("Telegram ENV vars not set")
         return False
 
+    payload = {"chat_id": chat_id, "text": message}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+
     try:
         r = requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": message},
+            json=payload,
             timeout=10,
         )
         logger.info("TG response: %s %s", r.status_code, r.text)
@@ -544,6 +548,33 @@ STATUS_ALIASES = {
     "new": "new",
     "confirmed": "confirmed",
 }
+
+TG_ALLOWED_NEXT = {
+    "new": ["confirmed", "canceled"],
+    "confirmed": ["courier_picked", "canceled"],
+    "courier_picked": ["courier_on_way", "canceled"],
+    "courier_on_way": ["courier_arrived", "canceled"],
+    "courier_arrived": ["completed", "canceled"],
+    "completed": [],
+    "canceled": [],
+}
+
+def tg_status_buttons(order_id: int, current_status: str):
+    # текущий статус нормализуем
+    cur = normalize_order_status(current_status)
+    next_list = TG_ALLOWED_NEXT.get(cur, [])
+
+    # если ничего нельзя — кнопок нет
+    if not next_list:
+        return None
+
+    # кнопки: каждая строка = одна кнопка (на телефоне удобнее)
+    keyboard = []
+    for st in next_list:
+        title = ORDER_STATUSES.get(st, {}).get("ru", st)  # в TG админский язык оставим RU
+        keyboard.append([{"text": f"➡️ {title}", "callback_data": f"order:{order_id}:status:{st}"}])
+
+    return {"inline_keyboard": keyboard}
 
 def normalize_order_status(status: str) -> str:
     s = (status or "new").strip().lower()
@@ -1379,14 +1410,16 @@ def checkout():
 
         send_telegram(
             "🛒 НОВЫЙ ЗАКАЗ\n"
+            f"ID: #{order.id}\n"
             f"Пользователь: {current_user.username}\n"
             f"Имя: {name}\n"
             f"Контакт: {contact}\n"
             f"Адрес: {address}\n"
             f"Время: {delivery_time}\n\n"
             f"{items_text}\n"
-            f"Итого: {total:.2f} €"
-        )
+            f"Итого: {total:.2f} €",
+            reply_markup=tg_status_buttons(order.id, order.status),
+     )
 
         return redirect(url_for("profile", lang=session.get("lang", "ru")))
 
@@ -1894,6 +1927,104 @@ def update_order_courier(order_id):
 
     return redirect(url_for("admin_orders", show=request.args.get("show", "active"), lang=session.get("lang","ru")))
 
+@app.route("/tg/webhook", methods=["POST"])
+def tg_webhook():
+    secret = os.getenv("TG_WEBHOOK_SECRET", "")
+    # защита: секрет должен совпадать
+    if not secret or request.args.get("secret") != secret:
+        return "forbidden", 403
+
+    data = request.get_json(silent=True) or {}
+    cb = data.get("callback_query")
+    if not cb:
+        return "ok", 200
+
+    cb_id = cb.get("id")
+    msg = cb.get("message") or {}
+    chat = msg.get("chat") or {}
+    chat_id = chat.get("id")
+
+    payload = cb.get("data", "")
+    # ожидаем: order:<id>:status:<new_status>
+    try:
+        parts = payload.split(":")
+        if len(parts) != 4 or parts[0] != "order" or parts[2] != "status":
+            return "ok", 200
+
+        order_id = int(parts[1])
+        new_status = parts[3].strip()
+
+        order = Order.query.get(order_id)
+        if not order:
+            _tg_answer(cb_id, "Заказ не найден")
+            return "ok", 200
+
+        old_status = normalize_order_status(order.status)
+        new_status = normalize_order_status(new_status)
+
+        allowed = TG_ALLOWED_NEXT.get(old_status, [])
+        if new_status not in allowed:
+            _tg_answer(cb_id, "Нельзя прыгать через статусы")
+            return "ok", 200
+
+        order.status = new_status
+        if new_status in ("completed", "canceled"):
+            order.is_deleted = True
+        else:
+            order.is_deleted = False
+
+        history = OrderStatusHistory(
+            order_id=order.id,
+            old_status=old_status,
+            new_status=new_status,
+            changed_by="telegram_admin",
+        )
+        db.session.add(history)
+        db.session.commit()
+
+        # обновим кнопки на следующие статусы
+        _tg_edit_buttons(chat_id, msg.get("message_id"), tg_status_buttons(order.id, order.status))
+
+        _tg_answer(cb_id, f"✅ Статус: {ORDER_STATUSES[new_status]['ru']}")
+        return "ok", 200
+
+    except Exception:
+        logger.exception("tg_webhook error")
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        if cb_id:
+            _tg_answer(cb_id, "Ошибка")
+        return "ok", 200
+
+
+def _tg_answer(callback_query_id: str, text: str):
+    token = os.getenv("TG_BOT_TOKEN")
+    if not token or not callback_query_id:
+        return
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/answerCallbackQuery",
+            json={"callback_query_id": callback_query_id, "text": text, "show_alert": False},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
+def _tg_edit_buttons(chat_id: int, message_id: int, reply_markup: dict | None):
+    token = os.getenv("TG_BOT_TOKEN")
+    if not token or not chat_id or not message_id:
+        return
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/editMessageReplyMarkup",
+            json={"chat_id": chat_id, "message_id": message_id, "reply_markup": reply_markup},
+            timeout=10,
+        )
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

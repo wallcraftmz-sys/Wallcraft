@@ -1649,8 +1649,8 @@ def update_order_status(order_id):
         return redirect(url_for("admin_orders"))
 
     order.status = new_status
-    if new_status == "completed":
-        order.is_deleted = True
+    if new_status in ("completed", "canceled"):
+    order.is_deleted = True
 
     history = OrderStatusHistory(
         order_id=order.id,
@@ -1684,15 +1684,22 @@ def delete_order(order_id):
 @admin_required
 def restore_order(order_id):
     order = Order.query.get_or_404(order_id)
-    if order.status == "completed":
-        flash("Завершённый заказ нельзя вернуть из архива.", "error")
-        return redirect(url_for("admin_orders", show="archive"))
 
+    # ✅ Восстанавливаем из архива
     order.is_deleted = False
+
+    # ✅ Если был completed — переводим в активный статус
+    # (выбери какой тебе нужен: confirmed или new)
+    if order.status == "completed":
+        order.status = "confirmed"  # или "new"
+
     db.session.commit()
+
     flash("Заказ восстановлен из архива", "success")
     audit_admin("order_restore", entity="Order", entity_id=order.id)
-    return redirect(url_for("admin_orders", show="archive"))
+
+    # ✅ После восстановления логично показать активные
+    return redirect(url_for("admin_orders", show="active"))
 
 
 @app.route("/admin/orders/hard_delete/<int:order_id>", methods=["POST"])

@@ -959,3 +959,64 @@ body.home .container{
   font-weight: 900;
 }
 .order-delivery small{ opacity: .7; font-weight: 800; }
+
+.order-timeline{
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  background:#ffffffb5;
+  border:1px solid rgba(0,0,0,.06);
+  backdrop-filter: blur(8px);
+}
+
+.timeline-title{
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.timeline-steps{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.timeline-step{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  opacity:.55;
+}
+
+.timeline-step .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:rgba(0,0,0,.25);
+}
+
+.timeline-step.active{
+  opacity:1;
+  border-color: rgba(0,0,0,.25);
+}
+
+.timeline-step.active .dot{
+  background: #1f7aff;
+}
+
+.timeline-step.done{
+  opacity:1;
+}
+
+.timeline-step.done .dot{
+  background: #2ecc71;
+}
+
+.timeline-track{
+  margin-top:10px;
+  font-size:14px;
+  opacity:.85;
+}

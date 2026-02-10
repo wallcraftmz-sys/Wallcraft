@@ -727,7 +727,16 @@ TRANSLATIONS = {
     # ADMIN TITLES (fix admin_orders text)
     "admin_orders":   {"ru": "Заказы",   "lv": "Pasūtījumi", "en": "Orders"},
     "admin_products": {"ru": "Товары",   "lv": "Preces",     "en": "Products"},
-  }
+
+    "delivery_timeline": {"ru": "Доставка", "lv": "Piegāde", "en": "Delivery"},
+    "timeline_new": {"ru": "Заказ принят", "lv": "Pasūtījums pieņemts", "en": "Order received"},
+    "timeline_confirmed": {"ru": "Подтверждён", "lv": "Apstiprināts", "en": "Confirmed"},
+    "timeline_picked": {"ru": "Курьер забрал", "lv": "Kurjers paņēma", "en": "Picked up"},
+    "timeline_on_way": {"ru": "Курьер в пути", "lv": "Kurjers ceļā", "en": "On the way"},
+    "timeline_arrived": {"ru": "Курьер на месте", "lv": "Kurjers ieradies", "en": "Arrived"},
+    "timeline_completed": {"ru": "Завершён", "lv": "Pabeigts", "en": "Completed"},
+    "timeline_canceled": {"ru": "Отменён", "lv": "Atcelts", "en": "Canceled"},
+    }
 
 def t(key: str, lang: str = None) -> str:
     lang = (lang or session.get("lang", "ru")).lower()
@@ -752,7 +761,42 @@ def inject_i18n():
         "normalize_order_status": normalize_order_status,
     }
 
+TIMELINE_STEPS = [
+    ("new", "timeline_new"),
+    ("confirmed", "timeline_confirmed"),
+    ("courier_picked", "timeline_picked"),
+    ("courier_on_way", "timeline_on_way"),
+    ("courier_arrived", "timeline_arrived"),
+    ("completed", "timeline_completed"),
+]
 
+def timeline_flags(current_status: str):
+    """
+    Возвращает список шагов с флагами done/active
+    """
+    current_status = normalize_order_status(current_status)
+    idx_map = {s: i for i, (s, _) in enumerate(TIMELINE_STEPS)}
+
+    # если canceled — отдельная логика
+    if current_status == "canceled":
+        return [{"key": "canceled", "label_key": "timeline_canceled", "done": True, "active": True}]
+
+    cur_i = idx_map.get(current_status, 0)
+
+    out = []
+    for i, (s, label_key) in enumerate(TIMELINE_STEPS):
+        out.append({
+            "key": s,
+            "label_key": label_key,
+            "done": i < cur_i,
+            "active": i == cur_i,
+        })
+    return out
+
+
+@app.context_processor
+def inject_timeline_helpers():
+    return {"timeline_flags": timeline_flags}
 # ======================
 # CORE-5: FORMAT HELPERS
 # ======================

@@ -42,6 +42,7 @@
 <div class="orders-list">
     {% for order in orders %}
     <div class="order-card">
+
         <div class="order-header">
             <strong>#{{ order.id }}</strong>
             <span class="order-status status-{{ order.status }}">
@@ -52,22 +53,44 @@
         <div class="order-body">
             <div>{{ order.items }}</div>
             <div class="order-total">{{ order.total }} €</div>
+
+            {# ✅ ДОБАВИЛИ: адрес / время / трек #}
+            {% if order.address %}
+                <div class="order-address" style="margin-top:10px">
+                    <strong>{{ t("address") }}:</strong> {{ order.address }}
+                </div>
+            {% endif %}
+
+            {% if order.delivery_time %}
+                <div class="order-time">
+                    <strong>{{ t("delivery_time") }}:</strong> {{ order.delivery_time }}
+                </div>
+            {% endif %}
+
+            {% if order.tracking_code %}
+                <div class="order-tracking">
+                    <strong>{{ t("tracking_code") }}:</strong> {{ order.tracking_code }}
+                </div>
+            {% endif %}
         </div>
 
         <div class="order-footer">
             {{ order.created_at.strftime("%d.%m.%Y %H:%M") }}
         </div>
+
         <div class="order-status">
-  <strong>{{ t("status") }}:</strong>
-  {{ ORDER_STATUSES.get(order.status, {}).get(lang, order.status) }}
-</div>
-<div class="order-delivery">
-  <strong>{{ t("delivery_provider") }}:</strong>
-  {{ t("delivery_" ~ order.delivery_provider) }}
-  {% if order.tracking_code %}
-    <br><small>{{ t("tracking_code") }}: {{ order.tracking_code }}</small>
-  {% endif %}
-</div>
+            <strong>{{ t("status") }}:</strong>
+            {{ ORDER_STATUSES.get(order.status, {}).get(lang, order.status) }}
+        </div>
+
+        <div class="order-delivery">
+            <strong>{{ t("delivery_provider") }}:</strong>
+            {{ t("delivery_" ~ order.delivery_provider) }}
+            {% if order.tracking_code %}
+                <br><small>{{ t("tracking_code") }}: {{ order.tracking_code }}</small>
+            {% endif %}
+        </div>
+
     </div>
     {% endfor %}
 </div>

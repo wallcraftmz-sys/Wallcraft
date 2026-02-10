@@ -1930,25 +1930,29 @@ def update_order_courier(order_id):
 @app.route("/tg/webhook", methods=["POST"])
 def tg_webhook():
     secret = os.getenv("TG_WEBHOOK_SECRET", "")
-    # защита: секрет должен совпадать
-    if not secret or request.args.get("secret") != secret:
+
+    # ✅ Telegram присылает секрет в заголовке
+    tg_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+    if not secret or tg_secret != secret:
         return "forbidden", 403
 
     data = request.get_json(silent=True) or {}
+
     cb = data.get("callback_query")
     if not cb:
         return "ok", 200
 
     cb_id = cb.get("id")
     msg = cb.get("message") or {}
-    chat = msg.get("chat") or {}
-    chat_id = chat.get("id")
+    chat_id = (msg.get("chat") or {}).get("id")
+    message_id = msg.get("message_id")
 
-    payload = cb.get("data", "")
-    # ожидаем: order:<id>:status:<new_status>
+    payload = cb.get("data", "")  # order:<id>:status:<new_status>
+
     try:
         parts = payload.split(":")
         if len(parts) != 4 or parts[0] != "order" or parts[2] != "status":
+            _tg_answer(cb_id, "Неверная команда")
             return "ok", 200
 
         order_id = int(parts[1])
@@ -1968,22 +1972,19 @@ def tg_webhook():
             return "ok", 200
 
         order.status = new_status
-        if new_status in ("completed", "canceled"):
-            order.is_deleted = True
-        else:
-            order.is_deleted = False
+        order.is_deleted = new_status in ("completed", "canceled")
 
-        history = OrderStatusHistory(
+        db.session.add(OrderStatusHistory(
             order_id=order.id,
             old_status=old_status,
             new_status=new_status,
             changed_by="telegram_admin",
-        )
-        db.session.add(history)
+        ))
         db.session.commit()
 
-        # обновим кнопки на следующие статусы
-        _tg_edit_buttons(chat_id, msg.get("message_id"), tg_status_buttons(order.id, order.status))
+        # обновим кнопки
+        if chat_id and message_id:
+            _tg_edit_buttons(chat_id, message_id, tg_status_buttons(order.id, order.status))
 
         _tg_answer(cb_id, f"✅ Статус: {ORDER_STATUSES[new_status]['ru']}")
         return "ok", 200

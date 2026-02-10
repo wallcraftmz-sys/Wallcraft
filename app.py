@@ -1651,6 +1651,8 @@ def update_order_status(order_id):
     order.status = new_status
     if new_status in ("completed", "canceled"):
         order.is_deleted = True
+    else:
+        order.is_deleted = False
 
     history = OrderStatusHistory(
         order_id=order.id,

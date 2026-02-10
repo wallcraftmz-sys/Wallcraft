@@ -1583,31 +1583,24 @@ def admin_orders():
     page = request.args.get("page", 1, type=int)
     PER_PAGE = 20
 
-    # ✅ СТАТУСЫ, которые считаем "активные" (в работе)
-    ACTIVE_STATUSES = [
-        "new",
-        "confirmed",
-        "courier_picked",
-        "courier_on_way",
-        "courier_arrived",
-
-        # ✅ поддержка старых статусов из базы (чтобы не ломалось)
-        "in_progress",
-        "shipped",
-    ]
-
-    # ✅ СТАТУСЫ "архив"
-    ARCHIVE_STATUSES = [
-        "completed",
-        "canceled",
-    ]
+    # ✅ что считаем архивом
+    ARCHIVE_STATUSES = ("completed", "canceled")
 
     query = Order.query
 
     if show == "archive":
-        query = query.filter(or_(Order.is_deleted.is_(True), Order.status.in_(ARCHIVE_STATUSES)))
+        query = query.filter(
+            or_(
+                Order.is_deleted.is_(True),
+                Order.status.in_(ARCHIVE_STATUSES)
+            )
+        )
     else:
-        query = query.filter(Order.is_deleted.is_(False), Order.status.in_(ACTIVE_STATUSES))
+        # ✅ активные = НЕ удалён и статус НЕ архивный
+        query = query.filter(
+            Order.is_deleted.is_(False),
+            ~Order.status.in_(ARCHIVE_STATUSES)
+        )
 
     if q:
         if q.isdigit():
@@ -1616,7 +1609,9 @@ def admin_orders():
             like = f"%{q}%"
             query = query.filter(or_(Order.name.ilike(like), Order.contact.ilike(like)))
 
-    pagination = query.order_by(Order.created_at.desc()).paginate(page=page, per_page=PER_PAGE, error_out=False)
+    pagination = query.order_by(Order.created_at.desc()).paginate(
+        page=page, per_page=PER_PAGE, error_out=False
+    )
 
     return render_template(
         "admin/orders.html",
@@ -1687,20 +1682,15 @@ def delete_order(order_id):
 def restore_order(order_id):
     order = Order.query.get_or_404(order_id)
 
-    # ✅ Восстанавливаем из архива
     order.is_deleted = False
 
-    # ✅ Если был completed — переводим в активный статус
-    # (выбери какой тебе нужен: confirmed или new)
-    if order.status == "completed":
+    # ✅ если был архивный статус — делаем активным
+    if order.status in ("completed", "canceled"):
         order.status = "confirmed"  # или "new"
 
     db.session.commit()
-
     flash("Заказ восстановлен из архива", "success")
-    audit_admin("order_restore", entity="Order", entity_id=order.id)
 
-    # ✅ После восстановления логично показать активные
     return redirect(url_for("admin_orders", show="active"))
 
 

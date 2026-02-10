@@ -90,6 +90,26 @@
                 <br><small>{{ t("tracking_code") }}: {{ order.tracking_code }}</small>
             {% endif %}
         </div>
+        <div class="order-timeline">
+  <div class="timeline-title">{{ t("delivery_timeline") }}</div>
+
+  <div class="timeline-steps">
+    {% for step in timeline_flags(order.status) %}
+      <div class="timeline-step
+                  {% if step.done %}done{% endif %}
+                  {% if step.active %}active{% endif %}">
+        <div class="dot"></div>
+        <div class="lbl">{{ t(step.label_key) }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if order.tracking_code %}
+    <div class="timeline-track">
+      <strong>{{ t("tracking_code") }}:</strong> {{ order.tracking_code }}
+    </div>
+  {% endif %}
+</div>
 
     </div>
     {% endfor %}
